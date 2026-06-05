@@ -1,4 +1,4 @@
-# remote-control-loop.ps1
+﻿# remote-control-loop.ps1
 # Maintient Claude Remote Control actif en permanence POUR CE PROJET.
 # Lance par le dossier Demarrage (voir installer-remote-control.ps1).
 # Si la session s'arrete (timeout reseau, veille, crash...), elle est relancee.
@@ -10,7 +10,7 @@ $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 
 # --- Nom de session : UNIQUE a ce projet (evite la confusion avec d'autres) ---
-$SessionName = "Cryptonauts"
+$SessionName = "CRYPTONAUTS"
 
 # --- Localiser claude.exe ---
 $claude = (Get-Command claude -ErrorAction SilentlyContinue).Source
@@ -54,3 +54,4 @@ while ($true) {
     }
     Start-Sleep -Seconds 10
 }
+
