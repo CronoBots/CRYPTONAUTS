@@ -1,35 +1,51 @@
 # desinstaller-remote-control.ps1
-# Retire le demarrage automatique ET arrete la session Remote Control en cours.
+# Retire le demarrage automatique (tache planifiee + ancien .vbs eventuel)
+# ET arrete la session Remote Control en cours -- UNIQUEMENT pour CE projet.
+# La suppression de la tache demande une elevation (UAC) : le script se
+# re-eleve tout seul si besoin.
 # Usage :  powershell -ExecutionPolicy Bypass -File .\desinstaller-remote-control.ps1
 
 $ErrorActionPreference = "SilentlyContinue"
 
-# 1. Supprimer le lanceur du dossier Demarrage
-$startupDir = [Environment]::GetFolderPath('Startup')
-$vbsPath    = Join-Path $startupDir "claude-remote-control-cryptonauts.vbs"
-if (Test-Path $vbsPath) {
-    Remove-Item $vbsPath -Force
-    Write-Host "[OK] Demarrage automatique supprime." -ForegroundColor Green
-} else {
-    Write-Host "[i] Aucun lanceur de demarrage trouve." -ForegroundColor DarkGray
+$taskName = "CRYPTONAUTS Remote Control"
+
+# --- Se re-elever si besoin (suppression de tache = admin) ---
+$isAdmin = ([Security.Principal.WindowsPrincipal] `
+    [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+    [Security.Principal.WindowsBuiltinRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "[i] Elevation requise pour supprimer la tache planifiee (UAC)..." -ForegroundColor Yellow
+    Start-Process powershell.exe -Verb RunAs -Wait -ArgumentList `
+        '-NoProfile','-ExecutionPolicy','Bypass','-File',"`"$PSCommandPath`""
+    exit
 }
 
-# 2. Arreter les process en cours -- UNIQUEMENT ceux de CE projet.
-#    Identifiant : le mot "Cryptonauts" dans la ligne de commande.
-#    C'est le nom de session ET le nom du dossier de CE projet, et il est
-#    UNIQUE : ni NEXBET ni API-SPORT ne contiennent "Cryptonauts".
-#    -> on attrape la boucle PowerShell, le lanceur .vbs ET le process
-#       claude.exe enfant (--name Cryptonauts / --remote-control Cryptonauts),
-#       quel que soit le style (ancien ou nouveau).
-$killed = 0
-$marker = "cryptonauts"
+# 1. Supprimer la tache planifiee
+if (Get-ScheduledTask -TaskName $taskName -ErrorAction SilentlyContinue) {
+    Unregister-ScheduledTask -TaskName $taskName -Confirm:$false
+    Write-Host "[OK] Tache planifiee '$taskName' supprimee." -ForegroundColor Green
+} else {
+    Write-Host "[i] Aucune tache planifiee '$taskName'." -ForegroundColor DarkGray
+}
 
-# (on retire d'abord le fichier .pid, devenu inutile)
+# 2. Supprimer un eventuel ancien lanceur .vbs (methode obsolete)
+$startupDir = [Environment]::GetFolderPath('Startup')
+$oldVbs = Join-Path $startupDir "claude-remote-control-cryptonauts.vbs"
+if (Test-Path $oldVbs) {
+    Remove-Item $oldVbs -Force
+    Write-Host "[OK] Ancien lanceur .vbs supprime." -ForegroundColor Green
+}
+
+# 3. Arreter les process en cours -- UNIQUEMENT ceux de CE projet.
+#    Identifiant : le mot "Cryptonauts" dans la ligne de commande (nom de
+#    session ET nom de dossier, UNIQUE : ni NEXBET ni BETSFIX ne le contiennent).
 $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 if (Test-Path $pidFile) { Remove-Item $pidFile -Force }
 
+$killed = 0
+$marker = "cryptonauts"
 Get-CimInstance Win32_Process | Where-Object {
-    $_.ProcessId -ne $PID -and                       # pas le desinstallateur lui-meme
+    $_.ProcessId -ne $PID -and
     $_.CommandLine -and
     $_.CommandLine.ToLower().Contains($marker)
 } | ForEach-Object {
@@ -39,4 +55,4 @@ Get-CimInstance Win32_Process | Where-Object {
 }
 
 Write-Host "[OK] $killed processus 'Cryptonauts' arrete(s)." -ForegroundColor Green
-Write-Host "(NEXBET et API-SPORT ne sont PAS touches.)" -ForegroundColor Cyan
+Write-Host "(NEXBET et BETSFIX ne sont PAS touches.)" -ForegroundColor Cyan

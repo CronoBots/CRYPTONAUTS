@@ -22,35 +22,25 @@ if (-not $claude) { $claude = "claude" }
 
 $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 
-# Style uniformise avec les autres projets (NEXBET, API-SPORT) :
-#   session interactive remote-control + autonomie totale.
-# On tente d'abord AVEC --continue (reprend la derniere conversation, comme
-# NEXBET). Si claude ressort tout de suite (aucune conversation a reprendre
-# dans ce dossier), on relance SANS --continue pour creer une session fraiche.
-$argsContinue = @("--remote-control", $SessionName, "--continue", "--dangerously-skip-permissions")
-$argsFresh    = @("--remote-control", $SessionName, "--dangerously-skip-permissions")
-$attempts     = @($argsContinue, $argsFresh)
+# Style IDENTIQUE au lanceur PRONOSTICS/NEXBET qui fonctionne :
+#   session remote-control FRAICHE, autonomie totale, SANS --continue.
+# IMPORTANT : --continue reprend une ancienne conversation LOCALE et n'etablit
+# PAS la session distante visible sur claude.ai/code. C'est pour ca que les
+# projets lances avec --continue ne montraient aucune session. On l'enleve.
+$argsFresh = @("--remote-control", $SessionName, "--dangerously-skip-permissions")
 
 # PID de la boucle (le desinstallateur cible aussi par le mot "Cryptonauts")
 Set-Content -Path $pidFile -Value $PID -Encoding ASCII
 
 while ($true) {
-    foreach ($argSet in $attempts) {
-        $start = Get-Date
-        try {
-            # IMPORTANT : on appelle claude DIRECTEMENT (operateur &), pas via
-            # Start-Process -WindowStyle Hidden. claude a besoin d'heriter de la
-            # console (cachee) de ce PowerShell pour le mode remote-control --
-            # exactement comme le lanceur de NEXBET. Avec Start-Process detache,
-            # claude perd sa console et ressort aussitot.
-            & $claude @argSet
-        } catch {
-            # on ignore et on passe a la tentative suivante
-        }
-        # Si la session a tenu >= 20s, c'est qu'elle fonctionnait : on ne passe
-        # pas a la variante "fresh", on attend juste avant un nouveau cycle.
-        if (((Get-Date) - $start).TotalSeconds -ge 20) { break }
-        # Sinon : sortie quasi immediate -> on essaie la variante suivante.
+    try {
+        # On appelle claude DIRECTEMENT (operateur &), pas via Start-Process
+        # -WindowStyle Hidden. claude a besoin d'heriter de la console (cachee)
+        # de ce PowerShell pour le mode remote-control -- comme NEXBET. Avec
+        # Start-Process detache, claude perd sa console et ressort aussitot.
+        & $claude @argsFresh
+    } catch {
+        # crash/timeout reseau : on relance apres une courte pause
     }
     Start-Sleep -Seconds 10
 }
