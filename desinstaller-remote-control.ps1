@@ -15,29 +15,28 @@ if (Test-Path $vbsPath) {
 }
 
 # 2. Arreter les process en cours -- UNIQUEMENT ceux de CE projet.
+#    Identifiant : le mot "Cryptonauts" dans la ligne de commande.
+#    C'est le nom de session ET le nom du dossier de CE projet, et il est
+#    UNIQUE : ni NEXBET ni API-SPORT ne contiennent "Cryptonauts".
+#    -> on attrape la boucle PowerShell, le lanceur .vbs ET le process
+#       claude.exe enfant (--name Cryptonauts / --remote-control Cryptonauts),
+#       quel que soit le style (ancien ou nouveau).
 $killed = 0
+$marker = "cryptonauts"
 
-# 2a. PID exacts notes par la boucle (la plus fiable)
+# (on retire d'abord le fichier .pid, devenu inutile)
 $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
-if (Test-Path $pidFile) {
-    Get-Content $pidFile | Where-Object { $_ -match '^\d+$' } | ForEach-Object {
-        Write-Host ("  arret PID {0} (fichier .pid)" -f $_) -ForegroundColor DarkGray
-        Stop-Process -Id ([int]$_) -Force -ErrorAction SilentlyContinue
-        $killed++
-    }
-    Remove-Item $pidFile -Force
-}
+if (Test-Path $pidFile) { Remove-Item $pidFile -Force }
 
-# 2b. Filet de securite : tout process dont la ligne de commande contient
-#     le chemin EXACT de CE dossier (jamais un autre projet).
-$projectEsc = [regex]::Escape($PSScriptRoot)
 Get-CimInstance Win32_Process | Where-Object {
-    $_.CommandLine -and $_.CommandLine -match $projectEsc
+    $_.ProcessId -ne $PID -and                       # pas le desinstallateur lui-meme
+    $_.CommandLine -and
+    $_.CommandLine.ToLower().Contains($marker)
 } | ForEach-Object {
-    Write-Host ("  arret PID {0} (chemin projet)" -f $_.ProcessId) -ForegroundColor DarkGray
+    Write-Host ("  arret PID {0} : {1}" -f $_.ProcessId, $_.CommandLine) -ForegroundColor DarkGray
     Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
     $killed++
 }
 
-Write-Host "[OK] $killed processus de CE projet arrete(s)." -ForegroundColor Green
-Write-Host "(Les autres projets, comme 'sport api', ne sont PAS touches.)" -ForegroundColor Cyan
+Write-Host "[OK] $killed processus 'Cryptonauts' arrete(s)." -ForegroundColor Green
+Write-Host "(NEXBET et API-SPORT ne sont PAS touches.)" -ForegroundColor Cyan
