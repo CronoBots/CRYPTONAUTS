@@ -4,3 +4,6 @@ node_modules/
 # Fichiers intermédiaires générés par Test.js
 Cryptonauts.html
 Owners.json
+
+# PID de la session Remote Control (local à chaque PC)
+.remote-control.pid

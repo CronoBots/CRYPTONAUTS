@@ -14,16 +14,30 @@ if (Test-Path $vbsPath) {
     Write-Host "[i] Aucun lanceur de demarrage trouve." -ForegroundColor DarkGray
 }
 
-# 2. Arreter les process en cours (boucle + remote-control)
+# 2. Arreter les process en cours -- UNIQUEMENT ceux de CE projet.
 $killed = 0
+
+# 2a. PID exacts notes par la boucle (la plus fiable)
+$pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
+if (Test-Path $pidFile) {
+    Get-Content $pidFile | Where-Object { $_ -match '^\d+$' } | ForEach-Object {
+        Write-Host ("  arret PID {0} (fichier .pid)" -f $_) -ForegroundColor DarkGray
+        Stop-Process -Id ([int]$_) -Force -ErrorAction SilentlyContinue
+        $killed++
+    }
+    Remove-Item $pidFile -Force
+}
+
+# 2b. Filet de securite : tout process dont la ligne de commande contient
+#     le chemin EXACT de CE dossier (jamais un autre projet).
+$projectEsc = [regex]::Escape($PSScriptRoot)
 Get-CimInstance Win32_Process | Where-Object {
-    $_.CommandLine -and (
-        $_.CommandLine -match "remote-control-loop\.ps1" -or
-        $_.CommandLine -match "remote-control --name .{0,3}Cryptonauts"
-    )
+    $_.CommandLine -and $_.CommandLine -match $projectEsc
 } | ForEach-Object {
+    Write-Host ("  arret PID {0} (chemin projet)" -f $_.ProcessId) -ForegroundColor DarkGray
     Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue
     $killed++
 }
-Write-Host "[OK] $killed processus arrete(s)." -ForegroundColor Green
-Write-Host "Remote Control est desactive." -ForegroundColor Cyan
+
+Write-Host "[OK] $killed processus de CE projet arrete(s)." -ForegroundColor Green
+Write-Host "(Les autres projets, comme 'sport api', ne sont PAS touches.)" -ForegroundColor Cyan

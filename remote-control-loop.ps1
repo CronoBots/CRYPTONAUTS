@@ -1,28 +1,37 @@
 # remote-control-loop.ps1
-# Maintient Claude Remote Control actif en permanence.
-# Lancé en arrière-plan par la tâche planifiée (voir installer-remote-control.ps1).
-# Si le process s'arrête (timeout réseau, mise en veille, crash...), il est relancé.
+# Maintient Claude Remote Control actif en permanence POUR CE PROJET.
+# Lance par le dossier Demarrage (voir installer-remote-control.ps1).
+# Si la session s'arrete (timeout reseau, veille, crash...), elle est relancee.
+#
+# Le PID de la session en cours est ecrit dans .remote-control.pid pour que
+# le desinstallateur puisse arreter UNIQUEMENT ce projet.
 
 $ErrorActionPreference = "Continue"
 Set-Location $PSScriptRoot
 
-# Localiser claude.exe
+# --- Nom de session : UNIQUE a ce projet (evite la confusion avec d'autres) ---
+$SessionName = "Cryptonauts"
+
+# --- Localiser claude.exe ---
 $claude = (Get-Command claude -ErrorAction SilentlyContinue).Source
 if (-not $claude) {
     $candidate = Join-Path $env:LOCALAPPDATA "Programs\Claude\claude.exe"
     if (Test-Path $candidate) { $claude = $candidate }
 }
-if (-not $claude) {
-    # Dernier recours : on suppose qu'il est dans le PATH
-    $claude = "claude"
-}
+if (-not $claude) { $claude = "claude" }
+
+$pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 
 while ($true) {
     try {
-        & $claude remote-control --name "Cryptonauts"
+        $proc = Start-Process -FilePath $claude `
+            -ArgumentList @("remote-control", "--name", $SessionName) `
+            -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru
+        # Noter le PID de la session (la boucle + la session)
+        Set-Content -Path $pidFile -Value @($PID, $proc.Id) -Encoding ASCII
+        Wait-Process -Id $proc.Id
     } catch {
         # on ignore et on relance
     }
-    # Le process s'est arrêté : petite pause puis relance
     Start-Sleep -Seconds 10
 }
