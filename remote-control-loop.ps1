@@ -24,8 +24,11 @@ $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 
 while ($true) {
     try {
+        # Style uniformise avec les autres projets (NEXBET, API-SPORT) :
+        #   session interactive + reprise (--continue) + autonomie totale
+        #   (--dangerously-skip-permissions)
         $proc = Start-Process -FilePath $claude `
-            -ArgumentList @("remote-control", "--name", $SessionName) `
+            -ArgumentList @("--remote-control", $SessionName, "--continue", "--dangerously-skip-permissions") `
             -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru
         # Noter le PID de la session (la boucle + la session)
         Set-Content -Path $pidFile -Value @($PID, $proc.Id) -Encoding ASCII
