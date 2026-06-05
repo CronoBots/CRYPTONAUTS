@@ -22,19 +22,31 @@ if (-not $claude) { $claude = "claude" }
 
 $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 
+# Style uniformise avec les autres projets (NEXBET, API-SPORT) :
+#   session interactive remote-control + autonomie totale.
+# On tente d'abord AVEC --continue (reprend la derniere conversation, comme
+# NEXBET). Si claude ressort tout de suite (aucune conversation a reprendre
+# dans ce dossier), on relance SANS --continue pour creer une session fraiche.
+$argsContinue = @("--remote-control", $SessionName, "--continue", "--dangerously-skip-permissions")
+$argsFresh    = @("--remote-control", $SessionName, "--dangerously-skip-permissions")
+$attempts     = @($argsContinue, $argsFresh)
+
 while ($true) {
-    try {
-        # Style uniformise avec les autres projets (NEXBET, API-SPORT) :
-        #   session interactive + reprise (--continue) + autonomie totale
-        #   (--dangerously-skip-permissions)
-        $proc = Start-Process -FilePath $claude `
-            -ArgumentList @("--remote-control", $SessionName, "--continue", "--dangerously-skip-permissions") `
-            -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru
-        # Noter le PID de la session (la boucle + la session)
-        Set-Content -Path $pidFile -Value @($PID, $proc.Id) -Encoding ASCII
-        Wait-Process -Id $proc.Id
-    } catch {
-        # on ignore et on relance
+    foreach ($argSet in $attempts) {
+        $start = Get-Date
+        try {
+            $proc = Start-Process -FilePath $claude -ArgumentList $argSet `
+                -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru
+            # Noter le PID de la session (la boucle + la session)
+            Set-Content -Path $pidFile -Value @($PID, $proc.Id) -Encoding ASCII
+            Wait-Process -Id $proc.Id
+        } catch {
+            # on ignore et on passe a la tentative suivante
+        }
+        # Si la session a tenu >= 20s, c'est qu'elle fonctionnait : on ne passe
+        # pas a la variante "fresh", on attend juste avant un nouveau cycle.
+        if (((Get-Date) - $start).TotalSeconds -ge 20) { break }
+        # Sinon : sortie quasi immediate -> on essaie la variante suivante.
     }
     Start-Sleep -Seconds 10
 }
