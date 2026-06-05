@@ -1,0 +1,6 @@
+# Dépendances Node
+node_modules/
+
+# Fichiers intermédiaires générés par Test.js
+Cryptonauts.html
+Owners.json

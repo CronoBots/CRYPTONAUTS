@@ -1,0 +1,12 @@
+{
+  "name": "cryptonauts-leaderboards",
+  "version": "1.0.0",
+  "description": "Générateur du leaderboard Cryptonauts (index.html) à partir de l'API crypto.com",
+  "private": true,
+  "scripts": {
+    "build": "node Test.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.0"
+  }
+}
