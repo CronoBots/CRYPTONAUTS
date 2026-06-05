@@ -31,15 +31,19 @@ $argsContinue = @("--remote-control", $SessionName, "--continue", "--dangerously
 $argsFresh    = @("--remote-control", $SessionName, "--dangerously-skip-permissions")
 $attempts     = @($argsContinue, $argsFresh)
 
+# PID de la boucle (le desinstallateur cible aussi par le mot "Cryptonauts")
+Set-Content -Path $pidFile -Value $PID -Encoding ASCII
+
 while ($true) {
     foreach ($argSet in $attempts) {
         $start = Get-Date
         try {
-            $proc = Start-Process -FilePath $claude -ArgumentList $argSet `
-                -WorkingDirectory $PSScriptRoot -WindowStyle Hidden -PassThru
-            # Noter le PID de la session (la boucle + la session)
-            Set-Content -Path $pidFile -Value @($PID, $proc.Id) -Encoding ASCII
-            Wait-Process -Id $proc.Id
+            # IMPORTANT : on appelle claude DIRECTEMENT (operateur &), pas via
+            # Start-Process -WindowStyle Hidden. claude a besoin d'heriter de la
+            # console (cachee) de ce PowerShell pour le mode remote-control --
+            # exactement comme le lanceur de NEXBET. Avec Start-Process detache,
+            # claude perd sa console et ressort aussitot.
+            & $claude @argSet
         } catch {
             # on ignore et on passe a la tentative suivante
         }
