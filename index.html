@@ -545,19 +545,13 @@ body::after {
       background: radial-gradient(ellipse at 50% 40%, #0b1030 0%, #03040a 70%);
       animation: introOut 0.6s ease 1.7s forwards;
     }
-    #intro img {
-      width: min(440px, 82vw);
-      height: auto;
-      filter: drop-shadow(0 0 26px rgba(102, 191, 255, 0.6));
-      animation: introIn 1.1s ease-out both;
-    }
     #intro .intro-title {
-      font-size: 2rem;
+      font-size: 2.8rem;
       letter-spacing: 0.35em;
       text-transform: uppercase;
       color: #fff;
       text-shadow: 0 0 18px rgba(102, 191, 255, 0.6);
-      animation: introIn 1.1s ease-out 0.18s both;
+      animation: introIn 1.1s ease-out both;
     }
     @keyframes introIn {
       from { opacity: 0; transform: translateY(20px) scale(0.9); }
@@ -607,13 +601,13 @@ body::after {
 
     @media (prefers-reduced-motion: reduce) {
       #intro { animation: introOut 0.3s ease 0.9s forwards; }
-      #intro img, #intro .intro-title { animation: none; }
+      #intro .intro-title { animation: none; }
       #scrollTopBtn { transition: opacity 0.2s ease, visibility 0.2s; }
     }
 
     @media screen and (max-width: 600px) {
       #scrollTopBtn { width: 46px; height: 46px; bottom: 16px; right: 16px; font-size: 1.3rem; }
-      #intro .intro-title { font-size: 1.4rem; }
+      #intro .intro-title { font-size: 1.8rem; }
     }
 
     @media screen and (max-width: 600px) {
@@ -755,7 +749,6 @@ body::after {
 </head>
 <body>
   <div id="intro" aria-hidden="true">
-    <img src="assets/Footer.png" alt="">
     <div class="intro-title">Cryptonauts</div>
   </div>
 
@@ -765,7 +758,7 @@ body::after {
   
   <main>
     <section class="collection-list">
-      <h1>🚀 COLLECTIONS</h1>
+      <h1>COLLECTIONS</h1>
       <div id="collections"></div>
     </section>
   </main>
@@ -872,7 +865,7 @@ body::after {
         const section = document.createElement('section');
         section.className = 'leaderboard-section';
         section.innerHTML = `
-          <h1>🚀 LEADERBOARDS</h1>
+          <h1>LEADERBOARDS</h1>
           <div class="summary">
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
             <ul id="global-owners">
@@ -1026,6 +1019,6 @@ body::after {
     });
   </script>
 
-  <button id="scrollTopBtn" aria-label="Retour en haut" title="Retour en haut">🚀</button>
+  <button id="scrollTopBtn" aria-label="Retour en haut" title="Retour en haut">↑</button>
 </body>
 </html>
