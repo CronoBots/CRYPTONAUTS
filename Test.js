@@ -844,7 +844,7 @@ body::after {
       animation: introOut 0.6s ease 1.7s forwards;
     }
     #intro img {
-      width: 140px;
+      width: min(440px, 82vw);
       height: auto;
       filter: drop-shadow(0 0 26px rgba(102, 191, 255, 0.6));
       animation: introIn 1.1s ease-out both;
@@ -911,7 +911,6 @@ body::after {
 
     @media screen and (max-width: 600px) {
       #scrollTopBtn { width: 46px; height: 46px; bottom: 16px; right: 16px; font-size: 1.3rem; }
-      #intro img { width: 110px; }
       #intro .intro-title { font-size: 1.4rem; }
     }
 
@@ -1054,7 +1053,7 @@ body::after {
 </head>
 <body>
   <div id="intro" aria-hidden="true">
-    <img src="assets/logo.png" alt="">
+    <img src="assets/Footer.png" alt="">
     <div class="intro-title">Cryptonauts</div>
   </div>
 
