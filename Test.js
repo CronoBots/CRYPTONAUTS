@@ -1447,6 +1447,302 @@ body::after {
       }
       .holders-badge { font-size: 0.8rem; padding: 5px 12px; }
     }
+
+    /* ════════════ GALERIE DE COLLECTIONS ════════════ */
+    .collection-list > h1 { text-align: center; }
+
+    #collections {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 22px;
+      align-items: stretch;
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .collection {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      opacity: 0;
+      translate: 0 20px;
+      animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+    }
+    @keyframes cardIn { to { opacity: 1; translate: 0 0; } }
+
+    .collection:hover,
+    .collection:focus-visible {
+      transform: translateY(-6px);
+      border-color: rgba(102, 191, 255, 0.45);
+      box-shadow: 0 16px 44px rgba(102, 191, 255, 0.20);
+      outline: none;
+    }
+
+    .collection-header {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .collection-cover {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: #0b1030;
+    }
+    .collection-cover img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      transition: transform 0.45s ease;
+    }
+    .collection:hover .collection-cover img,
+    .collection:focus-visible .collection-cover img { transform: scale(1.07); }
+    .collection-cover::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(to top, rgba(11, 16, 48, 0.85), transparent 55%);
+      pointer-events: none;
+    }
+    .cover-cta {
+      position: absolute;
+      z-index: 2;
+      bottom: 12px;
+      left: 50%;
+      transform: translateX(-50%) translateY(6px);
+      padding: 7px 16px;
+      border-radius: 999px;
+      background: rgba(3, 4, 10, 0.6);
+      border: 1px solid rgba(102, 191, 255, 0.5);
+      color: #fff;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    .collection:hover .cover-cta,
+    .collection:focus-visible .cover-cta { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .collection-body {
+      padding: 16px 16px 18px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+    .collection-body h2 {
+      font-size: 1.1rem;
+      line-height: 1.2;
+      margin: 0 0 4px;
+      text-shadow: 0 0 14px rgba(102, 191, 255, 0.3);
+    }
+    .collection-date {
+      display: block;
+      color: #cc8834;
+      font-size: 0.8rem;
+      margin-bottom: 8px;
+    }
+    .collection-stats {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+    .stat-chip {
+      flex: 1;
+      min-width: 0;
+      background: rgba(102, 191, 255, 0.07);
+      border: 1px solid rgba(102, 191, 255, 0.16);
+      border-radius: 12px;
+      padding: 10px 6px;
+    }
+    .stat-chip .v {
+      display: block;
+      font-size: 1.45rem;
+      line-height: 1;
+      color: var(--primary-color);
+      text-shadow: 0 0 14px rgba(102, 191, 255, 0.4);
+    }
+    .stat-chip .l {
+      display: block;
+      margin-top: 5px;
+      font-size: 0.58rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.65);
+    }
+
+    /* Lignes du leaderboard global : anti-débordement */
+    #global-owners li .left-container,
+    #additional-owners li .left-container {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    #global-owners li .left-container > a:first-of-type,
+    #additional-owners li .left-container > a:first-of-type {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #global-owners li .count-container,
+    #additional-owners li .count-container { flex: 0 0 auto; }
+
+    /* ════════════ MODALE DÉTAIL COLLECTION ════════════ */
+    #collectionModal .modal-box {
+      max-width: 560px;
+      padding: 0;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      max-height: 88vh;
+      animation: cmIn 0.35s ease;
+    }
+    @keyframes cmIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.97); }
+      to { opacity: 1; transform: none; }
+    }
+    .cm-header {
+      position: relative;
+      padding: 26px 20px 18px;
+      text-align: center;
+      border-bottom: 1px solid rgba(102, 191, 255, 0.15);
+      background: radial-gradient(ellipse at 50% 0%, rgba(102, 191, 255, 0.12), transparent 70%);
+      flex-shrink: 0;
+    }
+    .cm-header .cm-cover {
+      width: 96px;
+      height: 96px;
+      border-radius: 18px;
+      object-fit: cover;
+      border: 1px solid rgba(102, 191, 255, 0.3);
+      box-shadow: 0 0 24px rgba(102, 191, 255, 0.25);
+    }
+    .cm-header .cm-title {
+      font-size: 1.25rem;
+      margin: 12px 0 14px;
+    }
+    .cm-stats {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+    }
+    .cm-stat {
+      min-width: 92px;
+      padding: 8px 14px;
+      border-radius: 12px;
+      background: rgba(102, 191, 255, 0.08);
+      border: 1px solid rgba(102, 191, 255, 0.18);
+    }
+    .cm-stat .v { display: block; font-size: 1.5rem; line-height: 1; color: var(--primary-color); }
+    .cm-stat .l { display: block; margin-top: 4px; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.65); }
+
+    .cm-list {
+      list-style: none;
+      margin: 0;
+      padding: 14px 16px 18px;
+      overflow-y: auto;
+    }
+    #collectionModal .cm-list li {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 11px 12px;
+      margin-bottom: 9px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(102, 191, 255, 0.10);
+      border-left: 3px solid rgba(102, 191, 255, 0.35);
+      text-transform: uppercase;
+      font-weight: bold;
+      font-size: 0.95rem;
+    }
+    #collectionModal .cm-list li .lb-left {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    #collectionModal .cm-list li .lb-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--primary-color);
+    }
+    #collectionModal .cm-list li .rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.4rem;
+      border-radius: 999px;
+      background: rgba(102, 191, 255, 0.14);
+      border: 1px solid rgba(102, 191, 255, 0.30);
+      color: #cfe9ff;
+      font-size: 0.95rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    #collectionModal .cm-list li .lb-count {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex: 0 0 auto;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(102, 191, 255, 0.12);
+      border: 1px solid rgba(102, 191, 255, 0.22);
+    }
+    #collectionModal .cm-list li .lb-count .n { font-size: 1.05rem; }
+    #collectionModal .cm-list li .lb-count .t { font-size: 0.55rem; opacity: 0.6; letter-spacing: 0.04em; }
+
+    #collectionModal .cm-list li.rank-1 { border-left-color: #ffd700; background: linear-gradient(90deg, rgba(255, 215, 0, 0.16), rgba(255, 255, 255, 0.03)); }
+    #collectionModal .cm-list li.rank-2 { border-left-color: #c0c0c0; background: linear-gradient(90deg, rgba(210, 210, 210, 0.16), rgba(255, 255, 255, 0.03)); }
+    #collectionModal .cm-list li.rank-3 { border-left-color: #cd7f32; background: linear-gradient(90deg, rgba(205, 127, 50, 0.16), rgba(255, 255, 255, 0.03)); }
+    #collectionModal .cm-list li.rank-1 .rank { background: linear-gradient(135deg, #ffe680, #d4a017); border-color: rgba(255, 215, 0, 0.7); color: #2a1d00; }
+    #collectionModal .cm-list li.rank-2 .rank { background: linear-gradient(135deg, #f5f5f5, #b9b9b9); border-color: rgba(220, 220, 220, 0.7); color: #1d1d1d; }
+    #collectionModal .cm-list li.rank-3 .rank { background: linear-gradient(135deg, #f0b27a, #cd7f32); border-color: rgba(205, 127, 50, 0.7); color: #2a1400; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .collection { animation: none; opacity: 1; transform: none; translate: none; }
+      #collectionModal .modal-box { animation: none; }
+    }
+
+    @media screen and (max-width: 600px) {
+      #collections { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+      .collection-body { padding: 12px 10px 14px; }
+      .collection-body h2 { font-size: 0.92rem; }
+      .collection-stats { gap: 6px; }
+      .stat-chip { padding: 8px 4px; }
+      .stat-chip .v { font-size: 1.1rem; }
+      .stat-chip .l { font-size: 0.5rem; }
+      .cover-cta { font-size: 0.6rem; padding: 5px 10px; opacity: 1; transform: translateX(-50%); }
+      .cm-header .cm-cover { width: 74px; height: 74px; }
+      .cm-header .cm-title { font-size: 1.05rem; }
+      #global-owners li .count-text,
+      #additional-owners li .count-text { display: none; }
+      #collectionModal .cm-list li .lb-count .t { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1476,6 +1772,21 @@ body::after {
     </div>
   </footer>
 
+  <div id="collectionModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="cmTitle">
+    <div class="modal-box">
+      <button class="modal-close" id="collectionModalClose" aria-label="Close">&times;</button>
+      <div class="cm-header">
+        <img class="cm-cover" src="" alt="" loading="lazy" decoding="async">
+        <h2 class="cm-title" id="cmTitle"></h2>
+        <div class="cm-stats">
+          <div class="cm-stat"><span class="v cm-holders">0</span><span class="l">Holders</span></div>
+          <div class="cm-stat"><span class="v cm-items">0</span><span class="l">Cryptonauts</span></div>
+        </div>
+      </div>
+      <ul class="cm-list"></ul>
+    </div>
+  </div>
+
   <script>
     const collectionsData = ${JSON.stringify(allCollectionsData)};
     const globalOwnersData = ${JSON.stringify(globalOwnersData)};
@@ -1492,57 +1803,78 @@ body::after {
       return url && url.startsWith('https://x.com/') ? '@' + url.split('https://x.com/')[1] : '';
     }
 
-    function renderCollection(collection) {
+    // Carte de collection (galerie). Le détail des propriétaires s'ouvre dans une modale.
+    function renderCollection(collection, index) {
       try {
-        const sortedOwners = [...collection.owners].sort((a, b) => b.count - a.count);
-        let currentRank = 1;
-        let previousCount = null;
-        const rankedOwners = sortedOwners.map((owner, index) => {
-          if (index > 0 && owner.count < previousCount) {
-            currentRank += 1;
-          }
-          previousCount = owner.count;
-          let rankClass = '';
-          if (currentRank === 1) rankClass = 'collection-rank-1';
-          else if (currentRank === 2) rankClass = 'collection-rank-2';
-          else if (currentRank === 3) rankClass = 'collection-rank-3';
-          return { ...owner, rank: currentRank, rankClass };
-        });
-
         const div = document.createElement('div');
         div.className = 'collection';
+        div.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
+        const total = collection.owners.reduce((sum, o) => sum + (o.count || 0), 0);
+        const interactive = collection.owners.length > 0;
+        if (interactive) {
+          div.setAttribute('role', 'button');
+          div.setAttribute('tabindex', '0');
+          div.setAttribute('aria-label', \`View \${collection.title} holders\`);
+        }
         div.innerHTML = \`
           <div class="collection-header">
-            <img src="\${collection.image}" alt="\${collection.alt}" class="collection-image" loading="lazy" decoding="async">
-            <div class="title-container">
+            <div class="collection-cover">
+              <img src="\${collection.image}" alt="\${collection.alt}" loading="lazy" decoding="async">
+              \${interactive ? '<span class="cover-cta">VIEW HOLDERS</span>' : ''}
+            </div>
+            <div class="collection-body">
               <h2>\${collection.title}</h2>
-              \${collection.date ? \`<span style="color: #cc8834; font-weight: 700; margin-top: 8px;">\${collection.date}</span>\` : ''}
-              \${collection.ownersCount ? \`<div class="holders-badge"><span class="dot"></span>\${collection.ownersCount} HOLDERS</div>\` : ''}
-              \${collection.owners.length ? \`<span class="toggle-btn" data-section-id="\${collection.id}" aria-controls="\${collection.id}" aria-expanded="false" aria-label="Toggle \${collection.title} owners">SHOW OWNERS</span>\` : ''}
+              \${collection.date ? \`<span class="collection-date">\${collection.date}</span>\` : ''}
+              <div class="collection-stats">
+                <div class="stat-chip"><span class="v" data-count="\${collection.ownersCount || 0}">0</span><span class="l">Holders</span></div>
+                <div class="stat-chip"><span class="v" data-count="\${total}">0</span><span class="l">Cryptonauts</span></div>
+              </div>
             </div>
           </div>
-          \${collection.owners.length ? \`
-            <div id="\${collection.id}" class="hidden">
-              <ul>
-                \${rankedOwners.map(owner => \`
-                  <li class="\${owner.rankClass}">
-                    <div class="left-container">
-                      <span class="rank">\${owner.rank}</span>\${owner.rank <= 3 ? \`<span class="medal">\${['🥇','🥈','🥉'][owner.rank - 1]}</span>\` : ''}
-                      <a href="\${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">\${owner.name}</a>
-                      \${owner.twitter ? \`<a href="\${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">\${getTwitterHandle(owner.twitter)}</a>\` : ''}
-                    </div>
-                    <span class="count-container"><span class="count-number">\${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span>
-                  </li>
-                \`).join('')}
-              </ul>
-            </div>
-          \` : ''}
         \`;
+        if (interactive) {
+          div.addEventListener('click', () => openCollectionModal(collection));
+          div.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCollectionModal(collection); }
+          });
+        }
         return div;
       } catch (error) {
         console.error(\`Error rendering collection \${collection.title}:\`, error);
         return document.createElement('div');
       }
+    }
+
+    // Construit les lignes de propriétaires classées (réutilisé par la modale).
+    function buildOwnerRowsHTML(owners) {
+      const sorted = [...owners].sort((a, b) => b.count - a.count);
+      let rank = 1, prev = null;
+      return sorted.map((o, i) => {
+        if (i > 0 && o.count < prev) rank += 1;
+        prev = o.count;
+        const rc = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+        const medal = rank <= 3 ? \`<span class="medal">\${['🥇','🥈','🥉'][rank - 1]}</span>\` : '';
+        const tw = o.twitter ? \`<a href="\${validateTwitterUrl(o.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">\${getTwitterHandle(o.twitter)}</a>\` : '';
+        return \`<li class="\${rc}"><div class="lb-left"><span class="rank">\${rank}</span>\${medal}<a class="lb-name" href="\${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">\${o.name}</a>\${tw}</div><span class="lb-count"><span class="n">\${o.count}</span><span class="t">NFT\${o.count > 1 ? 's' : ''}</span></span></li>\`;
+      }).join('');
+    }
+
+    // Ouvre la modale détaillée d'une collection.
+    function openCollectionModal(collection) {
+      const modal = document.getElementById('collectionModal');
+      if (!modal) return;
+      const total = collection.owners.reduce((sum, o) => sum + (o.count || 0), 0);
+      const cover = modal.querySelector('.cm-cover');
+      cover.src = collection.image;
+      cover.alt = collection.title;
+      modal.querySelector('.cm-title').textContent = collection.title;
+      modal.querySelector('.cm-holders').textContent = (collection.ownersCount || 0).toLocaleString('fr-FR');
+      modal.querySelector('.cm-items').textContent = total.toLocaleString('fr-FR');
+      modal.querySelector('.cm-list').innerHTML = buildOwnerRowsHTML(collection.owners);
+      modal.hidden = false;
+      const box = modal.querySelector('.modal-box');
+      if (box) box.scrollTop = 0;
+      document.documentElement.style.overflow = 'hidden';
     }
 
     function renderGlobalOwners(owners) {
@@ -1688,8 +2020,8 @@ body::after {
           owner.twitter = owner.twitter ? validateTwitterUrl(owner.twitter) : '';
         });
 
-        collectionsData.forEach(collection => {
-          collectionsContainer.appendChild(renderCollection(collection));
+        collectionsData.forEach((collection, i) => {
+          collectionsContainer.appendChild(renderCollection(collection, i));
         });
 
         main.appendChild(renderGlobalOwners(globalOwnersData));
@@ -1706,24 +2038,34 @@ body::after {
           });
         });
 
-        // En-tête de collection entièrement cliquable (l'image, le titre ou le badge
-        // basculent l'affichage des propriétaires ; les liens restent cliquables).
-        const collectionHeaders = document.querySelectorAll('.collection-header');
-        collectionHeaders.forEach(header => {
-          const button = header.querySelector('.toggle-btn');
-          if (!button) return;
-          header.addEventListener('click', (e) => {
-            if (e.target.closest('a')) return;
-            const sectionId = button.getAttribute('data-section-id');
-            const section = document.getElementById(sectionId);
-            if (section) {
-              const isHidden = section.classList.contains('hidden');
-              section.classList.toggle('hidden', !isHidden);
-              button.textContent = isHidden ? 'HIDE OWNERS' : 'SHOW OWNERS';
-              button.setAttribute('aria-expanded', isHidden);
-            }
-          });
-        });
+        // Compteurs animés des cartes (déclenchés à l'entrée dans le viewport)
+        const chipCounters = document.querySelectorAll('.stat-chip .v[data-count]');
+        if ('IntersectionObserver' in window) {
+          const io = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                animateCount(entry.target, parseInt(entry.target.dataset.count, 10) || 0);
+                io.unobserve(entry.target);
+              }
+            });
+          }, { threshold: 0.4 });
+          chipCounters.forEach(c => io.observe(c));
+        } else {
+          chipCounters.forEach(c => { c.textContent = (parseInt(c.dataset.count, 10) || 0).toLocaleString('fr-FR'); });
+        }
+
+        // Fermeture de la modale détaillée d'une collection
+        const collectionModal = document.getElementById('collectionModal');
+        if (collectionModal) {
+          const closeCollectionModal = () => {
+            collectionModal.hidden = true;
+            document.documentElement.style.overflow = '';
+          };
+          const cmClose = document.getElementById('collectionModalClose');
+          if (cmClose) cmClose.addEventListener('click', closeCollectionModal);
+          collectionModal.addEventListener('click', (e) => { if (e.target === collectionModal) closeCollectionModal(); });
+          document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !collectionModal.hidden) closeCollectionModal(); });
+        }
 
         const showMoreButton = document.getElementById('show-more-owners');
         if (showMoreButton) {
