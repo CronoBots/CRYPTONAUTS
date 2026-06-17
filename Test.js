@@ -1055,20 +1055,24 @@ body::after {
     /* ── Bandeau de statistiques ── */
     .stats-band {
       display: flex;
-      justify-content: center;
-      gap: 14px;
-      flex-wrap: wrap;
-      margin: 4px 0 26px;
-    }
-    .stat-card {
-      flex: 1 1 150px;
-      max-width: 240px;
-      text-align: center;
-      padding: 18px 16px;
+      align-items: stretch;
+      max-width: 560px;
+      margin: 4px auto 26px;
       border-radius: 15px;
       background-color: rgba(20, 22, 38, 0.82);
       border: 1px solid rgba(102, 191, 255, 0.18);
       box-shadow: 0 0 18px rgba(102, 191, 255, 0.08);
+      overflow: hidden;
+    }
+    .stat-card {
+      flex: 1 1 0;
+      min-width: 0;
+      text-align: center;
+      padding: 16px 8px;
+      border-left: 1px solid rgba(102, 191, 255, 0.14);
+    }
+    .stat-card:first-child {
+      border-left: none;
     }
     .stat-number {
       font-size: 2.4rem;
@@ -1130,8 +1134,8 @@ body::after {
     }
 
     @media screen and (max-width: 600px) {
-      .stat-number { font-size: 1.7rem; }
-      .stat-label { font-size: 0.7rem; }
+      .stat-number { font-size: 1.6rem; }
+      .stat-label { font-size: 0.62rem; letter-spacing: 0.04em; }
     }
   </style>
 </head>
@@ -1324,7 +1328,7 @@ body::after {
         const totalNFTs = globalOwnersData.reduce((sum, o) => sum + (o.count || 0), 0);
         const collectionsCount = collectionsData.length;
         const stats = [
-          { value: uniqueOwners, label: 'Holders uniques' },
+          { value: uniqueOwners, label: 'Holders' },
           { value: totalNFTs, label: 'Cryptonauts' },
           { value: collectionsCount, label: 'Collections' }
         ];
