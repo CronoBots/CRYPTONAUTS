@@ -858,7 +858,7 @@ body::after {
       animation: introOut 0.6s ease 1.7s forwards;
     }
     #intro img {
-      width: min(440px, 82vw);
+      width: min(620px, 90vw);
       height: auto;
       animation: introIn 1.1s ease-out both;
     }
