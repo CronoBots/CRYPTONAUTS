@@ -322,7 +322,7 @@ function writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData) {
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Cryptonauts">
+  <meta name="apple-mobile-web-app-title" content="CRYPTONAUTS">
   <style>
     :root {
       --primary-color: #66bfff;
