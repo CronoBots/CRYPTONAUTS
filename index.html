@@ -798,38 +798,6 @@ body::after {
       color: rgba(255, 255, 255, 0.75);
     }
 
-    /* ── Étoile filante ── */
-    .shooting-star {
-      position: fixed;
-      top: -5%;
-      left: -8%;
-      width: 2px;
-      height: 2px;
-      border-radius: 50%;
-      background: #fff;
-      box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.7);
-      opacity: 0;
-      z-index: -1;
-      pointer-events: none;
-      animation: shoot 11s ease-in infinite;
-    }
-    .shooting-star::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      right: 2px;
-      width: 120px;
-      height: 1px;
-      transform: translateY(-50%);
-      background: linear-gradient(to left, rgba(255, 255, 255, 0.7), transparent);
-    }
-    @keyframes shoot {
-      0%   { transform: translate(0, 0); opacity: 0; }
-      2%   { opacity: 1; }
-      11%  { transform: translate(70vw, 60vh); opacity: 0; }
-      100% { transform: translate(70vw, 60vh); opacity: 0; }
-    }
-
     /* ── Focus clavier visible ── */
     .toggle-btn:focus-visible,
     .show-more-btn:focus-visible,
@@ -837,10 +805,6 @@ body::after {
     #searchInput:focus-visible {
       outline: 2px solid rgba(102, 191, 255, 0.7);
       outline-offset: 2px;
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      .shooting-star { display: none; }
     }
 
     @media screen and (max-width: 600px) {
@@ -914,6 +878,7 @@ body::after {
     .install-now:active { transform: scale(0.96); }
     .modal-close {
       position: absolute;
+      z-index: 5;
       top: 10px;
       right: 12px;
       width: 36px;
@@ -931,6 +896,7 @@ body::after {
     @media screen and (max-width: 600px) {
       .install-btn { font-size: 0.82rem; padding: 10px 16px; }
       .modal-box h2 { font-size: 1.3rem; }
+      .modal-close { width: 42px; height: 42px; top: 8px; right: 8px; font-size: 1.7rem; }
     }
 
     /* ════════ PRÉSENTATION PRO : classements & collections ════════ */
@@ -1577,6 +1543,8 @@ body::after {
       const box = modal.querySelector('.modal-box');
       if (box) box.scrollTop = 0;
       document.documentElement.style.overflow = 'hidden';
+      const closeBtn = modal.querySelector('.modal-close');
+      if (closeBtn) closeBtn.focus();
     }
 
     function renderGlobalOwners(owners) {
@@ -1904,7 +1872,6 @@ body::after {
   </script>
 
   <button id="scrollTopBtn" aria-label="Retour en haut" title="Retour en haut">↑</button>
-  <div class="shooting-star" aria-hidden="true"></div>
 
   <div id="installModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
     <div class="modal-box">
