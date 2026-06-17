@@ -1094,12 +1094,13 @@ body {
 </html>
 `;
 
-  // Write the HTML file
+  // Write the HTML file directement dans index.html (fichier publié sur GitHub)
   try {
-    fs.writeFileSync('Cryptonauts.html', htmlContent, 'utf8');
-    console.log('Cryptonauts.html generated successfully.');
+    fs.writeFileSync('index.html', htmlContent, 'utf8');
+    console.log('index.html generated successfully.');
   } catch (error) {
-    console.error('Error writing Cryptonauts.html:', error.message);
+    console.error('Error writing index.html:', error.message);
+    throw error;
   }
 }
 
@@ -1393,18 +1394,31 @@ async function main() {
       console.warn(`Global discrepancy detected: Scraped ${scrapedCryptonauts} Cryptonauts, but expected ${totalCryptonautsAcrossAllCollections}.`);
     }
 
+    // ── GARDE-FOU anti-écrasement ──
+    // Si aucune donnée n'a été récupérée (API bloquée / 403 / réseau coupé),
+    // on REFUSE de réécrire index.html pour ne pas remplacer le site par une
+    // page vide. On sort en erreur (exit code 1) pour que publier.ps1/.sh
+    // annule le commit + push.
+    if (totalUniqueOwners === 0) {
+      console.error('\n❌ Aucun propriétaire récupéré (API bloquée / 403 ?). index.html NON modifié pour ne pas écraser le site.');
+      process.exitCode = 1;
+      return;
+    }
+
     // Sauvegarder Owners.json
     saveOwnersJson(ownersData);
 
-    // Générer le fichier HTML
+    // Générer le fichier HTML (écrit directement index.html)
     writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData);
 
   } catch (error) {
     console.error('Main execution failed:', error.message);
+    process.exitCode = 1;
   }
 }
 
 // Exécuter le script
 main().catch(error => {
   console.error('Main execution failed:', error.message);
+  process.exitCode = 1;
 });

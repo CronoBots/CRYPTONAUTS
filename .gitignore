@@ -1,8 +1,7 @@
 # Dépendances Node
 node_modules/
 
-# Fichiers intermédiaires générés par Test.js
-Cryptonauts.html
+# Fichier intermédiaire généré par Test.js (cache des handles Twitter/X)
 Owners.json
 
 # PID de la session Remote Control (local à chaque PC)
