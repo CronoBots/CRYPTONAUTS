@@ -1,8 +1,7 @@
 # installer-remote-control.ps1
 # À LANCER UNE SEULE FOIS sur votre PC, dans le dossier du dépôt.
 #
-# Installe Claude Remote Control en TÂCHE PLANIFIÉE Windows -- exactement comme
-# le projet PRONOSTICS/NEXBET (tâche "NEXBET Remote Control") :
+# Installe Claude Remote Control en TÂCHE PLANIFIÉE Windows :
 #   - démarre automatiquement à chaque OUVERTURE DE SESSION Windows,
 #   - tourne en arrière-plan SANS fenêtre (PowerShell caché),
 #   - se relance tout seul s'il s'arrête (boucle remote-control-loop.ps1 +
@@ -48,8 +47,8 @@ if (Test-Path $oldVbs) {
     Write-Host "[OK] Ancien lanceur .vbs supprime (remplace par la tache planifiee)." -ForegroundColor Green
 }
 
-# Tâche identique à "NEXBET Remote Control" : déclencheur ouverture de session,
-# PowerShell caché lançant la boucle, relance auto en cas d'échec.
+# Tâche : déclencheur ouverture de session, PowerShell caché lançant la boucle,
+# relance auto en cas d'échec.
 $sid = [Security.Principal.WindowsIdentity]::GetCurrent().User.Value
 $xml = @"
 <?xml version="1.0" encoding="UTF-16"?>

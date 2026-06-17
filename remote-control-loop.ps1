@@ -22,8 +22,7 @@ if (-not $claude) { $claude = "claude" }
 
 $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 
-# Style IDENTIQUE au lanceur PRONOSTICS/NEXBET qui fonctionne :
-#   session remote-control FRAICHE, autonomie totale, SANS --continue.
+# Session remote-control FRAICHE, autonomie totale, SANS --continue.
 # IMPORTANT : --continue reprend une ancienne conversation LOCALE et n'etablit
 # PAS la session distante visible sur claude.ai/code. C'est pour ca que les
 # projets lances avec --continue ne montraient aucune session. On l'enleve.
@@ -36,7 +35,7 @@ while ($true) {
     try {
         # On appelle claude DIRECTEMENT (operateur &), pas via Start-Process
         # -WindowStyle Hidden. claude a besoin d'heriter de la console (cachee)
-        # de ce PowerShell pour le mode remote-control -- comme NEXBET. Avec
+        # de ce PowerShell pour le mode remote-control. Avec
         # Start-Process detache, claude perd sa console et ressort aussitot.
         & $claude @argsFresh
     } catch {

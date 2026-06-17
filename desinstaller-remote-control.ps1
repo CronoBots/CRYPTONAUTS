@@ -38,7 +38,7 @@ if (Test-Path $oldVbs) {
 
 # 3. Arreter les process en cours -- UNIQUEMENT ceux de CE projet.
 #    Identifiant : le mot "Cryptonauts" dans la ligne de commande (nom de
-#    session ET nom de dossier, UNIQUE : ni NEXBET ni BETSFIX ne le contiennent).
+#    session ET nom de dossier, UNIQUE : BETSFIX ne le contient pas).
 $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 if (Test-Path $pidFile) { Remove-Item $pidFile -Force }
 
@@ -55,4 +55,4 @@ Get-CimInstance Win32_Process | Where-Object {
 }
 
 Write-Host "[OK] $killed processus 'Cryptonauts' arrete(s)." -ForegroundColor Green
-Write-Host "(NEXBET et BETSFIX ne sont PAS touches.)" -ForegroundColor Cyan
+Write-Host "(BETSFIX n'est PAS touche.)" -ForegroundColor Cyan
