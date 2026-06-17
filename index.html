@@ -18,6 +18,13 @@
   <meta name="twitter:title" content="Cryptonauts Leaderboards">
   <meta name="twitter:description" content="Classements des holders Cryptonauts : collections, leaderboard global et liens X.">
   <meta name="twitter:image" content="https://cronobots.github.io/CRYPTONAUTS/assets/Header.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#03040a">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Cryptonauts">
   <style>
     :root {
       --primary-color: #66bfff;
@@ -840,6 +847,95 @@ body::after {
       .stat-number { font-size: 1.6rem; }
       .stat-label { font-size: 0.62rem; letter-spacing: 0.04em; }
     }
+    /* ── PWA : bouton d'installation + fenêtre d'explication ── */
+    .install-btn {
+      position: fixed;
+      bottom: 22px;
+      left: 22px;
+      z-index: 900;
+      padding: 12px 18px;
+      border: 1px solid rgba(102, 191, 255, 0.45);
+      border-radius: 30px;
+      background: rgba(20, 22, 38, 0.9);
+      color: var(--primary-color);
+      font-family: 'Geomanist-Bold', sans-serif;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(102, 191, 255, 0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .install-btn[hidden] { display: none; }
+    .install-btn:hover { box-shadow: 0 0 26px rgba(102, 191, 255, 0.55); }
+    .install-btn:active { transform: scale(0.96); }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(3, 4, 10, 0.82);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
+    }
+    .modal[hidden] { display: none; }
+    .modal-box {
+      position: relative;
+      width: 100%;
+      max-width: 460px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 26px 24px;
+      border-radius: 18px;
+      background: rgba(20, 22, 38, 0.97);
+      border: 1px solid rgba(102, 191, 255, 0.25);
+      box-shadow: 0 0 40px rgba(102, 191, 255, 0.15);
+    }
+    .modal-box h2 { font-size: 1.5rem; margin: 0 0 10px; }
+    .modal-box h3 { font-size: 1rem; color: var(--primary-color); margin: 18px 0 6px; }
+    .modal-box p { font-size: 0.95rem; color: rgba(255, 255, 255, 0.8); margin: 0 0 10px; text-transform: none; }
+    .modal-box ol { padding-left: 20px; margin: 0; }
+    .modal-box li { font-size: 0.92rem; margin-bottom: 8px; color: rgba(255, 255, 255, 0.85); text-transform: none; }
+    .install-now {
+      display: inline-block;
+      margin: 4px 0 6px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 30px;
+      background: var(--primary-color);
+      color: #03040a;
+      font-family: 'Geomanist-Bold', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .install-now[hidden] { display: none; }
+    .install-now:active { transform: scale(0.96); }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      color: #fff;
+      font-size: 1.5rem;
+      line-height: 1;
+      cursor: pointer;
+    }
+    .modal-close:hover { background: rgba(255, 255, 255, 0.16); }
+
+    @media screen and (max-width: 600px) {
+      .install-btn { font-size: 0.78rem; padding: 10px 14px; bottom: 16px; left: 16px; }
+      .modal-box h2 { font-size: 1.3rem; }
+    }
   </style>
 </head>
 <body>
@@ -1196,6 +1292,47 @@ body::after {
         if (scrollTopBtn) {
           scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         }
+
+        // ── PWA : service worker + installation sur l'écran d'accueil ──
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('sw.js').catch(() => {});
+        }
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        const installBtn = document.getElementById('installBtn');
+        const installModal = document.getElementById('installModal');
+        const installModalClose = document.getElementById('installModalClose');
+        const installNow = document.getElementById('installNow');
+        let deferredPrompt = null;
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          if (installNow) installNow.hidden = false;
+        });
+
+        if (installBtn && !isStandalone) {
+          installBtn.hidden = false;
+          installBtn.addEventListener('click', () => { if (installModal) installModal.hidden = false; });
+        }
+        if (installModal) {
+          const closeModal = () => { installModal.hidden = true; };
+          if (installModalClose) installModalClose.addEventListener('click', closeModal);
+          installModal.addEventListener('click', (e) => { if (e.target === installModal) closeModal(); });
+          document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+        }
+        if (installNow) {
+          installNow.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            await deferredPrompt.userChoice;
+            deferredPrompt = null;
+            installNow.hidden = true;
+          });
+        }
+        window.addEventListener('appinstalled', () => {
+          if (installBtn) installBtn.hidden = true;
+          if (installModal) installModal.hidden = true;
+        });
       } catch (error) {
         console.error('Error in DOMContentLoaded handler:', error);
       }
@@ -1204,5 +1341,28 @@ body::after {
 
   <button id="scrollTopBtn" aria-label="Retour en haut" title="Retour en haut">↑</button>
   <div class="shooting-star" aria-hidden="true"></div>
+
+  <button id="installBtn" class="install-btn" hidden>📲 Installer l'app</button>
+
+  <div id="installModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
+    <div class="modal-box">
+      <button class="modal-close" id="installModalClose" aria-label="Fermer">×</button>
+      <h2 id="installModalTitle">📲 Installer l'application</h2>
+      <p>Cryptonauts Leaderboards classe les détenteurs des collections NFT Cryptonauts (crypto.com). Ajoutez la page à votre écran d'accueil pour y accéder comme une vraie application — en plein écran, et même hors-ligne.</p>
+      <button id="installNow" class="install-now" hidden>Installer maintenant</button>
+      <h3>Sur iPhone / iPad (Safari)</h3>
+      <ol>
+        <li>Touchez le bouton <strong>Partager</strong> (carré avec une flèche ↑) en bas de l'écran.</li>
+        <li>Faites défiler puis choisissez <strong>« Sur l'écran d'accueil »</strong>.</li>
+        <li>Touchez <strong>Ajouter</strong> en haut à droite.</li>
+      </ol>
+      <h3>Sur Android (Chrome)</h3>
+      <ol>
+        <li>Touchez <strong>« Installer maintenant »</strong> ci-dessus, ou ouvrez le menu <strong>⋮</strong>.</li>
+        <li>Choisissez <strong>« Installer l'application »</strong>.</li>
+        <li>Confirmez avec <strong>Installer</strong>.</li>
+      </ol>
+    </div>
+  </div>
 </body>
 </html>

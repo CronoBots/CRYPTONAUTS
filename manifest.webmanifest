@@ -1,0 +1,16 @@
+{
+  "name": "Cryptonauts Leaderboards",
+  "short_name": "Cryptonauts",
+  "description": "Classements des détenteurs des collections NFT Cryptonauts (crypto.com).",
+  "lang": "fr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#03040a",
+  "theme_color": "#03040a",
+  "icons": [
+    { "src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
