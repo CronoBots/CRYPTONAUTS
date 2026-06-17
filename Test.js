@@ -343,7 +343,7 @@ body {
       padding: 15px;
       background-color: rgba(26, 26, 26, 0.8);
       border-radius: 15px;
-      box-shadow: var(--shadow);
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
     }
 
     .collection-header {
