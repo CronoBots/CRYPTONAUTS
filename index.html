@@ -849,10 +849,6 @@ body::after {
     }
     /* ── PWA : bouton d'installation + fenêtre d'explication ── */
     .install-btn {
-      position: fixed;
-      bottom: 22px;
-      left: 22px;
-      z-index: 900;
       padding: 12px 18px;
       border: 1px solid rgba(102, 191, 255, 0.45);
       border-radius: 30px;
@@ -933,7 +929,7 @@ body::after {
     .modal-close:hover { background: rgba(255, 255, 255, 0.16); }
 
     @media screen and (max-width: 600px) {
-      .install-btn { font-size: 0.78rem; padding: 10px 14px; bottom: 16px; left: 16px; }
+      .install-btn { font-size: 0.82rem; padding: 10px 16px; }
       .modal-box h2 { font-size: 1.3rem; }
     }
   </style>
@@ -959,6 +955,7 @@ body::after {
       <img src="assets/logo.png" alt="Cronobots Logo">
       <p>DEVELOPED BY <a href="https://x.com/Cronos_WTF" target="_blank">UNSCOOP</a></p>
     </div>
+    <button id="installBtn" class="install-btn">📲 Install App</button>
     <div class="footer-right">
       <p>LAST UPDATE: 2026-06-17</p>
     </div>
@@ -1310,9 +1307,12 @@ body::after {
           if (installNow) installNow.hidden = false;
         });
 
-        if (installBtn && !isStandalone) {
-          installBtn.hidden = false;
-          installBtn.addEventListener('click', () => { if (installModal) installModal.hidden = false; });
+        if (installBtn) {
+          if (isStandalone) {
+            installBtn.hidden = true;
+          } else {
+            installBtn.addEventListener('click', () => { if (installModal) installModal.hidden = false; });
+          }
         }
         if (installModal) {
           const closeModal = () => { installModal.hidden = true; };
@@ -1342,25 +1342,23 @@ body::after {
   <button id="scrollTopBtn" aria-label="Retour en haut" title="Retour en haut">↑</button>
   <div class="shooting-star" aria-hidden="true"></div>
 
-  <button id="installBtn" class="install-btn" hidden>📲 Installer l'app</button>
-
   <div id="installModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
     <div class="modal-box">
-      <button class="modal-close" id="installModalClose" aria-label="Fermer">×</button>
-      <h2 id="installModalTitle">📲 Installer l'application</h2>
-      <p>Cryptonauts Leaderboards classe les détenteurs des collections NFT Cryptonauts (crypto.com). Ajoutez la page à votre écran d'accueil pour y accéder comme une vraie application — en plein écran, et même hors-ligne.</p>
-      <button id="installNow" class="install-now" hidden>Installer maintenant</button>
-      <h3>Sur iPhone / iPad (Safari)</h3>
+      <button class="modal-close" id="installModalClose" aria-label="Close">×</button>
+      <h2 id="installModalTitle">📲 Install the app</h2>
+      <p>Cryptonauts Leaderboards ranks the holders of the Cryptonauts NFT collections (crypto.com). Add the page to your home screen to use it like a real app — fullscreen, and even offline.</p>
+      <button id="installNow" class="install-now" hidden>Install now</button>
+      <h3>On iPhone / iPad (Safari)</h3>
       <ol>
-        <li>Touchez le bouton <strong>Partager</strong> (carré avec une flèche ↑) en bas de l'écran.</li>
-        <li>Faites défiler puis choisissez <strong>« Sur l'écran d'accueil »</strong>.</li>
-        <li>Touchez <strong>Ajouter</strong> en haut à droite.</li>
+        <li>Tap the <strong>Share</strong> button (square with an up arrow ↑) at the bottom of the screen.</li>
+        <li>Scroll down and choose <strong>"Add to Home Screen"</strong>.</li>
+        <li>Tap <strong>Add</strong> in the top right.</li>
       </ol>
-      <h3>Sur Android (Chrome)</h3>
+      <h3>On Android (Chrome)</h3>
       <ol>
-        <li>Touchez <strong>« Installer maintenant »</strong> ci-dessus, ou ouvrez le menu <strong>⋮</strong>.</li>
-        <li>Choisissez <strong>« Installer l'application »</strong>.</li>
-        <li>Confirmez avec <strong>Installer</strong>.</li>
+        <li>Tap <strong>"Install now"</strong> above, or open the <strong>⋮</strong> menu.</li>
+        <li>Choose <strong>"Install app"</strong> (or "Add to Home screen").</li>
+        <li>Confirm with <strong>Install</strong>.</li>
       </ol>
     </div>
   </div>
