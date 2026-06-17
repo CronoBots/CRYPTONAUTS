@@ -1295,11 +1295,21 @@ body::after {
     #collectionModal .modal-box {
       max-width: 560px;
       padding: 0;
-      overflow: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       display: flex;
       flex-direction: column;
       max-height: 88vh;
       animation: cmIn 0.35s ease;
+    }
+    #collectionModal .modal-close {
+      position: sticky;
+      top: 10px;
+      align-self: flex-end;
+      flex-shrink: 0;
+      margin: 10px 10px -34px 0;
+      z-index: 6;
+      background: rgba(20, 22, 38, 0.92);
     }
     @keyframes cmIn {
       from { opacity: 0; transform: translateY(20px) scale(0.97); }
@@ -1344,7 +1354,7 @@ body::after {
       list-style: none;
       margin: 0;
       padding: 14px 16px 18px;
-      overflow-y: auto;
+      overflow: visible;
     }
     #collectionModal .cm-list li {
       display: flex;
