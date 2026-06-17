@@ -1119,7 +1119,7 @@ body::after {
     /* ════════════ GALERIE DE COLLECTIONS ════════════ */
     .collection-list > h1 { text-align: center; }
 
-    #collections {
+    #collections-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
       gap: 22px;
@@ -1397,7 +1397,7 @@ body::after {
     }
 
     @media screen and (max-width: 600px) {
-      #collections { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
+      #collections-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
       .collection-body { padding: 12px 10px 14px; }
       .collection-body h2 { font-size: 0.92rem; }
       .collection-stats { gap: 6px; }
@@ -1411,6 +1411,297 @@ body::after {
       #additional-owners li .count-text { display: none; }
       #collectionModal .cm-list li .lb-count .t { display: none; }
     }
+    /* ════════════════════ SHELL SITE WEB (hero, nav, sections) ════════════════════ */
+    html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+
+    /* ── Barre supérieure : bandeau LIVE défilant + navigation sticky ── */
+    .marquee {
+      overflow: hidden;
+      white-space: nowrap;
+      border-bottom: 1px solid rgba(102, 191, 255, 0.14);
+      background: rgba(3, 4, 10, 0.6);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+    }
+    .marquee-track {
+      display: inline-flex;
+      gap: 0;
+      padding: 7px 0;
+      animation: marquee 28s linear infinite;
+    }
+    .marquee-track span {
+      padding: 0 22px;
+      font-size: 0.74rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(207, 233, 255, 0.85);
+    }
+    .marquee-track span b { color: var(--primary-color); }
+    @keyframes marquee { to { transform: translateX(-50%); } }
+
+    .navbar {
+      position: sticky;
+      top: 0;
+      z-index: 800;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 26px;
+      border-bottom: 1px solid rgba(102, 191, 255, 0.10);
+      background: rgba(3, 4, 10, 0.35);
+      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(10px);
+      transition: background 0.3s ease, border-color 0.3s ease, padding 0.3s ease;
+    }
+    .navbar.scrolled {
+      background: rgba(3, 4, 10, 0.85);
+      border-color: rgba(102, 191, 255, 0.22);
+      padding: 10px 26px;
+    }
+    .navbar .brand {
+      font-size: 1.15rem;
+      letter-spacing: 0.14em;
+      color: #fff;
+      text-transform: uppercase;
+      text-shadow: 0 0 14px rgba(102, 191, 255, 0.5);
+    }
+    .navbar .brand:hover { text-decoration: none; }
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+    .nav-links a {
+      font-size: 0.82rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.78);
+      position: relative;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: -5px;
+      width: 0;
+      height: 1.5px;
+      background: var(--primary-color);
+      box-shadow: 0 0 8px var(--primary-color);
+      transition: width 0.25s ease;
+    }
+    .nav-links a:hover { color: #fff; text-decoration: none; }
+    .nav-links a:hover::after { width: 100%; }
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      border: 1px solid rgba(102, 191, 255, 0.3);
+      background: rgba(102, 191, 255, 0.08);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: #cfe9ff;
+    }
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #57e389;
+      box-shadow: 0 0 8px #57e389;
+      animation: livePulse 1.8s ease-in-out infinite;
+    }
+    @keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
+
+    /* ── HERO cinématique ── */
+    .hero {
+      position: relative;
+      min-height: calc(100vh - 84px);
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      padding: 40px 26px 60px;
+      box-sizing: border-box;
+    }
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 72% 45%, rgba(102, 191, 255, 0.22), transparent 45%),
+        radial-gradient(circle at 30% 70%, rgba(126, 32, 98, 0.16), transparent 50%);
+    }
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      align-items: center;
+      gap: 30px;
+    }
+    .hero-copy { animation: heroUp 0.9s ease both; }
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 18px;
+      padding: 7px 15px;
+      border-radius: 999px;
+      border: 1px solid rgba(102, 191, 255, 0.3);
+      background: rgba(102, 191, 255, 0.07);
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #cfe9ff;
+    }
+    .hero-title {
+      font-size: clamp(3rem, 9vw, 6.6rem);
+      line-height: 0.95;
+      margin: 0 0 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.01em;
+      text-shadow: 0 0 40px rgba(102, 191, 255, 0.35);
+    }
+    .hero-title span {
+      background: linear-gradient(120deg, #66bfff, #a9dbff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
+    .hero-sub {
+      max-width: 30em;
+      font-size: 1.02rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.72);
+      text-transform: none;
+      margin: 0 0 26px;
+    }
+    .hero-metrics { margin: 0 0 28px; }
+    .hero-metrics .stats-band { margin: 0; max-width: 480px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 14px 26px;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+    .btn:hover { text-decoration: none; transform: translateY(-2px); }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary {
+      background: linear-gradient(120deg, #66bfff, #3d9bff);
+      color: #03040a;
+      box-shadow: 0 0 26px rgba(102, 191, 255, 0.4);
+    }
+    .btn-primary:hover { box-shadow: 0 0 38px rgba(102, 191, 255, 0.65); }
+    .btn-ghost {
+      border: 1px solid rgba(102, 191, 255, 0.4);
+      background: rgba(102, 191, 255, 0.06);
+      color: #cfe9ff;
+    }
+    .btn-ghost:hover { background: rgba(102, 191, 255, 0.16); }
+
+    .hero-visual {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: heroUp 0.9s ease 0.15s both;
+    }
+    .hero-astronaut {
+      width: min(420px, 80%);
+      height: auto;
+      border-radius: 26px;
+      border: 1px solid rgba(102, 191, 255, 0.25);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(102, 191, 255, 0.18);
+      animation: float 7s ease-in-out infinite;
+    }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+    @keyframes heroUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+
+    .scroll-cue {
+      position: absolute;
+      z-index: 1;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.66rem;
+      letter-spacing: 0.22em;
+      color: rgba(255, 255, 255, 0.55);
+    }
+    .scroll-cue:hover { color: #fff; text-decoration: none; }
+    .scroll-cue .chev { font-size: 1.2rem; animation: bob 1.8s ease-in-out infinite; }
+    @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+    /* ── En-têtes de section ── */
+    .section { padding-top: 30px; }
+    .section-head {
+      text-align: center;
+      max-width: 760px;
+      margin: 0 auto 32px;
+    }
+    .section-head .eyebrow { margin-bottom: 14px; }
+    .section-title {
+      font-size: clamp(2rem, 5vw, 3.4rem);
+      margin: 0 0 12px;
+      text-transform: uppercase;
+      text-shadow: 0 0 24px rgba(102, 191, 255, 0.3);
+    }
+    .section-sub {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.65);
+      text-transform: none;
+      margin: 0;
+    }
+
+    /* ── Révélations au défilement ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(40px);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.7, 0.3, 1);
+    }
+    .reveal.in-view { opacity: 1; transform: none; }
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { opacity: 1; transform: none; transition: none; }
+      .hero-copy, .hero-visual { animation: none; }
+      .hero-astronaut { animation: none; }
+      .scroll-cue .chev, .live-dot { animation: none; }
+      .marquee-track { animation: none; }
+    }
+
+    @media screen and (max-width: 860px) {
+      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 18px; }
+      .hero-copy { order: 2; }
+      .hero-visual { order: 1; animation-delay: 0s; }
+      .hero-sub { margin-left: auto; margin-right: auto; }
+      .hero-cta { justify-content: center; }
+      .hero-metrics .stats-band { margin: 0 auto; }
+    }
+    @media screen and (max-width: 600px) {
+      .navbar { padding: 11px 16px; }
+      .nav-links { gap: 15px; }
+      .nav-links a { font-size: 0.72rem; }
+      .navbar .brand { font-size: 0.95rem; }
+      .hero { min-height: auto; padding: 30px 16px 44px; }
+      .hero-astronaut { width: min(280px, 72%); }
+      .btn { padding: 12px 20px; font-size: 0.78rem; }
+      .marquee-track span { font-size: 0.66rem; padding: 0 16px; }
+      .live-pill { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1418,14 +1709,50 @@ body::after {
     <img src="assets/Footer.png" alt="Cryptonauts">
   </div>
 
-  <header>
-    <img src="assets/Header.png" alt="Cryptonauts Leaderboard Header Banner">
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track">
+      <span>◆ <b>Cryptonauts Leaderboards</b></span><span>Live on crypto.com NFT</span><span>◆ Real-time holder rankings</span><span>11 Collections</span><span>◆ <b>Cryptonauts Leaderboards</b></span><span>Live on crypto.com NFT</span><span>◆ Real-time holder rankings</span><span>11 Collections</span>
+    </div>
+  </div>
+
+  <nav class="navbar" id="navbar">
+    <a href="#home" class="brand">Cryptonauts</a>
+    <div class="nav-links">
+      <a href="#collections">Collections</a>
+      <a href="#leaderboard">Leaderboard</a>
+      <a href="https://x.com/Cronos_WTF" target="_blank" rel="noopener">X</a>
+    </div>
+    <span class="live-pill"><span class="live-dot"></span>LIVE</span>
+  </nav>
+
+  <header id="home" class="hero">
+    <div class="hero-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow">◆ Crypto.com NFT · Real-time</span>
+        <h1 class="hero-title">Crypto<span>nauts</span></h1>
+        <p class="hero-sub">The official live leaderboards of the Cryptonauts universe. Explore every collection and discover the top holders across the galaxy — straight from the crypto.com NFT chain.</p>
+        <div class="hero-metrics" id="heroStats"></div>
+        <div class="hero-cta">
+          <a href="#collections" class="btn btn-primary">▶ Explore Collections</a>
+          <a href="#leaderboard" class="btn btn-ghost">View Leaderboard</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="assets/icon-512.png" alt="Quantum Cryptonauts astronaut" class="hero-astronaut" decoding="async">
+      </div>
+    </div>
+    <a href="#collections" class="scroll-cue" aria-label="Scroll to collections"><span>Scroll</span><span class="chev">⌄</span></a>
   </header>
-  
+
   <main>
-    <section class="collection-list">
-      <h1>COLLECTIONS</h1>
-      <div id="collections"></div>
+    <section class="section reveal" id="collections">
+      <div class="section-head">
+        <span class="eyebrow">◆ The Galaxy</span>
+        <h2 class="section-title">Collections</h2>
+        <p class="section-sub">Eleven collections orbiting the Cryptonauts universe. Tap any card to reveal its full holder ranking.</p>
+      </div>
+      <div id="collections-grid"></div>
     </section>
   </main>
 
@@ -1568,9 +1895,14 @@ body::after {
         const additionalOwners = rankedOwners.slice(10);
 
         const section = document.createElement('section');
-        section.className = 'leaderboard-section';
+        section.className = 'leaderboard-section section reveal';
+        section.id = 'leaderboard';
         section.innerHTML = `
-          <h1>LEADERBOARDS</h1>
+          <div class="section-head">
+            <span class="eyebrow">◆ Global Ranking</span>
+            <h2 class="section-title">Leaderboard</h2>
+            <p class="section-sub">The top holders across every Cryptonauts collection, combined.</p>
+          </div>
           <div class="summary">
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
             <ul id="global-owners">
@@ -1661,7 +1993,9 @@ body::after {
           band.appendChild(card);
           animateCount(num, s.value);
         });
-        main.insertBefore(band, main.firstChild);
+        const statsHost = document.getElementById('heroStats');
+        if (statsHost) statsHost.appendChild(band);
+        else main.insertBefore(band, main.firstChild);
       } catch (e) {
         console.error('Error building stats band:', e);
       }
@@ -1669,7 +2003,7 @@ body::after {
 
     document.addEventListener('DOMContentLoaded', () => {
       try {
-        const collectionsContainer = document.getElementById('collections');
+        const collectionsContainer = document.getElementById('collections-grid');
         const main = document.querySelector('main');
 
         if (!collectionsContainer || !main) {
@@ -1698,6 +2032,19 @@ body::after {
 
         // Bandeau de statistiques (compteurs animés)
         buildStatsBand();
+
+        // Révélations au défilement (sections + leaderboard)
+        const revealEls = document.querySelectorAll('.reveal');
+        if ('IntersectionObserver' in window) {
+          const ro = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+              if (e.isIntersecting) { e.target.classList.add('in-view'); ro.unobserve(e.target); }
+            });
+          }, { threshold: 0.12 });
+          revealEls.forEach(el => ro.observe(el));
+        } else {
+          revealEls.forEach(el => el.classList.add('in-view'));
+        }
 
         // Accessibilité clavier : bascules SHOW OWNERS / SHOW MORE utilisables au clavier
         document.querySelectorAll('.toggle-btn, .show-more-btn').forEach(el => {
@@ -1804,10 +2151,12 @@ body::after {
 
         // Bouton "retour en haut" + parallaxe léger du champ d'étoiles au défilement
         const scrollTopBtn = document.getElementById('scrollTopBtn');
+        const navbar = document.getElementById('navbar');
         const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let starTicking = false;
         const onScroll = () => {
           if (scrollTopBtn) scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+          if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
           if (!prefersReduced && !starTicking) {
             starTicking = true;
             requestAnimationFrame(() => {
