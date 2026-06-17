@@ -28,10 +28,15 @@
   <style>
     :root {
       --primary-color: #66bfff;
+      --accent: #ff6a1a;
       --background-dark: #000;
       --text-dark: #fff;
+      --muted: rgba(233, 240, 255, 0.62);
+      --hairline: rgba(150, 190, 240, 0.14);
       --collection-bg: #1a1a1a;
       --shadow: 0 2px 4px rgba(255,255,255,0.1);
+      --font-display: 'Geomanist-Bold', system-ui, sans-serif;
+      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
 
     @font-face {
@@ -44,11 +49,25 @@
     }
 
 body {
-  font-family: 'Geomanist-Bold', sans-serif;
-  line-height: 1.6;
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: 0.005em;
   margin: 0;
   color: var(--text-dark);
   background-color: #03040a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Police d'affichage réservée aux titres et aux données (contraste éditorial) */
+h1, h2, h3,
+.hero-title, .section-title, .navbar .brand,
+.btn, .stat-number, .stat-chip .v, .cm-stat .v,
+.rank, .count-number, .lb-count .n,
+.collection-body h2, .cm-title {
+  font-family: var(--font-display);
 }
 
 /* ── Décor spatial : nébuleuse + champ d'étoiles, 100% CSS (aucune requête externe) ── */
@@ -1702,6 +1721,175 @@ body::after {
       .marquee-track span { font-size: 0.66rem; padding: 0 16px; }
       .live-pill { display: none; }
     }
+    /* ════════════════════ FINITION PREMIUM ════════════════════ */
+
+    /* Grain filmique très léger sur l'ensemble */
+    .grain {
+      position: fixed;
+      inset: 0;
+      z-index: 9997;
+      pointer-events: none;
+      opacity: 0.04;
+      mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+
+    /* Eyebrow éditorial : libellé fin précédé d'un trait lumineux */
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 11px;
+      margin-bottom: 20px;
+      padding: 0;
+      border: none;
+      background: none;
+      border-radius: 0;
+      font-family: var(--font-body);
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .eyebrow::before {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+    .section-head .eyebrow { justify-content: center; }
+    .section-head .eyebrow::before { background: linear-gradient(90deg, transparent, var(--primary-color)); }
+    .section-head .eyebrow::after {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
+
+    /* Hero : titre et accroche affinés */
+    .hero-title {
+      font-size: clamp(2.9rem, 8.5vw, 6.2rem);
+      letter-spacing: -0.015em;
+      text-shadow: 0 0 34px rgba(102, 191, 255, 0.16);
+      margin-bottom: 20px;
+    }
+    .hero-title .tm {
+      font-size: 0.26em;
+      vertical-align: top;
+      margin-left: 0.12em;
+      color: var(--primary-color);
+      -webkit-text-fill-color: var(--primary-color);
+      letter-spacing: 0;
+    }
+    .hero-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1.1rem, 2.4vw, 1.55rem);
+      line-height: 1.28;
+      letter-spacing: 0.005em;
+      color: #eaf2ff;
+      text-transform: none;
+      margin: 0 0 16px;
+    }
+    .hero-sub {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    /* Cadre « galerie » autour de l'astronaute */
+    .hero-frame { position: relative; padding: 16px; }
+    .hero-frame::before,
+    .hero-frame::after {
+      content: '';
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border: 1px solid rgba(102, 191, 255, 0.45);
+      pointer-events: none;
+    }
+    .hero-frame::before { top: 0; left: 0; border-right: none; border-bottom: none; }
+    .hero-frame::after { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+    /* Boutons : icône alignée, retenue */
+    .btn { font-size: 0.82rem; letter-spacing: 0.04em; text-transform: none; }
+    .btn .ico { flex-shrink: 0; }
+    .btn-primary { box-shadow: 0 10px 30px rgba(102, 191, 255, 0.22); }
+    .btn-primary:hover { box-shadow: 0 14px 38px rgba(102, 191, 255, 0.42); }
+
+    /* Bandeau LIVE : séparateur losange discret */
+    .marquee { border-bottom: 1px solid var(--hairline); }
+    .marquee-track span { font-weight: 500; color: rgba(214, 232, 255, 0.78); text-transform: none; letter-spacing: 0.14em; }
+    .sep {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      margin: 0 18px;
+      transform: rotate(45deg);
+      background: rgba(102, 191, 255, 0.55);
+      vertical-align: middle;
+    }
+
+    /* Nav : icône X sans soulignement, libellés affinés */
+    .navbar { border-bottom: 1px solid var(--hairline); }
+    .nav-links a { font-weight: 500; text-transform: none; letter-spacing: 0.04em; color: rgba(233, 240, 255, 0.72); }
+    .nav-x { display: inline-flex; align-items: center; color: rgba(233, 240, 255, 0.72); }
+    .nav-x:hover { color: #fff; }
+    .nav-x::after { display: none; }
+    .live-pill { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; }
+
+    /* Métriques du hero : rangée à filets, sans cadre lourd */
+    .hero-metrics .stats-band {
+      background: none;
+      border: none;
+      box-shadow: none;
+      border-radius: 0;
+      border-top: 1px solid var(--hairline);
+      border-bottom: 1px solid var(--hairline);
+      padding: 6px 0;
+      max-width: 460px;
+    }
+    .hero-metrics .stat-card { border-left: none; padding: 14px 10px; }
+    .hero-metrics .stat-card + .stat-card { border-left: 1px solid var(--hairline); }
+    .stat-number { text-shadow: 0 0 18px rgba(102, 191, 255, 0.3); }
+    .stat-label { font-family: var(--font-body); font-weight: 500; }
+
+    /* Titres de section : glow retenu */
+    .section-title { text-shadow: none; letter-spacing: -0.01em; text-transform: none; }
+    .section-sub { color: var(--muted); }
+    .collection-body h2 { text-shadow: none; }
+    .cm-title { text-shadow: none; }
+
+    /* Champs & libellés en police de corps */
+    #searchInput { font-family: var(--font-body); font-weight: 500; }
+    .stat-chip .l, .cm-stat .l, .count-text, .lb-count .t { font-family: var(--font-body); font-weight: 500; }
+
+    /* Footer affiné */
+    footer {
+      border-top: 1px solid var(--hairline);
+      margin-top: 46px;
+      padding: 24px 26px;
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    footer p { margin: 0; }
+    footer .footer-left a { color: #cfe9ff; }
+    .install-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-body);
+      font-weight: 600;
+      text-transform: none;
+      letter-spacing: 0.02em;
+      box-shadow: none;
+    }
+    .install-btn:hover { box-shadow: 0 0 22px rgba(102, 191, 255, 0.4); }
+
+    @media screen and (max-width: 600px) {
+      .sep { margin: 0 12px; }
+      .hero-frame { padding: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -1709,9 +1897,11 @@ body::after {
     <img src="assets/Footer.png" alt="Cryptonauts">
   </div>
 
+  <div class="grain" aria-hidden="true"></div>
+
   <div class="marquee" aria-hidden="true">
     <div class="marquee-track">
-      <span>◆ <b>Cryptonauts Leaderboards</b></span><span>Live on crypto.com NFT</span><span>◆ Real-time holder rankings</span><span>11 Collections</span><span>◆ <b>Cryptonauts Leaderboards</b></span><span>Live on crypto.com NFT</span><span>◆ Real-time holder rankings</span><span>11 Collections</span>
+      <span>Cryptonauts Leaderboards</span><i class="sep"></i><span>Live on crypto.com</span><i class="sep"></i><span>Updated daily</span><i class="sep"></i><span>Eleven collections</span><i class="sep"></i><span>Cryptonauts Leaderboards</span><i class="sep"></i><span>Live on crypto.com</span><i class="sep"></i><span>Updated daily</span><i class="sep"></i><span>Eleven collections</span><i class="sep"></i>
     </div>
   </div>
 
@@ -1720,37 +1910,51 @@ body::after {
     <div class="nav-links">
       <a href="#collections">Collections</a>
       <a href="#leaderboard">Leaderboard</a>
-      <a href="https://x.com/Cronos_WTF" target="_blank" rel="noopener">X</a>
+      <a href="https://x.com/Cronos_WTF" target="_blank" rel="noopener" class="nav-x" aria-label="Cronobots on X">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
     </div>
-    <span class="live-pill"><span class="live-dot"></span>LIVE</span>
+    <span class="live-pill"><span class="live-dot"></span>Live</span>
   </nav>
 
   <header id="home" class="hero">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-copy">
-        <span class="eyebrow">◆ Crypto.com NFT · Real-time</span>
-        <h1 class="hero-title">Crypto<span>nauts</span></h1>
-        <p class="hero-sub">The official live leaderboards of the Cryptonauts universe. Explore every collection and discover the top holders across the galaxy — straight from the crypto.com NFT chain.</p>
+        <span class="eyebrow">Crypto.com NFT</span>
+        <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
+        <p class="hero-tagline">Eleven collections. One galaxy of holders.</p>
+        <p class="hero-sub">A live ranking of every Cryptonauts collection on crypto.com — who holds the most across the galaxy, refreshed every day.</p>
         <div class="hero-metrics" id="heroStats"></div>
         <div class="hero-cta">
-          <a href="#collections" class="btn btn-primary">▶ Explore Collections</a>
-          <a href="#leaderboard" class="btn btn-ghost">View Leaderboard</a>
+          <a href="#collections" class="btn btn-primary">
+            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>
+            Explore collections
+          </a>
+          <a href="#leaderboard" class="btn btn-ghost">
+            View leaderboard
+            <svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </a>
         </div>
       </div>
       <div class="hero-visual">
-        <img src="assets/icon-512.png" alt="Quantum Cryptonauts astronaut" class="hero-astronaut" decoding="async">
+        <div class="hero-frame">
+          <img src="assets/icon-512.png" alt="Quantum Cryptonauts astronaut" class="hero-astronaut" decoding="async">
+        </div>
       </div>
     </div>
-    <a href="#collections" class="scroll-cue" aria-label="Scroll to collections"><span>Scroll</span><span class="chev">⌄</span></a>
+    <a href="#collections" class="scroll-cue" aria-label="Scroll to collections">
+      <span>Scroll</span>
+      <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
   </header>
 
   <main>
     <section class="section reveal" id="collections">
       <div class="section-head">
-        <span class="eyebrow">◆ The Galaxy</span>
-        <h2 class="section-title">Collections</h2>
-        <p class="section-sub">Eleven collections orbiting the Cryptonauts universe. Tap any card to reveal its full holder ranking.</p>
+        <span class="eyebrow">The collections</span>
+        <h2 class="section-title">Eleven worlds, one crew</h2>
+        <p class="section-sub">Each collection is a chapter of the Cryptonauts saga. Open any one to see its holders, ranked.</p>
       </div>
       <div id="collections-grid"></div>
     </section>
@@ -1758,12 +1962,15 @@ body::after {
 
   <footer>
     <div class="footer-left">
-      <img src="assets/logo.png" alt="Cronobots Logo">
-      <p>DEVELOPED BY <a href="https://x.com/Cronos_WTF" target="_blank">UNSCOOP</a></p>
+      <img src="assets/logo.png" alt="Cronobots">
+      <p>Built by <a href="https://x.com/Cronos_WTF" target="_blank" rel="noopener">Unscoop</a></p>
     </div>
-    <button id="installBtn" class="install-btn">📲 Install App</button>
+    <button id="installBtn" class="install-btn">
+      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Install app
+    </button>
     <div class="footer-right">
-      <p>LAST UPDATE: 2026-06-17</p>
+      <p>Last updated 2026-06-17</p>
     </div>
   </footer>
 
@@ -1848,9 +2055,8 @@ body::after {
         if (i > 0 && o.count < prev) rank += 1;
         prev = o.count;
         const rc = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
-        const medal = rank <= 3 ? `<span class="medal">${['🥇','🥈','🥉'][rank - 1]}</span>` : '';
         const tw = o.twitter ? `<a href="${validateTwitterUrl(o.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(o.twitter)}</a>` : '';
-        return `<li class="${rc}"><div class="lb-left"><span class="rank">${rank}</span>${medal}<a class="lb-name" href="${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">${o.name}</a>${tw}</div><span class="lb-count"><span class="n">${o.count}</span><span class="t">NFT${o.count > 1 ? 's' : ''}</span></span></li>`;
+        return `<li class="${rc}"><div class="lb-left"><span class="rank">${rank}</span><a class="lb-name" href="${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">${o.name}</a>${tw}</div><span class="lb-count"><span class="n">${o.count}</span><span class="t">NFT${o.count > 1 ? 's' : ''}</span></span></li>`;
       }).join('');
     }
 
@@ -1909,7 +2115,7 @@ body::after {
               ${topTenOwners.map(owner => `
                 <li class="${owner.rankClass}">
                   <div class="left-container">
-                    <span class="rank">${owner.rank}</span>${owner.rank <= 3 ? `<span class="medal">${['🥇','🥈','🥉'][owner.rank - 1]}</span>` : ''}
+                    <span class="rank">${owner.rank}</span>
                     <a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${owner.name}</a>
                     ${owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : ''}
                   </div>
@@ -1923,7 +2129,7 @@ body::after {
                 ${additionalOwners.map(owner => `
                   <li class="${owner.rankClass}">
                     <div class="left-container">
-                      <span class="rank">${owner.rank}</span>${owner.rank <= 3 ? `<span class="medal">${['🥇','🥈','🥉'][owner.rank - 1]}</span>` : ''}
+                      <span class="rank">${owner.rank}</span>
                       <a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${owner.name}</a>
                       ${owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : ''}
                     </div>
@@ -2225,7 +2431,7 @@ body::after {
   <div id="installModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
     <div class="modal-box">
       <button class="modal-close" id="installModalClose" aria-label="Close">×</button>
-      <h2 id="installModalTitle">📲 Install the app</h2>
+      <h2 id="installModalTitle">Install the app</h2>
       <p>Cryptonauts Leaderboards ranks the holders of the Cryptonauts NFT collections (crypto.com). Add the page to your home screen to use it like a real app — fullscreen, and even offline.</p>
       <button id="installNow" class="install-now" hidden>Install now</button>
       <h3>On iPhone / iPad (Safari)</h3>
