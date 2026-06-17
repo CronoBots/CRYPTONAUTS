@@ -8,6 +8,16 @@
   <link rel="preload" href="fonts/Geomanist-Bold.otf" as="font" type="font/otf" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="preconnect" href="https://media.nft.crypto.com" crossorigin>
+  <meta name="description" content="Classements en temps réel des holders Cryptonauts (collection NFT crypto.com) : collections, leaderboard global et liens X.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Cryptonauts Leaderboards">
+  <meta property="og:description" content="Classements des holders Cryptonauts : collections, leaderboard global et liens X.">
+  <meta property="og:image" content="https://cronobots.github.io/CRYPTONAUTS/assets/Header.png">
+  <meta property="og:url" content="https://cronobots.github.io/CRYPTONAUTS/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Cryptonauts Leaderboards">
+  <meta name="twitter:description" content="Classements des holders Cryptonauts : collections, leaderboard global et liens X.">
+  <meta name="twitter:image" content="https://cronobots.github.io/CRYPTONAUTS/assets/Header.png">
   <style>
     :root {
       --primary-color: #66bfff;
@@ -61,6 +71,7 @@ body::after {
   background-repeat: repeat;
   background-size: 250px 250px;
   opacity: 0.55;
+  background-position: 0 var(--star-shift, 0px);
   animation: twinkle 6s ease-in-out infinite alternate;
 }
 @keyframes twinkle {
@@ -149,6 +160,8 @@ body::after {
       border: 1px solid rgba(102, 191, 255, 0.14);
       border-radius: 15px;
       box-shadow: var(--shadow);
+      content-visibility: auto;
+      contain-intrinsic-size: auto 260px;
     }
 
     .collection-header {
@@ -741,6 +754,87 @@ body::after {
         max-width: 100%;
       }
     }
+    /* ── Bandeau de statistiques ── */
+    .stats-band {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin: 4px 0 26px;
+    }
+    .stat-card {
+      flex: 1 1 150px;
+      max-width: 240px;
+      text-align: center;
+      padding: 18px 16px;
+      border-radius: 15px;
+      background-color: rgba(20, 22, 38, 0.82);
+      border: 1px solid rgba(102, 191, 255, 0.18);
+      box-shadow: 0 0 18px rgba(102, 191, 255, 0.08);
+    }
+    .stat-number {
+      font-size: 2.4rem;
+      line-height: 1;
+      color: var(--primary-color);
+      text-shadow: 0 0 16px rgba(102, 191, 255, 0.45);
+    }
+    .stat-label {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.75);
+    }
+
+    /* ── Étoile filante ── */
+    .shooting-star {
+      position: fixed;
+      top: -5%;
+      left: -8%;
+      width: 2px;
+      height: 2px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 12px 2px rgba(255, 255, 255, 0.7);
+      opacity: 0;
+      z-index: -1;
+      pointer-events: none;
+      animation: shoot 11s ease-in infinite;
+    }
+    .shooting-star::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      right: 2px;
+      width: 120px;
+      height: 1px;
+      transform: translateY(-50%);
+      background: linear-gradient(to left, rgba(255, 255, 255, 0.7), transparent);
+    }
+    @keyframes shoot {
+      0%   { transform: translate(0, 0); opacity: 0; }
+      2%   { opacity: 1; }
+      11%  { transform: translate(70vw, 60vh); opacity: 0; }
+      100% { transform: translate(70vw, 60vh); opacity: 0; }
+    }
+
+    /* ── Focus clavier visible ── */
+    .toggle-btn:focus-visible,
+    .show-more-btn:focus-visible,
+    #scrollTopBtn:focus-visible,
+    #searchInput:focus-visible {
+      outline: 2px solid rgba(102, 191, 255, 0.7);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .shooting-star { display: none; }
+    }
+
+    @media screen and (max-width: 600px) {
+      .stat-number { font-size: 1.7rem; }
+      .stat-label { font-size: 0.7rem; }
+    }
   </style>
 </head>
 <body>
@@ -909,6 +1003,55 @@ body::after {
       };
     }
 
+    function animateCount(el, target) {
+      const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce || !target) { el.textContent = String(target); return; }
+      const duration = 1200;
+      let startTs = null;
+      function step(ts) {
+        if (startTs === null) startTs = ts;
+        const p = Math.min((ts - startTs) / duration, 1);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = String(Math.round(target * eased));
+        if (p < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function buildStatsBand() {
+      try {
+        const main = document.querySelector('main');
+        if (!main || typeof globalOwnersData === 'undefined') return;
+        const uniqueOwners = globalOwnersData.length;
+        const totalNFTs = globalOwnersData.reduce((sum, o) => sum + (o.count || 0), 0);
+        const collectionsCount = collectionsData.length;
+        const stats = [
+          { value: uniqueOwners, label: 'Holders uniques' },
+          { value: totalNFTs, label: 'Cryptonauts' },
+          { value: collectionsCount, label: 'Collections' }
+        ];
+        const band = document.createElement('section');
+        band.className = 'stats-band';
+        stats.forEach(s => {
+          const card = document.createElement('div');
+          card.className = 'stat-card';
+          const num = document.createElement('div');
+          num.className = 'stat-number';
+          num.textContent = '0';
+          const lab = document.createElement('div');
+          lab.className = 'stat-label';
+          lab.textContent = s.label;
+          card.appendChild(num);
+          card.appendChild(lab);
+          band.appendChild(card);
+          animateCount(num, s.value);
+        });
+        main.insertBefore(band, main.firstChild);
+      } catch (e) {
+        console.error('Error building stats band:', e);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       try {
         const collectionsContainer = document.getElementById('collections');
@@ -936,6 +1079,18 @@ body::after {
         });
 
         main.appendChild(renderGlobalOwners(globalOwnersData));
+
+        // Bandeau de statistiques (compteurs animés)
+        buildStatsBand();
+
+        // Accessibilité clavier : bascules SHOW OWNERS / SHOW MORE utilisables au clavier
+        document.querySelectorAll('.toggle-btn, .show-more-btn').forEach(el => {
+          el.setAttribute('role', 'button');
+          el.setAttribute('tabindex', '0');
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
+          });
+        });
 
         const toggleButtons = document.querySelectorAll('.toggle-btn');
         toggleButtons.forEach(button => {
@@ -967,7 +1122,22 @@ body::after {
         const searchInput = document.getElementById('searchInput');
         if (searchInput) {
           searchInput.addEventListener('input', debounce(() => {
-            const filter = searchInput.value.toLowerCase();
+            const filter = searchInput.value.toLowerCase().trim();
+            const additionalOwners = document.getElementById('additional-owners');
+            const showMoreBtn = document.getElementById('show-more-owners');
+
+            // Pendant une recherche, on révèle la liste étendue (sinon les
+            // propriétaires classés au-delà du top 10 resteraient introuvables).
+            if (additionalOwners) {
+              if (filter) {
+                additionalOwners.classList.remove('hidden');
+              } else {
+                additionalOwners.classList.add('hidden');
+                if (showMoreBtn) { showMoreBtn.textContent = 'SHOW MORE'; showMoreBtn.setAttribute('aria-expanded', 'false'); }
+              }
+            }
+            if (showMoreBtn) showMoreBtn.style.display = filter ? 'none' : '';
+
             const listItems = document.querySelectorAll('#global-owners li, #additional-owners li');
             let found = false;
 
@@ -1001,12 +1171,23 @@ body::after {
           intro.addEventListener('animationend', (e) => { if (e.target === intro) dismissIntro(); });
         }
 
-        // Bouton "retour en haut" : apparaît après défilement, scroll doux au clic
+        // Bouton "retour en haut" + parallaxe léger du champ d'étoiles au défilement
         const scrollTopBtn = document.getElementById('scrollTopBtn');
+        const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let starTicking = false;
+        const onScroll = () => {
+          if (scrollTopBtn) scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+          if (!prefersReduced && !starTicking) {
+            starTicking = true;
+            requestAnimationFrame(() => {
+              document.documentElement.style.setProperty('--star-shift', (window.scrollY * 0.12) + 'px');
+              starTicking = false;
+            });
+          }
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+        onScroll();
         if (scrollTopBtn) {
-          const toggleScrollBtn = () => scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
-          window.addEventListener('scroll', toggleScrollBtn, { passive: true });
-          toggleScrollBtn();
           scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
         }
       } catch (error) {
@@ -1016,5 +1197,6 @@ body::after {
   </script>
 
   <button id="scrollTopBtn" aria-label="Retour en haut" title="Retour en haut">↑</button>
+  <div class="shooting-star" aria-hidden="true"></div>
 </body>
 </html>
