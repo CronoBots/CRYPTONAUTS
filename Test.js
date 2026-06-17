@@ -277,23 +277,23 @@ function writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData) {
       image: collection.image,
       alt: `${collection.name} COLLECTION ICON`,
       ownersCount: scrapedData.owners,
-      owners: Object.entries(scrapedData.ownerNFTs).map(([name, count]) => ({
-        name,
-        url: `https://crypto.com/nft/profile/${name}`,
-        count,
-        twitter: ownersData[name]?.twitter || ''
-      }))
+      // url reconstruite côté client, rank recalculé côté client, twitter omis si vide → JSON plus léger
+      owners: Object.entries(scrapedData.ownerNFTs).map(([name, count]) => {
+        const owner = { name, count };
+        const tw = ownersData[name]?.twitter;
+        if (tw) owner.twitter = tw;
+        return owner;
+      })
     };
   });
 
-  // Prepare globalOwnersData
-  const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, url, count, rank }) => ({
-    name,
-    url,
-    count,
-    rank,
-    twitter: ownersData[name]?.twitter || ''
-  }));
+  // Prepare globalOwnersData (sans url ni rank : reconstruits/recalculés côté client)
+  const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, count }) => {
+    const owner = { name, count };
+    const tw = ownersData[name]?.twitter;
+    if (tw) owner.twitter = tw;
+    return owner;
+  });
 
   // Generate HTML content
   const htmlContent = `
@@ -1364,16 +1364,17 @@ body::after {
           return;
         }
 
+        // URL du profil reconstruite depuis le nom (non stockée dans les données → plus léger)
         collectionsData.forEach(collection => {
           collection.owners.forEach(owner => {
-            owner.url = validateUrl(owner.url);
-            owner.twitter = validateTwitterUrl(owner.twitter);
+            owner.url = 'https://crypto.com/nft/profile/' + owner.name;
+            owner.twitter = owner.twitter ? validateTwitterUrl(owner.twitter) : '';
           });
         });
 
         globalOwnersData.forEach(owner => {
-          owner.url = validateUrl(owner.url);
-          owner.twitter = validateTwitterUrl(owner.twitter);
+          owner.url = 'https://crypto.com/nft/profile/' + owner.name;
+          owner.twitter = owner.twitter ? validateTwitterUrl(owner.twitter) : '';
         });
 
         collectionsData.forEach(collection => {
