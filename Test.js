@@ -88,19 +88,85 @@ function saveOwnersJson(ownersData) {
 // ─────────────────────────────────────────────────────────────────────────────
 const GQL_ENDPOINT = 'https://crypto.com/nft-api/graphql';
 
-// Helper générique pour les appels GraphQL
-async function gql(operationName, variables, query) {
-  const res = await axios.post(GQL_ENDPOINT, { operationName, variables, query }, {
-    timeout: 20000,
-    headers: {
-      'Content-Type': 'application/json',
-      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+// En-têtes communs à tous les appels (évite de recréer l'objet à chaque requête)
+const HTTP_HEADERS = {
+  'Content-Type': 'application/json',
+  'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+};
+
+// Nombre de tâches par-asset menées EN PARALLÈLE (étapes 2.5, 3 et Twitter).
+// Ne contrôle PAS le débit (c'est le rôle de rateGate) mais le nombre de
+// requêtes en vol simultanément, ce qui masque la latence réseau.
+const CONCURRENCY = 6;
+
+// Exécute `worker` sur chaque item avec au plus `limit` tâches simultanées.
+// Conserve l'ordre des résultats (results[i] correspond à items[i]).
+async function mapPool(items, limit, worker) {
+  const results = new Array(items.length);
+  let next = 0;
+  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
+    while (true) {
+      const idx = next++;
+      if (idx >= items.length) break;
+      results[idx] = await worker(items[idx], idx);
     }
   });
-  if (res.data?.errors) {
-    throw new Error(`GraphQL Error: ${res.data.errors.map(e => e.message).join(', ')}`);
+  await Promise.all(runners);
+  return results;
+}
+
+// ── LIMITEUR DE DÉBIT GLOBAL ─────────────────────────────────────────────────
+// crypto.com renvoie des 429 (Too Many Requests) dès que le DÉBIT global est
+// trop élevé — peu importe le nombre de workers. La concurrence (CONCURRENCY)
+// sert juste à masquer la latence ; c'est CE limiteur qui plafonne le débit
+// réel à ~1 requête / MIN_REQUEST_INTERVAL_MS, ce qui reproduit l'enveloppe de
+// l'ancienne version séquentielle (jamais bloquée) tout en évitant d'attendre
+// la réponse avant de lancer la suivante.
+const MIN_REQUEST_INTERVAL_MS = 200; // ≈ 5 req/s : débit de l'ancienne version (jamais bloquée)
+let _nextRequestSlot = 0;
+async function rateGate() {
+  const now = Date.now();
+  const slot = Math.max(now, _nextRequestSlot);
+  _nextRequestSlot = slot + MIN_REQUEST_INTERVAL_MS; // réservation atomique (pas d'await avant)
+  const wait = slot - now;
+  if (wait > 0) await delay(wait);
+}
+
+// Helper générique pour les appels GraphQL, avec retry sur erreurs HTTP
+// transitoires (réseau / 429 / 5xx). Les erreurs GraphQL *logiques* ne sont PAS
+// retentées (inutile) — elles remontent immédiatement à l'appelant.
+async function gql(operationName, variables, query, retries = 6) {
+  let attempt = 0;
+  while (true) {
+    try {
+      await rateGate(); // espacement global anti-429
+      const res = await axios.post(GQL_ENDPOINT, { operationName, variables, query }, {
+        timeout: 20000,
+        headers: HTTP_HEADERS
+      });
+      if (res.data?.errors) {
+        const e = new Error(`GraphQL Error: ${res.data.errors.map(e => e.message).join(', ')}`);
+        e.graphqlLogic = true; // erreur métier → non-retryable
+        throw e;
+      }
+      return res.data?.data;
+    } catch (err) {
+      const status = err.response?.status;
+      // 429 (Too Many Requests) / 403 / 5xx / erreurs réseau → retry avec backoff
+      // exponentiel + jitter. Le backoff long (jusqu'à ~12 s) laisse le temps à
+      // un ban temporaire de se lever ; le jitter évite que tous les workers du
+      // pool ne retentent au même instant (effet « thundering herd »).
+      const retryable = !err.graphqlLogic &&
+        (!err.response || status === 429 || status === 403 || (status >= 500 && status < 600));
+      if (attempt < retries && retryable) {
+        const base = Math.min(12000, 500 * Math.pow(2, attempt)); // 0.5s,1s,2s,4s,8s,12s
+        await delay(base + Math.floor(Math.random() * 400));
+        attempt++;
+        continue;
+      }
+      throw err;
+    }
   }
-  return res.data?.data;
 }
 
 // Infos collection (nom + métriques officielles : items / owners / editionsCount)
@@ -160,6 +226,7 @@ async function getTwitterUsername(username) {
 
   while (retries > 0 && !twitterUsername) {
     try {
+      await rateGate(); // espacement global anti-429
       const response = await axios.post(graphqlEndpoint, {
         query: profileQuery,
         variables: {
@@ -168,10 +235,7 @@ async function getTwitterUsername(username) {
         }
       }, {
         timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-        }
+        headers: HTTP_HEADERS
       });
 
       const result = response.data;
@@ -343,7 +407,7 @@ body {
       padding: 15px;
       background-color: rgba(26, 26, 26, 0.8);
       border-radius: 15px;
-      box-shadow: 0 0 18px rgba(255, 255, 255, 0.25);
+      box-shadow: var(--shadow);
     }
 
     .collection-header {
@@ -1186,7 +1250,6 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
         });
         cursor = hist.pageInfo.endCursor;
         hasMore = hist.pageInfo.hasNextPage;
-        if (hasMore) await delay(80);
       }
       console.log(`  ✓ Step 1: ${pageNum} pages, ${count} events, ${Object.keys(lastOwner).length} assets with at least one transfer.`);
     }
@@ -1203,7 +1266,6 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
         batch.forEach(a => allAssets.push(a));
         skip += 100;
         more = batch.length === 100;
-        if (more) await delay(80);
       }
       const totalMinted = allAssets.reduce((s, a) => s + (a.copiesInCirculation != null ? a.copiesInCirculation : (a.copies || 1)), 0);
       console.log(`  ✓ Step 2: ${allAssets.length} unique assets · ${totalMinted} editions minted.`);
@@ -1215,10 +1277,9 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
     const realEditionsPerAsset = {}; // assetId → [{ id, owner:{uuid,username} }]
     const multiEditionAssets = allAssets.filter(a => (a.copies || 1) > 1);
     if (multiEditionAssets.length > 0) {
-      console.log(`Step 2.5/3 — Resolving editions for ${multiEditionAssets.length} multi-edition NFTs…`);
+      console.log(`Step 2.5/3 — Resolving editions for ${multiEditionAssets.length} multi-edition NFTs (concurrency ${CONCURRENCY})…`);
       let mErrors = 0, mTotalEditions = 0, partialAssets = 0;
-      for (let i = 0; i < multiEditionAssets.length; i++) {
-        const a = multiEditionAssets[i];
+      await mapPool(multiEditionAssets, CONCURRENCY, async (a) => {
         const minted = a.copiesInCirculation != null ? a.copiesInCirculation : (a.copies || 1);
         const allEds = [];
         let apiTotalCount = 0;
@@ -1241,7 +1302,6 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
             edSkip += eds.length;
             if (eds.length < PAGE_SIZE) break;
             if (apiTotalCount > 0 && allEds.length >= apiTotalCount) break;
-            await delay(40);
           }
           realEditionsPerAsset[a.id] = allEds;
           mTotalEditions += allEds.length;
@@ -1253,8 +1313,7 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
           mErrors++;
           console.warn(`  ⚠ Error on asset "${a.name || a.id}": ${e.message}`);
         }
-        await delay(60);
-      }
+      });
       console.log(`  ✓ Step 2.5: ${mTotalEditions} editions resolved${partialAssets ? ` (${partialAssets} partial)` : ''}${mErrors ? ` (${mErrors} errors)` : ''}.`);
     } else {
       console.log('Step 2.5/3 skipped — no multi-edition NFTs in this collection.');
@@ -1263,11 +1322,11 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
     // ── ÉTAPE 3 — Owners manquants (single-éditions sans historique) ────────
     const missingAssets = allAssets.filter(a => !lastOwner[a.id] && (a.copies || 1) === 1);
     if (missingAssets.length > 0) {
-      console.log(`Step 3/3 — Resolving ${missingAssets.length} owner${missingAssets.length === 1 ? '' : 's'} via edition(id) API…`);
+      console.log(`Step 3/3 — Resolving ${missingAssets.length} owner${missingAssets.length === 1 ? '' : 's'} via edition(id) API (concurrency ${CONCURRENCY})…`);
       let resolved = 0, noEditionId = 0, apiErrors = 0;
-      for (const a of missingAssets) {
+      await mapPool(missingAssets, CONCURRENCY, async (a) => {
         const editionId = a.offerableEditionId || a.latestPurchasedEdition?.id || a.defaultListingV2?.editionId;
-        if (!editionId) { noEditionId++; continue; }
+        if (!editionId) { noEditionId++; return; }
         try {
           const ed = await gql('SnapEdition', { id: editionId }, Q_EDITION_OWNER);
           const owner = ed?.public?.edition?.owner;
@@ -1280,8 +1339,7 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
             resolved++;
           }
         } catch (e) { apiErrors++; }
-        await delay(60);
-      }
+      });
       console.log(`  ✓ Step 3: ${resolved} owners resolved · ${noEditionId} without edition ID · ${apiErrors} API errors.`);
     } else {
       console.log('Step 3/3 skipped — all single-edition NFTs already have an owner from transfer history.');
@@ -1326,12 +1384,12 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
     // ── Récupérer les liens Twitter/X pour les nouveaux propriétaires ──
     const newOwners = Object.keys(ownerNFTs).filter(o => !(o in ownersData));
     if (newOwners.length > 0) {
-      console.log(`Fetching Twitter usernames for ${newOwners.length} new owner${newOwners.length === 1 ? '' : 's'}…`);
-      for (const owner of newOwners) {
+      console.log(`Fetching Twitter usernames for ${newOwners.length} new owner${newOwners.length === 1 ? '' : 's'} (concurrency ${CONCURRENCY})…`);
+      await mapPool(newOwners, CONCURRENCY, async (owner) => {
         const twitterUrl = await getTwitterUsername(owner);
         ownersData[owner] = { username: owner, twitter: twitterUrl };
-        saveOwnersJson(ownersData);
-      }
+      });
+      saveOwnersJson(ownersData); // une seule écriture après tout le batch (vs une par owner avant)
     }
 
     // ── Logs de discrepancy (identiques à l'ancienne version) ──
@@ -1353,7 +1411,7 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
     });
 
     console.log(`✅ ${collectionName}: ${scrapedOwnersCount} unique owners · ${scrapedSupply} editions counted.`);
-    return { collectionName, ownerNFTs };
+    return { collectionName, ownerNFTs, ok: true };
 
   } catch (error) {
     console.error(`Error scraping collection ${collectionId}:`, error.message);
@@ -1364,7 +1422,7 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
       owners: 0,
       ownerNFTs: {}
     });
-    return { collectionName: collectionName || 'Error', ownerNFTs: {} };
+    return { collectionName: collectionName || 'Error', ownerNFTs: {}, ok: false };
   }
 }
 
@@ -1376,9 +1434,23 @@ async function main() {
     const collectionsData = [];
 
     // Plus besoin de lancer un navigateur Puppeteer : tout passe par GraphQL.
+    const failedCollections = [];
     for (const { url, usePagination } of collectionUrls) {
       console.log(`\n=== Processing collection: ${url} ===`);
-      await processCollection(url, usePagination, globalOwnerNFTs, collectionsData, ownersData);
+      const r = await processCollection(url, usePagination, globalOwnerNFTs, collectionsData, ownersData);
+      if (!r.ok) failedCollections.push(url);
+      await delay(300); // petite respiration entre collections (anti rate-limit)
+    }
+
+    // ── GARDE-FOU n°1 : échec d'au moins une collection ──
+    // Si une collection n'a pas pu être récupérée (429 / 403 / réseau), on
+    // REFUSE de réécrire index.html avec des données partielles. On sort en
+    // erreur pour que publier.ps1/.sh annulent le commit + push.
+    if (failedCollections.length > 0) {
+      console.error(`\n❌ ${failedCollections.length}/${collectionUrls.length} collection(s) en échec (API bloquée / 429 ?). index.html NON modifié pour ne pas publier des données partielles :`);
+      failedCollections.forEach(u => console.error(`   - ${u}`));
+      process.exitCode = 1;
+      return;
     }
 
     // Calculer les totaux
@@ -1394,7 +1466,7 @@ async function main() {
       console.warn(`Global discrepancy detected: Scraped ${scrapedCryptonauts} Cryptonauts, but expected ${totalCryptonautsAcrossAllCollections}.`);
     }
 
-    // ── GARDE-FOU anti-écrasement ──
+    // ── GARDE-FOU n°2 : aucune donnée du tout ──
     // Si aucune donnée n'a été récupérée (API bloquée / 403 / réseau coupé),
     // on REFUSE de réécrire index.html pour ne pas remplacer le site par une
     // page vide. On sort en erreur (exit code 1) pour que publier.ps1/.sh
