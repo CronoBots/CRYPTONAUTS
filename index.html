@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>CronoBots | Cryptonauts Leaderboards</title>
-  <link rel="preload" href="fonts/Geomanist-Bold.otf" as="font" type="font/otf" crossorigin="anonymous">
+  <link rel="preload" href="fonts/Geomanist-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="preconnect" href="https://media.nft.crypto.com" crossorigin>
   <meta name="description" content="Classements en temps réel des holders Cryptonauts (collection NFT crypto.com) : collections, leaderboard global et liens X.">
@@ -29,7 +29,8 @@
 
     @font-face {
       font-family: 'Geomanist-Bold';
-      src: url('fonts/Geomanist-Bold.otf') format('opentype');
+      src: url('fonts/Geomanist-Bold.woff2') format('woff2'),
+           url('fonts/Geomanist-Bold.otf') format('opentype');
       font-weight: normal;
       font-style: normal;
       font-display: swap;
@@ -1009,14 +1010,14 @@ body::after {
 
     function animateCount(el, target) {
       const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce || !target) { el.textContent = String(target); return; }
+      if (reduce || !target) { el.textContent = target.toLocaleString('fr-FR'); return; }
       const duration = 1200;
       let startTs = null;
       function step(ts) {
         if (startTs === null) startTs = ts;
         const p = Math.min((ts - startTs) / duration, 1);
         const eased = 1 - Math.pow(1 - p, 3);
-        el.textContent = String(Math.round(target * eased));
+        el.textContent = Math.round(target * eased).toLocaleString('fr-FR');
         if (p < 1) requestAnimationFrame(step);
       }
       requestAnimationFrame(step);
