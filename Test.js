@@ -2188,6 +2188,88 @@ body::after {
       .sep { margin: 0 12px; }
       .hero-frame { padding: 12px; }
     }
+
+    /* ── Intégration : statut, récit de collection, liens communauté ── */
+    .sold-badge {
+      position: absolute;
+      z-index: 2;
+      top: 12px;
+      left: 12px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(3, 4, 10, 0.55);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      -webkit-backdrop-filter: blur(5px);
+      backdrop-filter: blur(5px);
+      font-family: var(--font-body);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .cm-desc {
+      margin: 18px 0 0;
+      font-size: 0.9rem;
+      line-height: 1.62;
+      color: var(--muted);
+      text-transform: none;
+      text-align: left;
+    }
+    .cm-desc[hidden] { display: none; }
+    .cm-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      margin-top: 16px;
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(102, 191, 255, 0.4);
+      background: rgba(102, 191, 255, 0.08);
+      color: #cfe9ff;
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .cm-link[hidden] { display: none; }
+    .cm-link:hover { background: rgba(102, 191, 255, 0.18); text-decoration: none; }
+
+    .artist-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(216px, 1fr));
+      gap: 16px;
+      max-width: 920px;
+      margin: 0 auto;
+    }
+    .link-card {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      padding: 20px;
+      border-radius: 16px;
+      background: rgba(20, 22, 38, 0.55);
+      border: 1px solid var(--hairline);
+      color: #fff;
+      transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .link-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(102, 191, 255, 0.4);
+      background: rgba(20, 22, 38, 0.82);
+      text-decoration: none;
+    }
+    .lc-head {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: #fff;
+    }
+    .lc-head svg { color: var(--primary-color); flex-shrink: 0; }
+    .lc-sub { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.02em; }
   </style>
 </head>
 <body>
@@ -2208,7 +2290,8 @@ body::after {
     <div class="nav-links">
       <a href="#collections">Collections</a>
       <a href="#leaderboard">Leaderboard</a>
-      <a href="https://x.com/Cronos_WTF" target="_blank" rel="noopener" class="nav-x" aria-label="Cronobots on X">
+      <a href="#artist">Artist</a>
+      <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="nav-x" aria-label="Cryptonauts on X">
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
     </div>
@@ -2256,6 +2339,32 @@ body::after {
       </div>
       <div id="collections-grid"></div>
     </section>
+
+    <section class="section reveal" id="artist">
+      <div class="section-head">
+        <span class="eyebrow">The artist</span>
+        <h2 class="section-title">Fran Rodríguez</h2>
+        <p class="section-sub">An expanding universe by surreal Spanish artist Fran Rodríguez — thirteen curated drops on crypto.com, a fully sold-out saga, and more than 400K&nbsp;dollars in total volume.</p>
+      </div>
+      <div class="artist-links">
+        <a href="https://crypto.com/nft/profile/cabezaenlasnubes?tab=created" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Crypto.com NFT</span>
+          <span class="lc-sub">Artist profile &amp; drops</span>
+        </a>
+        <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X / Twitter</span>
+          <span class="lc-sub">@cryptonautscdc</span>
+        </a>
+        <a href="https://discord.com/invite/TyTazHHgdV" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M20.317 4.369a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.249a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.077.077 0 00-.079-.036A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.2 14.2 0 001.226-1.994.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.245.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.893.077.077 0 00-.041.106c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.029 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.057c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg> Discord</span>
+          <span class="lc-sub">Join the crew</span>
+        </a>
+        <a href="https://linktr.ee/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M9 15l6-6M10 7h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> Linktree</span>
+          <span class="lc-sub">Every official link</span>
+        </a>
+      </div>
+    </section>
   </main>
 
   <footer>
@@ -2282,6 +2391,11 @@ body::after {
           <div class="cm-stat"><span class="v cm-holders">0</span><span class="l">Holders</span></div>
           <div class="cm-stat"><span class="v cm-items">0</span><span class="l">Cryptonauts</span></div>
         </div>
+        <p class="cm-desc"></p>
+        <a class="cm-link" target="_blank" rel="noopener" hidden>
+          View on crypto.com
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
       </div>
       <ul class="cm-list"></ul>
     </div>
@@ -2303,6 +2417,22 @@ body::after {
       return url && url.startsWith('https://x.com/') ? '@' + url.split('https://x.com/')[1] : '';
     }
 
+    // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
+    // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
+    const COLLECTION_META = {
+      "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
+      "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
+      "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
+      "Legendary Cryptonauts": { id: "c220b3299c59deccf1340251036ac4ac", items: 326, soldOut: true, desc: "The legend begins here. Magic and science go hand in hand in an adventure through the fabric of space and time. Fran Rodríguez's sixth collection of the sold-out Cryptonauts saga: after 10 curated drops and 320K+ dollars in total volume, his most epic and biggest collection to date." },
+      "TIME TRAVEL Cryptonauts": { id: "98d9a2bfd53bd130fc267c9c92ed3236", items: 241, soldOut: true, desc: "Meet the Time Travel Cryptonauts — quantum travelers who journeyed into the past to share astrophysics with primitive humans, and returned from the farthest future with revolutionary forms of energy. Time has changed forever. Fran Rodríguez's fifth collection of the saga." },
+      "Quantum Cryptonauts V2": { id: "89d7138226413ae153f306dd5cfabf33", items: 119, soldOut: true, desc: "The Quantum Cryptonauts — the dark knights of the cosmos. They are everywhere at once; they feel and know everything. Fran Rodríguez's fourth chapter of the saga and his first fully animated avatars, after seven curated drops and 300K+ dollars in total volume." },
+      "Quantum Cryptonauts": { id: "bbcd969a80642cf8934d33061be8a194", items: 129, soldOut: true, desc: "The Quantum Cryptonauts — the dark knights of the cosmos. They are everywhere at once; they feel and know everything. An epic, highly awaited collection full of psychedelia and cosmic surrealism, after seven curated drops and 275K+ dollars in total volume. Join the crew." },
+      "Cryptonauts 2024": { id: "10615ea6d69edfc24975c419941304e3", items: 115, soldOut: true, desc: "The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — they have been everywhere, at all times. A group of quantum astronauts whose advanced technology let them reach the deepest corners of the mind, and a world of endless possibilities." },
+      "Cryptonauts Golden Crew": { id: "f1d242e1c49e009427b38fc953ef4e89", items: 12, soldOut: true, desc: "An exclusive collection of 1/1 Cryptonauts reserved for the top holders and VIP members of the community." },
+      "Cryptonauts: The dark side of the dune": { id: "da522f33fb5285981f6d154e575fe0a3", items: 22, soldOut: true, desc: "Fran Rodríguez presents 'The dark side of the dune', the second chapter of the sold-out Cryptonauts saga. After years beyond the solar system, the Cryptonauts have found planets fit for life — humanity is ready to colonize another system. Join the space pioneers and conquer new worlds." },
+      "Cryptonauts": { id: "c942e9924b01fae996d8f817060611eb", items: 24, soldOut: true, desc: "Fran Rodríguez presents Cryptonauts, the first saga of his universe on Crypto.com. The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — brave quantum astronauts whose technology lets them reach the deepest corners of the mind, and a world of endless possibilities." }
+    };
+
     // Carte de collection (galerie). Le détail des propriétaires s'ouvre dans une modale.
     function renderCollection(collection, index) {
       try {
@@ -2310,6 +2440,7 @@ body::after {
         div.className = 'collection';
         div.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
         const total = collection.owners.reduce((sum, o) => sum + (o.count || 0), 0);
+        const meta = COLLECTION_META[collection.title] || {};
         const interactive = collection.owners.length > 0;
         if (interactive) {
           div.setAttribute('role', 'button');
@@ -2320,6 +2451,7 @@ body::after {
           <div class="collection-header">
             <div class="collection-cover">
               <img src="\${collection.image}" alt="\${collection.alt}" loading="lazy" decoding="async">
+              \${meta.soldOut ? '<span class="sold-badge">Sold out</span>' : ''}
               \${interactive ? '<span class="cover-cta">VIEW HOLDERS</span>' : ''}
             </div>
             <div class="collection-body">
@@ -2369,6 +2501,14 @@ body::after {
       modal.querySelector('.cm-title').textContent = collection.title;
       modal.querySelector('.cm-holders').textContent = (collection.ownersCount || 0).toLocaleString('fr-FR');
       modal.querySelector('.cm-items').textContent = total.toLocaleString('fr-FR');
+      const meta = COLLECTION_META[collection.title] || {};
+      const descEl = modal.querySelector('.cm-desc');
+      const linkEl = modal.querySelector('.cm-link');
+      if (descEl) { descEl.textContent = meta.desc || ''; descEl.hidden = !meta.desc; }
+      if (linkEl) {
+        if (meta.id) { linkEl.href = 'https://crypto.com/nft/collection/' + meta.id; linkEl.hidden = false; }
+        else { linkEl.hidden = true; }
+      }
       modal.querySelector('.cm-list').innerHTML = buildOwnerRowsHTML(collection.owners);
       modal.hidden = false;
       const box = modal.querySelector('.modal-box');
@@ -2532,7 +2672,8 @@ body::after {
           collectionsContainer.appendChild(renderCollection(collection, i));
         });
 
-        main.appendChild(renderGlobalOwners(globalOwnersData));
+        const artistSection = document.getElementById('artist');
+        main.insertBefore(renderGlobalOwners(globalOwnersData), artistSection);
 
         // Bandeau de statistiques (compteurs animés)
         buildStatsBand();
