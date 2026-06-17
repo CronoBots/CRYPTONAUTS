@@ -305,6 +305,7 @@ function writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData) {
   <title>CronoBots | Cryptonauts Leaderboards</title>
   <link rel="preload" href="fonts/Geomanist-Bold.otf" as="font" type="font/otf" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="assets/icon.png">
+  <link rel="preconnect" href="https://media.nft.crypto.com" crossorigin>
   <style>
     :root {
       --primary-color: #66bfff;
@@ -326,9 +327,46 @@ body {
   font-family: 'Geomanist-Bold', sans-serif;
   line-height: 1.6;
   margin: 0;
-  background: url('https://www.transparenttextures.com/patterns/stardust.png'), #000;
-  background-attachment: fixed;
   color: var(--text-dark);
+  background-color: #03040a;
+}
+
+/* ── Décor spatial : nébuleuse + champ d'étoiles, 100% CSS (aucune requête externe) ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background:
+    radial-gradient(ellipse at 50% -10%, rgba(78,46,138,0.38), transparent 55%),
+    radial-gradient(ellipse at 100% 100%, rgba(22,74,148,0.28), transparent 50%),
+    radial-gradient(ellipse at 0% 85%, rgba(126,32,98,0.18), transparent 45%),
+    #03040a;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(1.5px 1.5px at 25px 35px, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 130px 90px, rgba(255,255,255,0.85), transparent),
+    radial-gradient(1px 1px at 200px 160px, rgba(255,255,255,0.7), transparent),
+    radial-gradient(1px 1px at 60px 200px, rgba(255,255,255,0.6), transparent),
+    radial-gradient(1.5px 1.5px at 175px 250px, #fff, transparent),
+    radial-gradient(1px 1px at 100px 130px, rgba(255,255,255,0.5), transparent);
+  background-repeat: repeat;
+  background-size: 250px 250px;
+  opacity: 0.55;
+  animation: twinkle 6s ease-in-out infinite alternate;
+}
+@keyframes twinkle {
+  from { opacity: 0.35; }
+  to   { opacity: 0.7; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::after { animation: none; opacity: 0.5; }
 }
 
     header {
@@ -405,7 +443,8 @@ body {
     .collection {
       margin-bottom: 20px;
       padding: 15px;
-      background-color: rgba(26, 26, 26, 0.8);
+      background-color: rgba(20, 22, 38, 0.82);
+      border: 1px solid rgba(102, 191, 255, 0.14);
       border-radius: 15px;
       box-shadow: var(--shadow);
     }
@@ -767,6 +806,30 @@ body {
       vertical-align: middle;
     }
 
+    /* ── Accents thème astronaute : glow des titres + halos lumineux du podium ── */
+    h1,
+    .leaderboard-section h1 {
+      text-shadow: 0 0 16px rgba(102, 191, 255, 0.45);
+    }
+    h2 {
+      text-shadow: 0 0 14px rgba(102, 191, 255, 0.35);
+    }
+    #global-owners li.rank-1,
+    #additional-owners li.rank-1,
+    .collection ul li.collection-rank-1 {
+      box-shadow: 0 0 22px rgba(255, 215, 0, 0.30);
+    }
+    #global-owners li.rank-2,
+    #additional-owners li.rank-2,
+    .collection ul li.collection-rank-2 {
+      box-shadow: 0 0 22px rgba(192, 192, 192, 0.26);
+    }
+    #global-owners li.rank-3,
+    #additional-owners li.rank-3,
+    .collection ul li.collection-rank-3 {
+      box-shadow: 0 0 22px rgba(205, 127, 50, 0.26);
+    }
+
     @media screen and (max-width: 600px) {
       h1 {
         font-size: 2rem;
@@ -911,7 +974,7 @@ body {
   
   <main>
     <section class="collection-list">
-      <h1>COLLECTIONS</h1>
+      <h1>🚀 COLLECTIONS</h1>
       <div id="collections"></div>
     </section>
   </main>
@@ -963,7 +1026,7 @@ body {
         div.className = 'collection';
         div.innerHTML = \`
           <div class="collection-header">
-            <img src="\${collection.image}" alt="\${collection.alt}" class="collection-image">
+            <img src="\${collection.image}" alt="\${collection.alt}" class="collection-image" loading="lazy" decoding="async">
             <div class="title-container">
               <h2>\${collection.title}</h2>
               \${collection.date ? \`<span style="color: #cc8834; font-weight: 700; margin-top: 8px;">\${collection.date}</span>\` : ''}
@@ -1018,7 +1081,7 @@ body {
         const section = document.createElement('section');
         section.className = 'leaderboard-section';
         section.innerHTML = \`
-          <h1>LEADERBOARDS</h1>
+          <h1>🚀 LEADERBOARDS</h1>
           <div class="summary">
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
             <ul id="global-owners">
@@ -1049,7 +1112,7 @@ body {
               </ul>
             \` : ''}
           </div>
-          <img src="assets/Footer.png" alt="Cryptonauts Footer Banner" class="footer-image">
+          <img src="assets/Footer.png" alt="Cryptonauts Footer Banner" class="footer-image" loading="lazy" decoding="async">
         \`;
         return section;
       } catch (error) {
