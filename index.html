@@ -2298,10 +2298,10 @@ body::after {
     .iv-reveal.iv-in { opacity: 1; transform: none; }
     /* Cover hero */
     .iv-hero { position: relative; margin: 0 0 22px; border-radius: 18px; overflow: hidden; border: 1px solid var(--hairline); aspect-ratio: 16 / 9; }
-    .iv-hero img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.3, 1); }
-    .iv-hero:hover img { transform: scale(1.05); }
-    .iv-hero-grad { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(3,4,10,0.92) 0%, rgba(3,4,10,0.28) 46%, transparent 72%); }
-    .iv-hero-cap { position: absolute; left: 24px; right: 24px; bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .iv-hero { cursor: zoom-in; }
+    .iv-hero img { width: 100%; height: 100%; object-fit: cover; display: block; transform: translateY(0) scale(1.1); will-change: transform; }
+    .iv-hero-grad { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(0deg, rgba(3,4,10,0.92) 0%, rgba(3,4,10,0.28) 46%, transparent 72%); }
+    .iv-hero-cap { position: absolute; left: 24px; right: 24px; bottom: 20px; display: flex; flex-direction: column; gap: 6px; pointer-events: none; }
     .iv-hero-kick { font-family: var(--font-body); font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
     .iv-hero-title { font-family: var(--font-display); font-size: clamp(1.6rem, 5vw, 2.6rem); color: #fff; line-height: 1; text-shadow: 0 2px 24px rgba(0,0,0,0.5); }
     /* Meta chips */
@@ -2333,11 +2333,30 @@ body::after {
     /* Source */
     .iv-article p.iv-source { margin: 38px 0 0; padding-top: 20px; border-top: 1px solid var(--hairline); font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
     .iv-source a { color: var(--primary-color); }
-    /* Lightbox */
-    .iv-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(2,3,8,0.93); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); cursor: zoom-out; animation: ivLbIn 0.25s ease; }
+    /* Bouton CTA "lire l'original" */
+    .iv-cta { display: inline-flex; align-items: center; gap: 12px; margin: 36px 0 0; padding: 13px 22px; border-radius: 999px; font-family: var(--font-body); font-size: 0.84rem; letter-spacing: 0.06em; text-transform: uppercase; color: #eaf2ff; border: 1px solid rgba(102,191,255,0.4); background: linear-gradient(120deg, rgba(102,191,255,0.12), rgba(232,192,105,0.08)); transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease; }
+    .iv-cta:hover { transform: translateY(-2px); border-color: rgba(102,191,255,0.75); box-shadow: 0 12px 34px rgba(102,191,255,0.22); text-decoration: none; }
+    .iv-cta-ic { display: inline-flex; color: var(--primary-color); }
+    .iv-cta-ar { transition: transform 0.25s ease; }
+    .iv-cta:hover .iv-cta-ar { transform: translateX(4px); }
+    /* Barre de progression de lecture */
+    .iv-progress { position: fixed; top: 0; left: 0; width: 100%; height: 3px; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, var(--primary-color), var(--gold)); z-index: 900; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; box-shadow: 0 0 10px rgba(102,191,255,0.5); }
+    .iv-progress.show { opacity: 1; }
+    /* Lightbox avec navigation */
+    .iv-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: clamp(16px, 4vw, 56px); background: rgba(2,3,8,0.94); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); animation: ivLbIn 0.28s ease; }
     .iv-lightbox[hidden] { display: none; }
-    .iv-lightbox img { max-width: min(94vw, 1100px); max-height: 90vh; border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+    .iv-lb-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; max-width: 100%; max-height: 100%; }
+    .iv-lb-fig img { max-width: min(92vw, 1080px); max-height: 82vh; border-radius: 12px; box-shadow: 0 30px 90px rgba(0,0,0,0.65); animation: ivImgIn 0.3s ease; }
+    .iv-lb-fig figcaption { font-size: 0.84rem; color: rgba(233,240,255,0.75); text-align: center; max-width: 640px; }
+    .iv-lb-x { position: absolute; top: 18px; right: 20px; width: 42px; height: 42px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.14); cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+    .iv-lb-x:hover { background: rgba(255,255,255,0.18); transform: rotate(90deg); }
+    .iv-lb-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 50px; height: 50px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.14); cursor: pointer; transition: background 0.2s ease; }
+    .iv-lb-nav:hover { background: rgba(102,191,255,0.28); }
+    .iv-lb-prev { left: 18px; } .iv-lb-next { right: 18px; }
+    .iv-lb-count { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); font-family: var(--font-body); font-size: 0.74rem; letter-spacing: 0.14em; color: rgba(233,240,255,0.6); }
     @keyframes ivLbIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes ivImgIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: none; } }
+    @media (max-width: 600px) { .iv-lb-nav { width: 42px; height: 42px; } .iv-lb-prev { left: 8px; } .iv-lb-next { right: 8px; } }
     @media (max-width: 600px) {
       .iv-hero { aspect-ratio: 4 / 3; }
       .iv-hero-cap { left: 16px; right: 16px; bottom: 14px; }
@@ -2852,9 +2871,27 @@ body::after {
               <p class="iv-a">Any person who is self-absorbed, daydreaming all the time. Space lovers, psychonauts seeking altered states of consciousness and, in general, minds looking for something beyond the ordinary.</p>
             </div>
 
+            <a class="iv-cta iv-reveal" href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">
+              <span class="iv-cta-ic"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12l4 4v10H4z"/><path d="M8 10h8M8 14h6"/></svg></span>
+              <span class="iv-cta-tx">Read the original on Medium</span>
+              <svg class="iv-cta-ar" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
             <p class="iv-source iv-reveal">Source — <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">“Creator Community: Fran Rodríguez”</a>, Crypto.com NFT (Medium), 17 December 2021. Interview &amp; artwork © Fran Rodríguez.</p>
           </article>
-          <div class="iv-lightbox" id="ivLightbox" hidden aria-hidden="true"><img src="" alt=""></div>
+          <div class="iv-progress" id="ivProgress" aria-hidden="true"></div>
+          <div class="iv-lightbox" id="ivLightbox" hidden aria-hidden="true">
+            <button class="iv-lb-x" id="ivLbClose" type="button" aria-label="Close">
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+            <button class="iv-lb-nav iv-lb-prev" id="ivLbPrev" type="button" aria-label="Previous image">
+              <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <figure class="iv-lb-fig"><img src="" alt="" decoding="async"><figcaption id="ivLbCap"></figcaption></figure>
+            <button class="iv-lb-nav iv-lb-next" id="ivLbNext" type="button" aria-label="Next image">
+              <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <span class="iv-lb-count" id="ivLbCount"></span>
+          </div>
         </div>
         <div class="tab-panel" data-panel="universe">
           <div class="tab-text">
@@ -3658,38 +3695,92 @@ body::after {
               artistTabs.querySelectorAll('.tab-panel').forEach(p => {
                 p.classList.toggle('is-active', p.dataset.panel === id);
               });
+              // recalcule parallaxe/progression de l'interview après bascule d'onglet
+              window.dispatchEvent(new Event('scroll'));
             });
           });
         }
 
-        // Interview : révélation au défilement (observer dédié) + lightbox des images
+        // Interview : reveal au défilement + parallaxe cover + progression de lecture + lightbox navigable
         (function () {
-          const ivEls = document.querySelectorAll('.iv-reveal');
+          const article = document.querySelector('.iv-article');
+          if (!article) return;
           const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          if (ivEls.length) {
-            if (!('IntersectionObserver' in window) || reduce) {
-              ivEls.forEach(e => e.classList.add('iv-in'));
-            } else {
-              const ivObs = new IntersectionObserver((ents) => {
-                ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add('iv-in'); ivObs.unobserve(e.target); } });
-              }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
-              ivEls.forEach(e => ivObs.observe(e));
-            }
+
+          // 1) Révélation au défilement
+          const ivEls = article.querySelectorAll('.iv-reveal');
+          if (!('IntersectionObserver' in window) || reduce) {
+            ivEls.forEach(e => e.classList.add('iv-in'));
+          } else {
+            const ivObs = new IntersectionObserver((ents) => {
+              ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add('iv-in'); ivObs.unobserve(e.target); } });
+            }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+            ivEls.forEach(e => ivObs.observe(e));
           }
+
+          // 2) Parallaxe de la cover + barre de progression (un seul handler, throttlé en rAF)
+          const heroImg = article.querySelector('.iv-hero img');
+          const bar = document.getElementById('ivProgress');
+          let ticking = false;
+          function onScroll() {
+            if (ticking) return; ticking = true;
+            requestAnimationFrame(() => {
+              ticking = false;
+              if (article.offsetParent === null) { if (bar) bar.classList.remove('show'); return; }
+              const vh = window.innerHeight;
+              if (bar) {
+                const r = article.getBoundingClientRect();
+                const total = r.height - vh;
+                const pct = total > 0 ? Math.min(1, Math.max(0, -r.top / total)) : 0;
+                bar.style.transform = 'scaleX(' + pct + ')';
+                bar.classList.toggle('show', r.top < vh && r.bottom > 0);
+              }
+              if (heroImg && !reduce) {
+                const hr = heroImg.parentElement.getBoundingClientRect();
+                if (hr.bottom > 0 && hr.top < vh) {
+                  const prog = (vh - hr.top) / (vh + hr.height);
+                  heroImg.style.transform = 'translateY(' + ((prog - 0.5) * 28).toFixed(1) + 'px) scale(1.1)';
+                }
+              }
+            });
+          }
+          window.addEventListener('scroll', onScroll, { passive: true });
+          window.addEventListener('resize', onScroll, { passive: true });
+          onScroll();
+
+          // 3) Lightbox navigable (toutes les images de l'interview)
           const lb = document.getElementById('ivLightbox');
           if (lb) {
-            const lbImg = lb.querySelector('img');
+            const shots = Array.prototype.slice.call(article.querySelectorAll('.iv-hero img, .iv-shot img'));
+            const lbImg = lb.querySelector('.iv-lb-fig img');
+            const lbCap = document.getElementById('ivLbCap');
+            const lbCount = document.getElementById('ivLbCount');
+            let idx = 0;
+            const show = (i) => {
+              idx = (i + shots.length) % shots.length;
+              const s = shots[idx];
+              lbImg.src = s.currentSrc || s.src;
+              lbImg.alt = s.alt || '';
+              if (lbCap) lbCap.textContent = s.alt || '';
+              if (lbCount) lbCount.textContent = (idx + 1) + ' / ' + shots.length;
+            };
+            const open = (i) => { show(i); lb.hidden = false; document.documentElement.style.overflow = 'hidden'; };
             const close = () => { lb.hidden = true; document.documentElement.style.overflow = ''; };
-            document.querySelectorAll('.iv-shot img').forEach(img => {
-              img.addEventListener('click', () => {
-                lbImg.src = img.currentSrc || img.src;
-                lbImg.alt = img.alt || '';
-                lb.hidden = false;
-                document.documentElement.style.overflow = 'hidden';
-              });
+            shots.forEach((img, i) => { img.style.cursor = 'zoom-in'; img.addEventListener('click', () => open(i)); });
+            const byId = (id) => document.getElementById(id);
+            byId('ivLbClose').addEventListener('click', close);
+            byId('ivLbPrev').addEventListener('click', (e) => { e.stopPropagation(); show(idx - 1); });
+            byId('ivLbNext').addEventListener('click', (e) => { e.stopPropagation(); show(idx + 1); });
+            lb.addEventListener('click', (e) => { if (e.target === lb || e.target.classList.contains('iv-lb-fig')) close(); });
+            document.addEventListener('keydown', (e) => {
+              if (lb.hidden) return;
+              if (e.key === 'Escape') close();
+              else if (e.key === 'ArrowLeft') show(idx - 1);
+              else if (e.key === 'ArrowRight') show(idx + 1);
             });
-            lb.addEventListener('click', close);
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !lb.hidden) close(); });
+            let sx = 0;
+            lb.addEventListener('touchstart', (e) => { sx = e.touches[0].clientX; }, { passive: true });
+            lb.addEventListener('touchend', (e) => { const dx = e.changedTouches[0].clientX - sx; if (Math.abs(dx) > 50) show(idx + (dx < 0 ? 1 : -1)); }, { passive: true });
           }
         })();
 
