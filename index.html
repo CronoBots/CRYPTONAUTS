@@ -1426,14 +1426,20 @@ body::after {
     }
 
     @media screen and (max-width: 600px) {
-      #collections-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; }
-      .collection-body { padding: 12px 10px 14px; }
-      .collection-body h2 { font-size: 0.92rem; }
-      .collection-stats { gap: 6px; }
-      .stat-chip { padding: 8px 4px; }
+      /* Galerie mobile : 1 collection par ligne, carte horizontale (image à gauche, infos à droite) */
+      #collections-grid { grid-template-columns: 1fr; gap: 13px; }
+      .collection-header { flex-direction: row; align-items: stretch; gap: 0; }
+      .collection-cover { width: 122px; flex-shrink: 0; aspect-ratio: auto; align-self: stretch; }
+      .collection-cover::after { display: none; }
+      .cover-cta { display: none; }
+      .sold-badge { top: 8px; left: 8px; font-size: 0.5rem; padding: 4px 8px; }
+      .collection-body { text-align: left; padding: 13px 15px; display: flex; flex-direction: column; justify-content: center; gap: 5px; min-width: 0; }
+      .collection-body h2 { font-size: 1.04rem; margin: 0 0 1px; }
+      .collection-date { margin: 0; font-size: 0.72rem; }
+      .collection-stats { margin-top: 6px; padding-top: 0; gap: 8px; }
+      .stat-chip { padding: 7px 6px; }
       .stat-chip .v { font-size: 1.1rem; }
       .stat-chip .l { font-size: 0.5rem; }
-      .cover-cta { font-size: 0.6rem; padding: 5px 10px; opacity: 1; transform: translateX(-50%); }
       .cm-header .cm-cover { width: 74px; height: 74px; }
       .cm-header .cm-title { font-size: 1.05rem; }
       #global-owners li .count-text,
