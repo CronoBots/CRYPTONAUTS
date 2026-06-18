@@ -2555,7 +2555,7 @@ body::after {
       background: linear-gradient(to bottom, rgba(3, 4, 10, 0.15), rgba(3, 4, 10, 0.5) 60%, #03040a);
     }
     .cv-back {
-      position: absolute; z-index: 2; top: 18px; left: 18px;
+      position: absolute; z-index: 4; top: 18px; left: 18px;
       display: inline-flex; align-items: center; gap: 8px;
       padding: 10px 16px; border-radius: 999px;
       border: 1px solid rgba(102, 191, 255, 0.4);
@@ -2568,9 +2568,10 @@ body::after {
     .cv-back:active { transform: scale(0.97); }
 
     .cv-inner { max-width: 1080px; margin: 0 auto; padding: 0 20px 40px; }
-    /* Titre centré horizontalement ET verticalement dans la bannière */
+    /* Titre centré horizontalement ET verticalement dans la bannière.
+       pointer-events:none -> ne bloque pas les clics du bouton retour situé dessous. */
     .cv-title {
-      position: absolute; z-index: 2; inset: 0;
+      position: absolute; z-index: 2; inset: 0; pointer-events: none;
       display: flex; align-items: center; justify-content: center; text-align: center;
       margin: 0; padding: 46px 26px 26px;
       font-size: clamp(1.7rem, 4.6vw, 3rem); line-height: 1.1;
@@ -2618,9 +2619,9 @@ body::after {
     #cvList { padding: 0; }
 
     @media screen and (max-width: 600px) {
-      .cv-title { padding: 40px 14px 18px; }
-      .cv-logo { width: 92px; height: 92px; right: 5%; border-radius: 16px; }
-      .cv-meta { padding: 18px 108px 0 0; min-height: 50px; }
+      .cv-title { padding: 34px 14px 16px; }
+      .cv-logo { width: 86px; height: 86px; right: 16px; border-radius: 15px; }
+      .cv-meta { padding: 56px 0 0; min-height: 0; }
       .cv-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
       #cvNfts { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
