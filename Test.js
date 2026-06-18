@@ -327,6 +327,7 @@ function writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData) {
     :root {
       --primary-color: #66bfff;
       --accent: #ff6a1a;
+      --gold: #e8c069;
       --background-dark: #000;
       --text-dark: #fff;
       --muted: rgba(233, 240, 255, 0.62);
@@ -1863,8 +1864,9 @@ body::after {
       z-index: 0;
       pointer-events: none;
       background:
-        radial-gradient(circle at 72% 45%, rgba(102, 191, 255, 0.22), transparent 45%),
-        radial-gradient(circle at 30% 70%, rgba(126, 32, 98, 0.16), transparent 50%);
+        radial-gradient(circle at 70% 42%, rgba(102, 191, 255, 0.30), transparent 42%),
+        radial-gradient(circle at 73% 47%, rgba(232, 192, 105, 0.10), transparent 36%),
+        radial-gradient(circle at 28% 72%, rgba(126, 32, 98, 0.18), transparent 50%);
     }
     .hero-inner {
       position: relative;
@@ -1891,12 +1893,12 @@ body::after {
       color: #cfe9ff;
     }
     .hero-title {
-      font-size: clamp(3rem, 9vw, 6.6rem);
-      line-height: 0.95;
+      font-size: clamp(3.2rem, 9.6vw, 7rem);
+      line-height: 0.94;
       margin: 0 0 18px;
       text-transform: uppercase;
-      letter-spacing: 0.01em;
-      text-shadow: 0 0 40px rgba(102, 191, 255, 0.35);
+      letter-spacing: 0.02em;
+      text-shadow: 0 0 50px rgba(102, 191, 255, 0.42);
     }
     .hero-title span {
       background: linear-gradient(120deg, #66bfff, #a9dbff);
@@ -1950,6 +1952,20 @@ body::after {
       align-items: center;
       animation: heroUp 0.9s ease 0.15s both;
     }
+    /* Aura : l'astronaute est « rétro-éclairé » (radiance / lumière & ombre) */
+    .hero-visual::before {
+      content: ''; position: absolute; z-index: 0;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 86%; aspect-ratio: 1 / 1; border-radius: 50%;
+      background: radial-gradient(circle, rgba(102, 191, 255, 0.38), rgba(232, 192, 105, 0.10) 42%, transparent 68%);
+      filter: blur(30px); pointer-events: none;
+      animation: auraPulse 6.5s ease-in-out infinite;
+    }
+    .hero-visual .hero-frame { position: relative; z-index: 1; }
+    @keyframes auraPulse {
+      0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
+    }
     .hero-astronaut {
       width: min(420px, 80%);
       height: auto;
@@ -1980,16 +1996,21 @@ body::after {
     @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
 
     /* ── En-têtes de section ── */
-    .section { padding-top: 30px; }
+    .section { padding-top: 48px; }
     .section-head {
       text-align: center;
       max-width: 760px;
-      margin: 0 auto 32px;
+      margin: 0 auto 42px;
     }
     .section-head .eyebrow { margin-bottom: 14px; }
+    /* Filet doré sous l'en-tête (accent « luxe », inspiration Luminaria) */
+    .section-head::after {
+      content: ''; display: block; width: 58px; height: 2px; margin: 26px auto 0;
+      background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+    }
     .section-title {
-      font-size: clamp(2rem, 5vw, 3.4rem);
-      margin: 0 0 12px;
+      font-size: clamp(2.1rem, 5.3vw, 3.7rem);
+      margin: 0 0 14px;
       text-transform: uppercase;
       text-shadow: 0 0 24px rgba(102, 191, 255, 0.3);
     }
@@ -2169,7 +2190,7 @@ body::after {
     .stat-label { font-family: var(--font-body); font-weight: 500; }
 
     /* Titres de section : glow retenu */
-    .section-title { text-shadow: none; letter-spacing: -0.01em; text-transform: none; }
+    .section-title { text-shadow: 0 0 22px rgba(102, 191, 255, 0.22); letter-spacing: 0.04em; text-transform: uppercase; }
     .section-sub { color: var(--muted); }
     .collection-body h2 { text-shadow: none; }
     .cm-title { text-shadow: none; }
@@ -2714,6 +2735,16 @@ body::after {
       .col-stat .cl { font-size: 0.46rem; }
       .col-arrow { display: none; }
     }
+    /* ── Ethos : ligne narrative monumentale (accueil) ── */
+    .ethos { max-width: 900px; margin: 0 auto; padding: 60px 24px 34px; text-align: center; }
+    .ethos-line {
+      font-family: var(--font-display);
+      font-size: clamp(1.45rem, 3.6vw, 2.4rem);
+      line-height: 1.42; letter-spacing: 0.01em; margin: 0;
+      color: #eaf2ff; text-transform: none;
+    }
+    .ethos-gold { color: var(--gold); }
+    @media (prefers-reduced-motion: reduce) { .hero-visual::before { animation: none; } }
   </style>
 </head>
 <body>
@@ -2769,6 +2800,10 @@ body::after {
   </header>
 
   <main>
+    <section class="ethos reveal" data-view="home">
+      <p class="ethos-line">Not a drop — a living saga. Eleven sold-out worlds, forged piece by piece by Fran Rodríguez, and written <span class="ethos-gold">holder by holder</span>.</p>
+    </section>
+
     <section class="section reveal spot-section" id="spotlight" data-view="home">
       <div class="section-head">
         <span class="eyebrow">Spotlight</span>
