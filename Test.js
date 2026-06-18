@@ -423,7 +423,7 @@ body::after {
     }
 
     main {
-      padding: 20px;
+      padding: 24px clamp(18px, 4vw, 72px);
     }
 
     .footer-image {
@@ -540,6 +540,8 @@ body::after {
       background: none;
       padding: 0;
       box-shadow: none;
+      max-width: 1080px;
+      margin: 0 auto;
     }
 
     #searchInput {
@@ -1220,9 +1222,9 @@ body::after {
     /* ════════ PRÉSENTATION PRO : classements & collections ════════ */
 
     /* Largeur de lecture confortable sur grand écran */
+    /* PC : le contenu utilise toute la largeur (gouttières fluides via le padding de main) */
     main {
-      max-width: 1080px;
-      margin: 0 auto;
+      max-width: none;
     }
 
     .collection-list > h1,
@@ -1779,9 +1781,9 @@ body::after {
       z-index: 800;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       gap: 16px;
-      padding: 14px 26px;
+      padding: 16px clamp(18px, 4vw, 72px);
       border-bottom: 1px solid rgba(102, 191, 255, 0.10);
       background: rgba(3, 4, 10, 0.35);
       -webkit-backdrop-filter: blur(10px);
@@ -1791,28 +1793,37 @@ body::after {
     .navbar.scrolled {
       background: rgba(3, 4, 10, 0.85);
       border-color: rgba(102, 191, 255, 0.22);
-      padding: 10px 26px;
+      padding: 12px clamp(18px, 4vw, 72px);
     }
-    .navbar .brand {
-      font-size: 1.15rem;
-      letter-spacing: 0.14em;
-      color: #fff;
-      text-transform: uppercase;
-      text-shadow: 0 0 14px rgba(102, 191, 255, 0.5);
-    }
-    .navbar .brand:hover { text-decoration: none; }
     .nav-links {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: clamp(22px, 3.2vw, 46px);
     }
     .nav-links a {
-      font-size: 0.82rem;
-      letter-spacing: 0.1em;
+      font-family: var(--font-display);
+      font-size: 1.04rem;
+      letter-spacing: 0.13em;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.78);
+      color: rgba(255, 255, 255, 0.82);
+      text-shadow: 0 0 12px rgba(102, 191, 255, 0.22);
       position: relative;
     }
+    .nav-social {
+      position: absolute;
+      right: clamp(18px, 4vw, 72px);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    .nav-social a {
+      display: inline-flex;
+      color: rgba(233, 240, 255, 0.6);
+      transition: color 0.2s ease, transform 0.2s ease;
+    }
+    .nav-social a:hover { color: #fff; transform: translateY(-2px); text-decoration: none; }
     .nav-links a::after {
       content: '';
       position: absolute;
@@ -1855,7 +1866,7 @@ body::after {
       display: flex;
       align-items: center;
       overflow: hidden;
-      padding: 40px 26px 60px;
+      padding: 40px clamp(22px, 4vw, 72px) 60px;
       box-sizing: border-box;
     }
     .hero-bg {
@@ -1872,7 +1883,7 @@ body::after {
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 1200px;
+      max-width: 1560px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
@@ -2046,12 +2057,11 @@ body::after {
       .hero-metrics .stats-band { margin: 0 auto; }
     }
     @media screen and (max-width: 600px) {
-      .navbar { padding: 11px 16px; }
-      .nav-links { gap: 16px; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .navbar { padding: 11px 16px; justify-content: flex-start; }
+      .nav-links { gap: 20px; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: center; }
       .nav-links::-webkit-scrollbar { display: none; }
-      .nav-links a { font-size: 0.72rem; letter-spacing: 0.02em; white-space: nowrap; }
-      .nav-x { display: none; }
-      .navbar .brand { font-size: 0.95rem; flex-shrink: 0; }
+      .nav-links a { font-size: 0.84rem; letter-spacing: 0.06em; white-space: nowrap; }
+      .nav-social { display: none; }
       .hero { min-height: auto; padding: 30px 16px 44px; }
       .hero-astronaut { width: min(280px, 72%); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
@@ -2165,12 +2175,9 @@ body::after {
       vertical-align: middle;
     }
 
-    /* Nav : icône X sans soulignement, libellés affinés */
+    /* Nav : libellés monumentaux en majuscules, centrés */
     .navbar { border-bottom: 1px solid var(--hairline); }
-    .nav-links a { font-weight: 500; text-transform: none; letter-spacing: 0.04em; color: rgba(233, 240, 255, 0.72); }
-    .nav-x { display: inline-flex; align-items: center; color: rgba(233, 240, 255, 0.72); }
-    .nav-x:hover { color: #fff; }
-    .nav-x::after { display: none; }
+    .nav-social a::after { display: none; }
     .live-pill { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; }
 
     /* Métriques du hero : rangée à filets, sans cadre lourd */
@@ -2590,7 +2597,8 @@ body::after {
     .cv-back:hover { background: rgba(102, 191, 255, 0.18); }
     .cv-back:active { transform: scale(0.97); }
 
-    .cv-inner { max-width: 1080px; margin: 0 auto; padding: 0 20px 40px; }
+    .cv-inner { max-width: none; margin: 0 auto; padding: 0 clamp(18px, 4vw, 72px) 44px; }
+    #cvList { max-width: 1100px; margin: 0 auto; }
     /* Titre centré horizontalement ET verticalement dans la bannière.
        pointer-events:none -> ne bloque pas les clics du bouton retour situé dessous. */
     .cv-title {
@@ -2651,7 +2659,9 @@ body::after {
     }
     /* ════════ SPOTLIGHT : mur d'œuvres en mouvement ════════ */
     .spot-wall {
-      overflow: hidden;
+      overflow-x: clip;
+      overflow-y: visible;
+      padding: 22px 0;
       display: flex;
       flex-direction: column;
       gap: 16px;
@@ -2682,7 +2692,7 @@ body::after {
       .spot-row { gap: 12px; }
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
-    #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1080px; margin: 0 auto; }
+    #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: none; margin: 0 auto; }
     .col-row {
       position: relative; display: block; height: 134px;
       border-radius: 18px; overflow: hidden; text-decoration: none;
@@ -2755,14 +2765,24 @@ body::after {
   <div class="grain" aria-hidden="true"></div>
 
   <nav class="navbar" id="navbar">
-    <a href="#home" class="brand">Cryptonauts</a>
     <div class="nav-links">
-      <a href="#home" data-nav="home">Home</a>
+      <a href="#home" data-nav="home">World</a>
+      <a href="#artist" data-nav="artist">Artist</a>
       <a href="#collections" data-nav="collections">Collections</a>
       <a href="#leaderboard" data-nav="leaderboard">Leaderboard</a>
-      <a href="#artist" data-nav="artist">Artist</a>
-      <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="nav-x" aria-label="Cryptonauts on X">
+    </div>
+    <div class="nav-social">
+      <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" aria-label="X">
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://instagram.com/lacabezaenlasnubes" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a href="https://discord.com/invite/TyTazHHgdV" target="_blank" rel="noopener" aria-label="Discord">
+        <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="currentColor"><path d="M20.317 4.369a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.249a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.077.077 0 00-.079-.036A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.2 14.2 0 001.226-1.994.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.245.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.893.077.077 0 00-.041.106c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.029 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.057c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
+      </a>
+      <a href="https://linktr.ee/cryptonautscdc" target="_blank" rel="noopener" aria-label="Linktree">
+        <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 15l6-6M10 7h5v5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/></svg>
       </a>
     </div>
   </nav>
