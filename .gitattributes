@@ -1,2 +1,9 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Médias binaires : jamais de normalisation de fins de ligne
+*.mp4 binary
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.woff2 binary

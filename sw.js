@@ -8,7 +8,7 @@
  * Le nom du cache est versionné : incrémentez CACHE_VERSION à chaque
  * changement de la liste précachée pour forcer la mise à jour.
  */
-const CACHE_VERSION = 'v2';
+const CACHE_VERSION = 'v3';
 const CACHE = 'cryptonauts-' + CACHE_VERSION;
 
 const PRECACHE = [
@@ -20,7 +20,8 @@ const PRECACHE = [
   './assets/Footer.png',
   './assets/logo.png',
   './assets/icon-192.png',
-  './assets/icon-512.png'
+  './assets/icon-512.png',
+  './assets/nebula-poster.jpg'
 ];
 
 self.addEventListener('install', (event) => {
@@ -43,6 +44,10 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
+  // Vidéo (fond de hero) : laisse le navigateur gérer le streaming natif
+  // (requêtes Range / 206). Ne pas intercepter ni mettre en cache.
+  if (req.headers.has('range') || /\.mp4($|\?)/i.test(req.url)) return;
 
   let url;
   try { url = new URL(req.url); } catch (e) { return; }
