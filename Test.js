@@ -2082,11 +2082,12 @@ body::after {
       .hero-metrics .stats-band { margin: 0 auto; }
     }
     @media screen and (max-width: 600px) {
-      .navbar { padding: 11px 16px; justify-content: flex-start; }
-      .nav-links { gap: 20px; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
+      /* Nav mobile sur deux lignes : liens sociaux en haut à droite, boutons centrés en dessous. */
+      .navbar { flex-direction: column; align-items: stretch; gap: 7px; padding: 8px 14px 9px; }
+      .nav-social { display: flex; position: static; transform: none; order: -1; justify-content: flex-end; gap: 20px; }
+      .nav-links { gap: 11px; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: center; }
       .nav-links::-webkit-scrollbar { display: none; }
-      .nav-links a { font-size: 0.84rem; letter-spacing: 0.06em; white-space: nowrap; }
-      .nav-social { display: none; }
+      .nav-links a { font-size: 0.7rem; letter-spacing: 0.015em; white-space: nowrap; }
       .hero { min-height: auto; padding: 30px 16px 44px; }
       .hero-astronaut { width: min(280px, 72%); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
