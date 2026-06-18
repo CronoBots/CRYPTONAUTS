@@ -1812,7 +1812,11 @@ body::after {
       color: rgba(255, 255, 255, 0.82);
       text-shadow: 0 0 12px rgba(102, 191, 255, 0.22);
       position: relative;
+      display: inline-flex;
+      align-items: center;
     }
+    /* Icônes de nav : masquées sur desktop (libellés texte), affichées sur mobile. */
+    .nav-ico { width: 23px; height: 23px; display: none; flex-shrink: 0; }
     .nav-social {
       position: absolute;
       right: clamp(18px, 4vw, 72px);
@@ -2082,12 +2086,16 @@ body::after {
       .hero-metrics .stats-band { margin: 0 auto; }
     }
     @media screen and (max-width: 600px) {
-      /* Nav mobile sur deux lignes : liens sociaux en haut à droite, boutons centrés en dessous. */
-      .navbar { flex-direction: column; align-items: stretch; gap: 7px; padding: 8px 14px 9px; }
-      .nav-social { display: flex; position: static; transform: none; order: -1; justify-content: flex-end; gap: 20px; }
-      .nav-links { gap: 11px; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: center; }
-      .nav-links::-webkit-scrollbar { display: none; }
-      .nav-links a { font-size: 0.7rem; letter-spacing: 0.015em; white-space: nowrap; }
+      /* Nav mobile : menu d'icônes sur une seule ligne (sections + liens sociaux). */
+      .navbar { flex-direction: row; align-items: center; justify-content: space-between; gap: 4px; padding: 9px 12px; }
+      .nav-links { flex: 1; min-width: 0; gap: 2px; justify-content: space-around; }
+      .nav-links a { padding: 7px 7px; color: rgba(233, 240, 255, 0.58); text-shadow: none; border-radius: 9px; }
+      .nav-links a::after { display: none; }
+      .nav-links a.is-active { color: var(--primary-color); background: rgba(102, 191, 255, 0.12); }
+      .nav-ico { display: block; }
+      .nav-txt { display: none; }
+      .nav-social { display: flex; position: static; transform: none; gap: 13px; padding-left: 9px; border-left: 1px solid rgba(255, 255, 255, 0.1); }
+      .nav-social svg { width: 16px; height: 16px; }
       .hero { min-height: auto; padding: 30px 16px 44px; }
       .hero-astronaut { width: min(280px, 72%); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
@@ -2847,11 +2855,11 @@ body::after {
 
   <nav class="navbar" id="navbar">
     <div class="nav-links">
-      <a href="#home" data-nav="home">World</a>
-      <a href="#artist" data-nav="artist">Artist</a>
-      <a href="#collections" data-nav="collections">Collections</a>
-      <a href="#leaderboard" data-nav="leaderboard">Leaderboard</a>
-      <a href="#salesbot" data-nav="salesbot">Sales Bot</a>
+      <a href="#home" data-nav="home"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18" stroke-linecap="round"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke-linecap="round"/></svg><span class="nav-txt">World</span></a>
+      <a href="#artist" data-nav="artist"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0" stroke-linecap="round"/></svg><span class="nav-txt">Artist</span></a>
+      <a href="#collections" data-nav="collections"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span class="nav-txt">Collections</span></a>
+      <a href="#leaderboard" data-nav="leaderboard"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 20V11M12 20V4M18 20v-6"/></svg><span class="nav-txt">Leaderboard</span></a>
+      <a href="#salesbot" data-nav="salesbot"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="4.5" y="8" width="15" height="11" rx="2.5"/><path d="M12 5.5V8" stroke-linecap="round"/><circle cx="12" cy="4.3" r="1.3"/><circle cx="9.2" cy="13" r="1.15" fill="currentColor" stroke="none"/><circle cx="14.8" cy="13" r="1.15" fill="currentColor" stroke="none"/><path d="M9.5 16.3h5" stroke-linecap="round"/></svg><span class="nav-txt">Sales Bot</span></a>
     </div>
     <div class="nav-social">
       <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" aria-label="X">
