@@ -2554,6 +2554,14 @@ body::after {
           <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Crypto.com NFT</span>
           <span class="lc-sub">Artist profile &amp; drops</span>
         </a>
+        <a href="https://franrodriguezart.com/" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" stroke-linecap="round"/></svg> Website</span>
+          <span class="lc-sub">Portfolio &amp; prints</span>
+        </a>
+        <a href="https://lacabezaenlasnubes.cargo.site/" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg> Portfolio</span>
+          <span class="lc-sub">lacabezaenlasnubes</span>
+        </a>
         <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
           <span class="lc-head"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X / Twitter</span>
           <span class="lc-sub">@cryptonautscdc</span>
