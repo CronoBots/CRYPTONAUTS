@@ -2362,53 +2362,56 @@ body::after {
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1080px; margin: 0 auto; }
     .col-row {
-      position: relative; display: block; height: 132px;
-      border-radius: 16px; overflow: hidden; text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.07);
+      position: relative; display: block; height: 134px;
+      border-radius: 18px; overflow: hidden; text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.08);
       background: linear-gradient(135deg, #0b1030, #161526);
       box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
       opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
     }
     .col-row:hover, .col-row:focus-visible {
-      border-color: rgba(102, 191, 255, 0.45);
-      box-shadow: 0 14px 34px rgba(102, 191, 255, 0.18);
+      border-color: rgba(102, 191, 255, 0.5);
+      box-shadow: 0 16px 38px rgba(102, 191, 255, 0.2);
+      transform: translateY(-2px);
       outline: none;
     }
-    .col-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.5; transition: transform 0.45s ease, opacity 0.3s ease; }
-    .col-row:hover .col-bg { transform: scale(1.05); opacity: 0.62; }
-    .col-grad { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3, 4, 10, 0.9) 0%, rgba(3, 4, 10, 0.5) 30%, rgba(3, 4, 10, 0.5) 70%, rgba(3, 4, 10, 0.9) 100%); }
+    .col-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.58; transition: transform 0.5s ease, opacity 0.3s ease; }
+    .col-row:hover .col-bg { transform: scale(1.06); opacity: 0.72; }
+    .col-grad { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3, 4, 10, 0.94) 0%, rgba(3, 4, 10, 0.62) 26%, rgba(3, 4, 10, 0.58) 74%, rgba(3, 4, 10, 0.94) 100%); }
     .col-logo {
       position: absolute; z-index: 2; left: 22px; top: 50%; transform: translateY(-50%);
-      width: 94px; height: 94px; border-radius: 15px; object-fit: cover;
-      border: 1px solid rgba(102, 191, 255, 0.32); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+      width: 96px; height: 96px; border-radius: 16px; object-fit: cover;
+      border: 1px solid rgba(102, 191, 255, 0.32);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(11, 16, 48, 0.5);
+      transition: box-shadow 0.25s ease, border-color 0.25s ease;
     }
+    .col-row:hover .col-logo { border-color: rgba(102, 191, 255, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 22px rgba(102, 191, 255, 0.3); }
     .col-title-wrap {
-      position: absolute; z-index: 2; inset: 0; padding: 0 168px;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 5px;
+      position: absolute; z-index: 2; inset: 0; padding: 0 200px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 6px;
     }
-    .col-title { margin: 0; font-size: clamp(1.05rem, 2.3vw, 1.55rem); line-height: 1.15; color: #fff; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85); }
-    .col-date { font-size: 0.68rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(233, 240, 255, 0.7); }
-    .col-stats { position: absolute; z-index: 2; right: 22px; top: 50%; transform: translateY(-50%); display: flex; gap: 14px; }
+    .col-title { margin: 0; font-size: clamp(1.1rem, 2.3vw, 1.6rem); line-height: 1.14; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9); }
+    .col-date { font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(233, 240, 255, 0.72); }
+    .col-stats { position: absolute; z-index: 2; right: 54px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 16px; }
     .col-stat { text-align: center; }
-    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.3rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(102, 191, 255, 0.35); }
+    .col-stat + .col-stat { border-left: 1px solid var(--hairline); padding-left: 16px; }
+    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.35rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(102, 191, 255, 0.35); }
     .col-stat .cl { display: block; margin-top: 4px; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    .col-sold {
-      position: absolute; z-index: 3; top: 12px; right: 16px;
-      padding: 4px 9px; border-radius: 999px; background: rgba(3, 4, 10, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.25); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
-      font-family: var(--font-body); font-size: 0.5rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
-    }
+    .col-arrow { position: absolute; z-index: 2; right: 18px; top: 50%; transform: translateY(-50%); color: rgba(233, 240, 255, 0.5); transition: color 0.25s ease, transform 0.25s ease; }
+    .col-row:hover .col-arrow { color: var(--primary-color); transform: translateY(-50%) translateX(3px); }
     @media (prefers-reduced-motion: reduce) { .col-row { animation: none; opacity: 1; translate: none; } }
     @media screen and (max-width: 600px) {
-      .col-row { height: 104px; }
-      .col-logo { width: 66px; height: 66px; left: 12px; border-radius: 12px; }
-      .col-title-wrap { padding: 0 84px 0 88px; }
-      .col-title { font-size: 0.96rem; }
-      .col-date { font-size: 0.58rem; }
-      .col-stats { right: 12px; gap: 9px; }
-      .col-stat .cv { font-size: 1rem; }
-      .col-stat .cl { font-size: 0.47rem; }
-      .col-sold { top: 8px; right: 10px; font-size: 0.46rem; padding: 3px 7px; }
+      .col-row { height: 106px; }
+      .col-logo { width: 70px; height: 70px; left: 12px; border-radius: 13px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(11, 16, 48, 0.5); }
+      .col-title-wrap { padding: 0 118px 0 92px; }
+      .col-title { font-size: 0.98rem; }
+      .col-date { font-size: 0.55rem; letter-spacing: 0.12em; }
+      .col-stats { right: 14px; gap: 11px; }
+      .col-stat + .col-stat { padding-left: 11px; }
+      .col-stat .cv { font-size: 1.02rem; }
+      .col-stat .cl { font-size: 0.46rem; }
+      .col-arrow { display: none; }
     }
   </style>
 </head>
@@ -2482,7 +2485,7 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">The collections</span>
         <h2 class="section-title">Eleven worlds, one crew</h2>
-        <p class="section-sub">Each collection is a chapter of the Cryptonauts saga. Open any one to see its holders, ranked.</p>
+        <p class="section-sub">Eleven chapters of the Cryptonauts saga — every one sold out. Tap any collection to explore its items and holders.</p>
       </div>
       <div id="collections-grid"></div>
     </section>
@@ -2757,7 +2760,6 @@ body::after {
         a.innerHTML = `
           <div class="col-bg" data-cid="${meta.id || ''}"></div>
           <div class="col-grad"></div>
-          ${meta.soldOut ? '<span class="col-sold">Sold out</span>' : ''}
           <img class="col-logo" src="${collection.image}" alt="${collection.alt}" loading="lazy" decoding="async">
           <div class="col-title-wrap">
             <h3 class="col-title">${collection.title}</h3>
@@ -2767,6 +2769,7 @@ body::after {
             <div class="col-stat"><span class="cv">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
             <div class="col-stat"><span class="cv">${(items || 0).toLocaleString('fr-FR')}</span><span class="cl">Items</span></div>
           </div>
+          <svg class="col-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         `;
         return a;
       } catch (error) {
