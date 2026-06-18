@@ -1760,7 +1760,7 @@ body::after {
     }
     @media screen and (max-width: 600px) {
       .navbar { padding: 11px 16px; justify-content: flex-start; }
-      .nav-links { gap: 20px; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: center; }
+      .nav-links { gap: 20px; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; justify-content: flex-start; }
       .nav-links::-webkit-scrollbar { display: none; }
       .nav-links a { font-size: 0.84rem; letter-spacing: 0.06em; white-space: nowrap; }
       .nav-social { display: none; }
@@ -2456,6 +2456,61 @@ body::after {
       color: #eaf2ff; text-transform: none;
     }
     .ethos-gold { color: var(--gold); }
+
+    /* ── Sales Bot : flux des dernières ventes ── */
+    .sb-live {
+      display: inline-block; width: 8px; height: 8px; margin-right: 7px;
+      border-radius: 50%; background: #34e29a; vertical-align: middle;
+      box-shadow: 0 0 0 0 rgba(52, 226, 154, 0.6); animation: sbPulse 1.8s ease-out infinite;
+    }
+    @keyframes sbPulse {
+      0% { box-shadow: 0 0 0 0 rgba(52, 226, 154, 0.55); }
+      70% { box-shadow: 0 0 0 7px rgba(52, 226, 154, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(52, 226, 154, 0); }
+    }
+    .sb-wrap { max-width: 940px; margin: 0 auto; }
+    .sb-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
+    .sb-count { font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(233, 240, 255, 0.55); }
+    .sb-refresh {
+      display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+      font-family: var(--font-body); font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase;
+      color: rgba(233, 240, 255, 0.82); padding: 8px 14px; border-radius: 999px;
+      border: 1px solid rgba(102, 191, 255, 0.28); background: rgba(102, 191, 255, 0.06);
+      transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .sb-refresh:hover { background: rgba(102, 191, 255, 0.14); border-color: rgba(102, 191, 255, 0.5); color: #fff; }
+    .sb-refresh svg { transition: transform 0.5s ease; }
+    .sb-refresh:hover svg { transform: rotate(-180deg); }
+    .sb-feed { display: flex; flex-direction: column; gap: 9px; }
+    .sb-row {
+      display: grid; grid-template-columns: 54px 1fr auto; gap: 15px; align-items: center;
+      padding: 11px 16px; border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(16, 19, 33, 0.5);
+      transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+    }
+    .sb-row:hover { transform: translateY(-2px); border-color: rgba(102, 191, 255, 0.4); background: rgba(20, 26, 46, 0.7); text-decoration: none; }
+    .sb-thumb { width: 54px; height: 54px; border-radius: 11px; object-fit: cover; background: rgba(255, 255, 255, 0.04); flex-shrink: 0; }
+    .sb-main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+    .sb-name { font-family: var(--font-display); font-size: 0.98rem; color: #f2f6ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 0.76rem; color: rgba(233, 240, 255, 0.5); min-width: 0; }
+    .sb-col { color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
+    .sb-parties { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-arrow { color: rgba(102, 191, 255, 0.8); margin: 0 1px; }
+    .sb-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
+    .sb-price { font-family: var(--font-display); font-size: 1.02rem; color: #66bfff; text-shadow: 0 0 14px rgba(102, 191, 255, 0.3); white-space: nowrap; }
+    .sb-time { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(233, 240, 255, 0.4); white-space: nowrap; }
+    .sb-empty { text-align: center; color: rgba(233, 240, 255, 0.55); padding: 40px 0; }
+    .sb-skel { height: 76px; border-radius: 15px; background: linear-gradient(100deg, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.03) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; border: none; }
+    @media screen and (max-width: 600px) {
+      .sb-row { grid-template-columns: 46px 1fr auto; gap: 11px; padding: 10px 12px; }
+      .sb-thumb { width: 46px; height: 46px; }
+      .sb-name { font-size: 0.9rem; }
+      .sb-meta { font-size: 0.72rem; gap: 2px 8px; }
+      .sb-col { max-width: 150px; }
+      .sb-price { font-size: 0.94rem; }
+    }
+    @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
+
     @media (prefers-reduced-motion: reduce) { .hero-visual::before { animation: none; } }
   </style>
 </head>
@@ -2472,6 +2527,7 @@ body::after {
       <a href="#artist" data-nav="artist">Artist</a>
       <a href="#collections" data-nav="collections">Collections</a>
       <a href="#leaderboard" data-nav="leaderboard">Leaderboard</a>
+      <a href="#salesbot" data-nav="salesbot">Sales Bot</a>
     </div>
     <div class="nav-social">
       <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" aria-label="X">
@@ -2636,6 +2692,24 @@ body::after {
         </a>
           </div></div>
         </div>
+      </div>
+    </section>
+
+    <section class="section reveal hidden-view" id="salesbot" data-view="salesbot">
+      <div class="section-head">
+        <span class="eyebrow"><span class="sb-live"></span> Live feed</span>
+        <h2 class="section-title">Sales Bot</h2>
+        <p class="section-sub">The latest sales across every Cryptonauts collection, pulled live from crypto.com — newest first.</p>
+      </div>
+      <div class="sb-wrap">
+        <div class="sb-bar">
+          <span class="sb-count" id="sbCount"></span>
+          <button class="sb-refresh" id="sbRefresh" type="button" aria-label="Refresh sales">
+            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
+            Refresh
+          </button>
+        </div>
+        <div id="salesFeed" class="sb-feed"></div>
       </div>
     </section>
   </main>
@@ -2905,12 +2979,17 @@ body::after {
     }
 
     // Vues séparées : une seule section affichée à la fois (Home / Collections / Stats / Leaderboard / Artist / collection).
-    const VIEWS = ['home', 'collections', 'leaderboard', 'artist'];
+    const VIEWS = ['home', 'collections', 'leaderboard', 'artist', 'salesbot'];
     let spotlightLoaded = false;
     let collectionsAnimated = false;
     function syncNav(name) {
       document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
-        a.classList.toggle('is-active', a.dataset.nav === name);
+        const on = a.dataset.nav === name;
+        a.classList.toggle('is-active', on);
+        // Sur mobile (nav défilante), amène l'onglet actif dans le champ de vision.
+        if (on && window.matchMedia('(max-width: 600px)').matches) {
+          try { a.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) { }
+        }
       });
     }
     function showView(name) {
@@ -2929,6 +3008,96 @@ body::after {
       if (name === 'collections' && !collectionsAnimated) {
         collectionsAnimated = true;
         loadGalleryBanners();
+      }
+      if (name === 'salesbot' && !salesLoaded) { salesLoaded = true; loadSales(); }
+    }
+
+    // ── Sales Bot : flux des dernières ventes (events « transferred » avec prix) ──
+    // Une vente = un transfert de propriété avec un montant > 0 (vendeur → acheteur).
+    let salesLoaded = false;
+    const SALES_GQL_Q = 'query($collectionId:ID!,$first:Int!,$naturesIn:[String!]){public{collection(id:$collectionId){eventHistory(first:$first,naturesIn:$naturesIn){edges{node{id asset{id name cover{url}} user{username displayName} toUser{username displayName} listing{currency salePriceDecimalUSD} nature amountDecimal createdAt}}}}}}';
+
+    function sbTimeAgo(iso) {
+      const t = new Date(iso).getTime();
+      if (!t) return '';
+      const s = Math.max(0, (Date.now() - t) / 1000);
+      if (s < 60) return 'just now';
+      const m = s / 60; if (m < 60) return Math.floor(m) + 'm ago';
+      const h = m / 60; if (h < 24) return Math.floor(h) + 'h ago';
+      const d = h / 24; if (d < 30) return Math.floor(d) + 'd ago';
+      const mo = d / 30; if (mo < 12) return Math.floor(mo) + 'mo ago';
+      return Math.floor(d / 365) + 'y ago';
+    }
+    function sbPrice(amt, cur, usd) {
+      let n = parseFloat(amt);
+      if (!(n > 0)) n = parseFloat(usd);
+      if (!(n > 0)) return '';
+      const v = Number.isInteger(n) ? n.toLocaleString('en-US') : n.toFixed(2);
+      return (cur && cur !== 'USD') ? (v + ' ' + cur) : ('$' + v);
+    }
+    function sbUser(u) {
+      const name = u && (u.displayName || u.username);
+      return name ? String(name).trim() : '—';
+    }
+
+    async function loadSales() {
+      const feed = document.getElementById('salesFeed');
+      const countEl = document.getElementById('sbCount');
+      if (!feed) return;
+      feed.innerHTML = '<div class="sb-row sb-skel"></div>'.repeat(8);
+      if (countEl) countEl.textContent = 'Loading…';
+      const cols = (typeof collectionsData !== 'undefined' ? collectionsData : []).map(c => {
+        const meta = COLLECTION_META[c.title] || {};
+        return { title: c.title, id: meta.id, image: c.image };
+      }).filter(c => c.id);
+      try {
+        const results = await Promise.all(cols.map(c =>
+          fetch(NFT_GQL, {
+            method: 'POST', headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ variables: { collectionId: c.id, first: 12, naturesIn: ['transferred'] }, query: SALES_GQL_Q })
+          })
+            .then(r => r.json())
+            .then(j => ({ c, edges: ((((j || {}).data || {}).public || {}).collection || {}).eventHistory ? j.data.public.collection.eventHistory.edges : [] }))
+            .catch(() => ({ c, edges: [] }))
+        ));
+        const sales = [];
+        results.forEach(({ c, edges }) => {
+          (edges || []).forEach(e => {
+            const n = e && e.node; if (!n) return;
+            const amt = parseFloat(n.amountDecimal);
+            const usd = parseFloat(n.listing && n.listing.salePriceDecimalUSD);
+            if (!(amt > 0) && !(usd > 0)) return;
+            sales.push({
+              col: c.title, colImg: c.image,
+              assetId: n.asset && n.asset.id,
+              asset: (n.asset && n.asset.name) || '',
+              cover: (n.asset && n.asset.cover && n.asset.cover.url) || '',
+              price: sbPrice(n.amountDecimal, n.listing && n.listing.currency, n.listing && n.listing.salePriceDecimalUSD),
+              seller: sbUser(n.user), buyer: sbUser(n.toUser),
+              t: n.createdAt, ts: new Date(n.createdAt).getTime() || 0
+            });
+          });
+        });
+        sales.sort((a, b) => b.ts - a.ts);
+        const top = sales.slice(0, 50);
+        if (!top.length) { feed.innerHTML = '<p class="sb-empty">No recent sales found.</p>'; if (countEl) countEl.textContent = ''; return; }
+        feed.innerHTML = top.map(s => {
+          const thumb = s.cover ? (s.cover + '?d=lg-logo') : s.colImg;
+          const link = s.assetId ? ('https://crypto.com/nft/collectible/' + s.assetId) : 'https://crypto.com/nft';
+          return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
+            + '<img class="sb-thumb" src="' + escHtml(thumb) + '" alt="" loading="lazy" decoding="async">'
+            + '<div class="sb-main">'
+            + '<span class="sb-name">' + escHtml(s.asset || s.col) + '</span>'
+            + '<span class="sb-meta"><span class="sb-col">' + escHtml(s.col) + '</span>'
+            + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span></span>'
+            + '</div>'
+            + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span>'
+            + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
+        }).join('');
+        if (countEl) countEl.textContent = top.length + ' recent sales';
+      } catch (e) {
+        feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>';
+        if (countEl) countEl.textContent = '';
       }
     }
 
@@ -3269,6 +3438,8 @@ body::after {
         if (cvBack) cvBack.addEventListener('click', () => { location.hash = '#collections'; });
         const cvMoreBtn = document.getElementById('cvMore');
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
+        const sbRefreshBtn = document.getElementById('sbRefresh');
+        if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', loadSales);
         window.addEventListener('hashchange', handleRoute);
         handleRoute();
 
