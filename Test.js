@@ -2544,7 +2544,7 @@ body::after {
     .cv-banner {
       position: relative;
       width: 100%;
-      height: clamp(180px, 32vw, 360px);
+      height: clamp(230px, 34vw, 380px);
       overflow: hidden;
       background: linear-gradient(135deg, #0b1030, #161526);
     }
@@ -2568,16 +2568,24 @@ body::after {
     .cv-back:active { transform: scale(0.97); }
 
     .cv-inner { max-width: 1080px; margin: 0 auto; padding: 0 20px 40px; }
-    .cv-head { display: flex; gap: 22px; align-items: flex-end; margin-top: -70px; position: relative; z-index: 1; margin-bottom: 26px; }
+    /* Titre centré horizontalement ET verticalement dans la bannière */
+    .cv-title {
+      position: absolute; z-index: 2; inset: 0;
+      display: flex; align-items: center; justify-content: center; text-align: center;
+      margin: 0; padding: 46px 26px 26px;
+      font-size: clamp(1.7rem, 4.6vw, 3rem); line-height: 1.1;
+      text-shadow: 0 3px 26px rgba(0, 0, 0, 0.9);
+    }
+    /* Logo à cheval : moitié dans la bannière, moitié en dessous, à droite */
     .cv-logo {
-      width: 132px; height: 132px; border-radius: 20px; object-fit: cover; flex-shrink: 0;
+      position: absolute; z-index: 3; right: 7%; bottom: 0; transform: translateY(50%);
+      width: 128px; height: 128px; border-radius: 20px; object-fit: cover;
       border: 1px solid rgba(102, 191, 255, 0.3);
-      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(102, 191, 255, 0.15);
+      box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(102, 191, 255, 0.18);
       background: #0b1030;
     }
-    .cv-headinfo { flex: 1; min-width: 0; padding-bottom: 4px; }
-    .cv-release { font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
-    .cv-title { font-size: clamp(1.6rem, 4vw, 2.6rem); margin: 6px 0 8px; line-height: 1.05; }
+    .cv-meta { padding: 22px 184px 0 0; min-height: 66px; }
+    .cv-release { display: block; margin-bottom: 8px; font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
     .cv-sold {
       display: inline-block; padding: 4px 12px; border-radius: 999px;
       border: 1px solid rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.06);
@@ -2610,9 +2618,9 @@ body::after {
     #cvList { padding: 0; }
 
     @media screen and (max-width: 600px) {
-      .cv-head { flex-direction: column; align-items: center; text-align: center; gap: 12px; margin-top: -56px; }
-      .cv-logo { width: 104px; height: 104px; }
-      .cv-desc { margin-left: auto; margin-right: auto; }
+      .cv-title { padding: 40px 14px 18px; }
+      .cv-logo { width: 92px; height: 92px; right: 5%; border-radius: 16px; }
+      .cv-meta { padding: 18px 108px 0 0; min-height: 50px; }
       .cv-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
       #cvNfts { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
@@ -2648,6 +2656,57 @@ body::after {
       .spot-wall { gap: 12px; }
       .spot-row { gap: 12px; }
     }
+    /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
+    #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1080px; margin: 0 auto; }
+    .col-row {
+      position: relative; display: block; height: 132px;
+      border-radius: 16px; overflow: hidden; text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      background: linear-gradient(135deg, #0b1030, #161526);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+    }
+    .col-row:hover, .col-row:focus-visible {
+      border-color: rgba(102, 191, 255, 0.45);
+      box-shadow: 0 14px 34px rgba(102, 191, 255, 0.18);
+      outline: none;
+    }
+    .col-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.5; transition: transform 0.45s ease, opacity 0.3s ease; }
+    .col-row:hover .col-bg { transform: scale(1.05); opacity: 0.62; }
+    .col-grad { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3, 4, 10, 0.9) 0%, rgba(3, 4, 10, 0.5) 30%, rgba(3, 4, 10, 0.5) 70%, rgba(3, 4, 10, 0.9) 100%); }
+    .col-logo {
+      position: absolute; z-index: 2; left: 22px; top: 50%; transform: translateY(-50%);
+      width: 94px; height: 94px; border-radius: 15px; object-fit: cover;
+      border: 1px solid rgba(102, 191, 255, 0.32); box-shadow: 0 8px 22px rgba(0, 0, 0, 0.5);
+    }
+    .col-title-wrap {
+      position: absolute; z-index: 2; inset: 0; padding: 0 168px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 5px;
+    }
+    .col-title { margin: 0; font-size: clamp(1.05rem, 2.3vw, 1.55rem); line-height: 1.15; color: #fff; text-shadow: 0 2px 16px rgba(0, 0, 0, 0.85); }
+    .col-date { font-size: 0.68rem; letter-spacing: 0.13em; text-transform: uppercase; color: rgba(233, 240, 255, 0.7); }
+    .col-stats { position: absolute; z-index: 2; right: 22px; top: 50%; transform: translateY(-50%); display: flex; gap: 14px; }
+    .col-stat { text-align: center; }
+    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.3rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(102, 191, 255, 0.35); }
+    .col-stat .cl { display: block; margin-top: 4px; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .col-sold {
+      position: absolute; z-index: 3; top: 12px; right: 16px;
+      padding: 4px 9px; border-radius: 999px; background: rgba(3, 4, 10, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.25); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+      font-family: var(--font-body); font-size: 0.5rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: #fff;
+    }
+    @media (prefers-reduced-motion: reduce) { .col-row { animation: none; opacity: 1; translate: none; } }
+    @media screen and (max-width: 600px) {
+      .col-row { height: 104px; }
+      .col-logo { width: 66px; height: 66px; left: 12px; border-radius: 12px; }
+      .col-title-wrap { padding: 0 84px 0 88px; }
+      .col-title { font-size: 0.96rem; }
+      .col-date { font-size: 0.58rem; }
+      .col-stats { right: 12px; gap: 9px; }
+      .col-stat .cv { font-size: 1rem; }
+      .col-stat .cl { font-size: 0.47rem; }
+      .col-sold { top: 8px; right: 10px; font-size: 0.46rem; padding: 3px 7px; }
+    }
   </style>
 </head>
 <body>
@@ -2656,12 +2715,6 @@ body::after {
   </div>
 
   <div class="grain" aria-hidden="true"></div>
-
-  <div class="marquee" aria-hidden="true">
-    <div class="marquee-track">
-      <span>Cryptonauts Leaderboards</span><i class="sep"></i><span>Live on crypto.com</span><i class="sep"></i><span>Updated daily</span><i class="sep"></i><span>Eleven collections</span><i class="sep"></i><span>Cryptonauts Leaderboards</span><i class="sep"></i><span>Live on crypto.com</span><i class="sep"></i><span>Updated daily</span><i class="sep"></i><span>Eleven collections</span><i class="sep"></i>
-    </div>
-  </div>
 
   <nav class="navbar" id="navbar">
     <a href="#home" class="brand">Cryptonauts</a>
@@ -2675,7 +2728,6 @@ body::after {
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
     </div>
-    <span class="live-pill"><span class="live-dot"></span>Live</span>
   </nav>
 
   <header id="home" class="hero" data-view="home">
@@ -2842,19 +2894,17 @@ body::after {
         <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M19 12H6M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         All collections
       </button>
+      <h1 class="cv-title"></h1>
+      <img class="cv-logo" src="" alt="">
     </div>
     <div class="cv-inner">
-      <div class="cv-head">
-        <img class="cv-logo" src="" alt="">
-        <div class="cv-headinfo">
-          <span class="cv-release"></span>
-          <h1 class="cv-title"></h1>
-          <span class="cv-sold" hidden>Sold out</span>
-          <p class="cv-desc"></p>
-          <a class="cv-link btn btn-primary" target="_blank" rel="noopener">View on crypto.com
-            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </div>
+      <div class="cv-meta">
+        <span class="cv-release"></span>
+        <span class="cv-sold" hidden>Sold out</span>
+        <p class="cv-desc"></p>
+        <a class="cv-link btn btn-primary" target="_blank" rel="noopener">View on crypto.com
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
       </div>
       <div class="cv-stats">
         <div class="cv-stat"><span class="v cv-holders">0</span><span class="l">Holders</span></div>
@@ -2987,46 +3037,38 @@ body::after {
     }
 
     // Carte de collection (galerie). Le détail des propriétaires s'ouvre dans une modale.
+    // Ligne-bannière d'une collection : fond = bannière (chargée en direct), logo à gauche,
+    // titre centré, stats à droite. Tout le bloc est un lien vers la page de la collection.
     function renderCollection(collection, index) {
       try {
-        const div = document.createElement('div');
-        div.className = 'collection';
-        div.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
-        const total = collection.owners.reduce((sum, o) => sum + (o.count || 0), 0);
         const meta = COLLECTION_META[collection.title] || {};
-        const interactive = collection.owners.length > 0;
-        if (interactive) {
-          div.setAttribute('role', 'button');
-          div.setAttribute('tabindex', '0');
-          div.setAttribute('aria-label', \`View \${collection.title} holders\`);
-        }
-        div.innerHTML = \`
-          <div class="collection-header">
-            <div class="collection-cover">
-              <img src="\${collection.image}" alt="\${collection.alt}" loading="lazy" decoding="async">
-              \${meta.soldOut ? '<span class="sold-badge">Sold out</span>' : ''}
-              \${interactive ? '<span class="cover-cta">VIEW HOLDERS</span>' : ''}
-            </div>
-            <div class="collection-body">
-              <h2>\${collection.title}</h2>
-              \${COLLECTION_RELEASE[collection.title] ? \`<span class="collection-date">\${COLLECTION_RELEASE[collection.title]}</span>\` : ''}
-              <div class="collection-stats">
-                <div class="stat-chip"><span class="v" data-count="\${collection.ownersCount || 0}">0</span><span class="l">Holders</span></div>
-                <div class="stat-chip"><span class="v" data-count="\${total}">0</span><span class="l">Cryptonauts</span></div>
-              </div>
-            </div>
+        const st = COLLECTION_STATS[collection.title] || {};
+        const total = collection.owners.reduce((sum, o) => sum + (o.count || 0), 0);
+        const items = st.supply || total;
+        const rel = COLLECTION_RELEASE[collection.title] || '';
+        const a = document.createElement('a');
+        a.className = 'col-row';
+        a.href = '#c/' + index;
+        a.setAttribute('aria-label', 'View ' + collection.title);
+        a.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
+        a.innerHTML = \`
+          <div class="col-bg" data-cid="\${meta.id || ''}"></div>
+          <div class="col-grad"></div>
+          \${meta.soldOut ? '<span class="col-sold">Sold out</span>' : ''}
+          <img class="col-logo" src="\${collection.image}" alt="\${collection.alt}" loading="lazy" decoding="async">
+          <div class="col-title-wrap">
+            <h3 class="col-title">\${collection.title}</h3>
+            \${rel ? \`<span class="col-date">\${rel}</span>\` : ''}
+          </div>
+          <div class="col-stats">
+            <div class="col-stat"><span class="cv">\${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
+            <div class="col-stat"><span class="cv">\${(items || 0).toLocaleString('fr-FR')}</span><span class="cl">Items</span></div>
           </div>
         \`;
-        if (interactive) {
-          div.addEventListener('click', () => { location.hash = '#c/' + index; });
-          div.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); location.hash = '#c/' + index; }
-          });
-        }
-        return div;
+        return a;
       } catch (error) {
         console.error(\`Error rendering collection \${collection.title}:\`, error);
-        return document.createElement('div');
+        return document.createElement('a');
       }
     }
 
@@ -3132,8 +3174,17 @@ body::after {
       if (name === 'home' && !spotlightLoaded) { spotlightLoaded = true; loadSpotlight(); }
       if (name === 'collections' && !collectionsAnimated) {
         collectionsAnimated = true;
-        document.querySelectorAll('.stat-chip .v[data-count]').forEach(c => animateCount(c, parseInt(c.dataset.count, 10) || 0));
+        loadGalleryBanners();
       }
+    }
+
+    // Charge les bannières de fond des lignes de la galerie (en direct, en cache).
+    function loadGalleryBanners() {
+      document.querySelectorAll('.col-bg[data-cid]').forEach(el => {
+        const cid = el.dataset.cid;
+        if (!cid) return;
+        fetchBanner(cid).then(b => { if (b.banner) el.style.backgroundImage = 'url("' + b.banner + '")'; });
+      });
     }
 
     // Spotlight : mur d'œuvres en mouvement (chargé en direct depuis crypto.com).
