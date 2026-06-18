@@ -2289,6 +2289,29 @@ body::after {
     .links-group { margin-bottom: 24px; }
     .links-group:last-child { margin-bottom: 0; }
     .links-h { font-family: var(--font-body); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 0 12px; }
+
+    /* ── Interview : article complet (onglet Artist) ── */
+    .iv-article { max-width: 760px; margin: 0 auto; text-align: left; }
+    .iv-article p { color: var(--muted); line-height: 1.78; margin: 0 0 4px; font-size: 1.02rem; text-transform: none; }
+    .iv-cover { margin: 0 0 20px; border-radius: 16px; overflow: hidden; border: 1px solid var(--hairline); }
+    .iv-cover img { width: 100%; display: block; }
+    .iv-article p.iv-kicker { font-family: var(--font-body); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 0 0 14px; }
+    .iv-article p.iv-lede { color: #eaf2ff; font-size: 1.12rem; line-height: 1.6; margin: 0 0 26px; padding-bottom: 22px; border-bottom: 1px solid var(--hairline); }
+    .iv-q { font-family: var(--font-display); font-size: 1.05rem; color: #fff; margin: 26px 0 8px; line-height: 1.3; text-transform: none; }
+    .iv-feature { margin: 30px 0; }
+    .iv-feature img { width: 100%; display: block; border-radius: 16px; border: 1px solid var(--hairline); }
+    .iv-feature figcaption { font-size: 0.82rem; color: var(--muted); text-align: center; margin-top: 10px; }
+    .iv-feature figcaption em { color: #cfe9ff; }
+    .iv-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 30px 0 0; }
+    .iv-gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 1px solid var(--hairline); }
+    .iv-article p.iv-caption { font-size: 0.82rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
+    .iv-article p.iv-source { margin: 34px 0 0; padding-top: 18px; border-top: 1px solid var(--hairline); font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+    .iv-source a { color: var(--primary-color); }
+    @media (max-width: 600px) {
+      .iv-gallery { grid-template-columns: 1fr 1fr; }
+      .iv-article p.iv-lede { font-size: 1.02rem; }
+    }
+
     @media (prefers-reduced-motion: reduce) { .tab-panel.is-active { animation: none; } }
 
     /* Stats : nom de collection + année de sortie */
@@ -2676,14 +2699,75 @@ body::after {
           </div>
         </div>
         <div class="tab-panel" data-panel="interview">
-          <div class="tab-text">
-            <blockquote class="iv">“Art has to be honest. Really honest. I like art that offers an alternative way of seeing things.”</blockquote>
-            <blockquote class="iv">“I like the freedom NFTs give artists — the opportunity to work and live off your art without depending on managers.”</blockquote>
-            <blockquote class="iv">“Message, no doubt. The technique seems totally secondary.”</blockquote>
-            <a class="btn btn-ghost" href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">Read the full interview
-              <svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </a>
-          </div>
+          <article class="iv-article">
+            <figure class="iv-cover">
+              <img src="assets/interview/cover.jpg" alt="Fran Rodríguez, photographed for Crypto.com NFT" loading="lazy" decoding="async">
+            </figure>
+            <p class="iv-kicker">Crypto.com NFT · Creator Community · 17 Dec 2021 · 7 min read</p>
+            <p class="iv-lede">“Creator Community” highlights some of the most interesting creators with collectibles available on the Crypto.com NFT platform.</p>
+
+            <h4 class="iv-q">Where are you from, and what was your upbringing like?</h4>
+            <p>I was born in a small industrial town in northern Spain, then I went to live in Madrid for 10 years. Now, I live in Barcelona. I grew up in a very normal, working-class family, but there were always books and music — and I was brought up in a very patient and sensitive way. I guess that influenced me to dedicate myself to something related to art.</p>
+
+            <h4 class="iv-q">When did you first know you wanted to be a professional artist?</h4>
+            <p>I always wanted to dedicate myself to something related to art and creativity, since what I liked to do most was to draw and tell stories. From a very young age, I was clear about my inability to dedicate myself to anything else. I always dreamed of being able to live without having to get up early — without having to do things out of obligation. Now I can say that I have achieved it. That makes me very happy.</p>
+
+            <h4 class="iv-q">Are you self-taught, or did you receive any training?</h4>
+            <p>I studied graphic design in college and then I did several online and classroom courses. But I must say that almost everything I know, I know thanks to spending hours and hours of sleepless nights — for several years — reading in forums, watching tutorials and asking people who knew more than me. I strongly believe in self-learning. On the internet, we have access to all human knowledge for free. It’s just a matter of getting started.</p>
+
+            <figure class="iv-feature">
+              <img src="assets/interview/clouds.jpg" alt="Surreal collage of a silhouette before clouds and stars, by Fran Rodríguez" loading="lazy" decoding="async">
+              <figcaption>Fran works as <em>lacabezaenlasnubes</em> — “head in the clouds.”</figcaption>
+            </figure>
+
+            <h4 class="iv-q">Tell us about your professional experience.</h4>
+            <p>I started working in advertising and marketing agencies as an art director in Madrid. After 10 years, I had a small existential crisis and decided I didn’t want to continue working for brands. It was a revelation. I quit my job and started working as a freelancer. The beginning was hard, but in a few years I managed to make a name for myself and projects started to come out. I have been living exclusively from my artistic work for 10 years. I accept some commissions, from time to time, because I love to design album covers — but I live from my personal work.</p>
+
+            <h4 class="iv-q">How were you monetising your art before NFTs?</h4>
+            <p>I was selling prints of my work. I also sold the rights to some of my work to be used in magazines or as book or album covers. I live on passive income that my work generates around the world.</p>
+
+            <h4 class="iv-q">How did you get into NFTs?</h4>
+            <p>I saw several artist friends starting to talk about NFTs on Instagram in February and March this year. I asked them and they told me. I spent several days studying and decided to give it a try. It’s the best decision I’ve ever made in my life.</p>
+
+            <h4 class="iv-q">What do you like most about working in the NFT space?</h4>
+            <p>I like the freedom it gives artists — the opportunity to work and live off their artistic work without having to depend on other artists or brands or managers; I believe in decentralisation. I didn’t know anything about crypto seven months ago, but now I can say that these months have been some of the most exciting and interesting of my life. I have learned a lot and met some brilliant people.</p>
+
+            <h4 class="iv-q">Do you collect NFTs yourself?</h4>
+            <p>Yes, I am starting a modest collection… I love being able to support artists I connect with.</p>
+
+            <div class="iv-gallery">
+              <img src="assets/interview/art-1.jpg" alt="Two figures on an orange dune beneath a floating shape, by Fran Rodríguez" loading="lazy" decoding="async">
+              <img src="assets/interview/art-2.jpg" alt="A levitating astronaut over a dune at sunset, by Fran Rodríguez" loading="lazy" decoding="async">
+              <img src="assets/interview/art-3.jpg" alt="Arches opening onto desert dunes at dusk, by Fran Rodríguez" loading="lazy" decoding="async">
+            </div>
+            <p class="iv-caption">Stills from “Postcards From a Dream” and “Quantum Landscapes” by Fran Rodríguez.</p>
+
+            <h4 class="iv-q">Tell us about the NFTs in your first collection.</h4>
+            <p>As the title indicates, they are postcards sent from dreams. They reflect various recurring dreams and visions that I have had, both asleep and awake — in a meditative and absorbed state. I would like those who see, and hopefully buy, the pieces to be transported to mental places where they are happy — and for them to look at reality with another perspective.</p>
+
+            <h4 class="iv-q">What do you consider “good” art?</h4>
+            <p>For me, art has to be honest. Really honest. It must not respond to any practical or commercial purpose, nor be affected by fashions or trends. I like art that offers me an alternative way of seeing things and living — art that creates, somehow, a parallel universe.</p>
+
+            <h4 class="iv-q">What’s your favourite artistic movement?</h4>
+            <p>Surrealism and, in general, any movement or artist who tries to reflect in their work their mind — their way of seeing and imagining the world. In short, all psychedelic art.</p>
+
+            <h4 class="iv-q">What’s more important: technique or message?</h4>
+            <p>Message, no doubt. The technique, the way something is made, seems to me totally secondary. The emotion it conveys, the impact and the story it wants to tell is what is important.</p>
+
+            <h4 class="iv-q">What do you try to say with your art?</h4>
+            <p>I try to transmit curiosity, amazement and fascination for nature — for the cosmos. That’s all that matters to me. I want people who see my work to feel a part of the magic I feel when I contemplate a sky or a mountain.</p>
+
+            <h4 class="iv-q">What are the common themes of your work?</h4>
+            <p>Outer space, nature and the human figure facing the immensity of the cosmos. Mysterious shapes, geometries and people with their backs turned.</p>
+
+            <h4 class="iv-q">What inspires you, in general?</h4>
+            <p>Nature. The universe. Everything that is not me inspires me — how the cosmos affects my mind, how it transforms it. I love the outdoors. Hiking. Music is a huge source of inspiration for me. I listen to music all the time, about eight or nine hours a day — in my studio, walking, cooking…</p>
+
+            <h4 class="iv-q">Who is your audience?</h4>
+            <p>Any person who is self-absorbed, daydreaming all the time. Space lovers, psychonauts seeking altered states of consciousness and, in general, minds looking for something beyond the ordinary.</p>
+
+            <p class="iv-source">Source — <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">“Creator Community: Fran Rodríguez”</a>, Crypto.com NFT (Medium), 17 December 2021. Interview &amp; artwork © Fran Rodríguez.</p>
+          </article>
         </div>
         <div class="tab-panel" data-panel="universe">
           <div class="tab-text">
