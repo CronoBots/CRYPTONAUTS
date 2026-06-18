@@ -2725,7 +2725,7 @@ body::after {
       <div class="section-head">
         <span class="eyebrow"><span class="sb-live"></span> Live feed</span>
         <h2 class="section-title">Sales Bot</h2>
-        <p class="section-sub">The latest sales across every Cryptonauts collection, pulled live from crypto.com — newest first.</p>
+        <p class="section-sub">The latest sales and mints across every Cryptonauts collection — on crypto.com and Crovia — newest first.</p>
       </div>
       <div class="sb-wrap">
         <div class="sb-bar">
@@ -3072,6 +3072,41 @@ body::after {
       const name = u && (u.displayName || u.username);
       return name ? String(name).trim() : '—';
     }
+    // Adresse de portefeuille abrégée : 0x1234…abcd
+    function sbShort(a) { return a ? (a.slice(0, 6) + '…' + a.slice(-4)) : '—'; }
+
+    // Mints on-chain d'une collection Crovia/Cronos (Quantum Cryptonauts V3),
+    // comptés comme des ventes (primary sales). Prix natif en CRO converti en USD
+    // (taux live CoinGecko), repli en CRO si le taux est indisponible.
+    const V3_SALES = [{"t":96,"b":"0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed","cro":400,"ts":1781738126},{"t":95,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781735977},{"t":94,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":1500,"ts":1781734045},{"t":93,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":1500,"ts":1781734045},{"t":92,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":1500,"ts":1781734045},{"t":91,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":1500,"ts":1781734045},{"t":90,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":1500,"ts":1781734045},{"t":89,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781725971},{"t":88,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781725971},{"t":87,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781725971},{"t":86,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781725971},{"t":85,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781725971},{"t":84,"b":"0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2","cro":300,"ts":1781724908},{"t":83,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781724535},{"t":82,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781724535},{"t":81,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781724535},{"t":80,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781724535},{"t":79,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":1500,"ts":1781724535},{"t":78,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":1200,"ts":1781721201},{"t":77,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":1200,"ts":1781721201},{"t":76,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":1200,"ts":1781721201},{"t":75,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":1200,"ts":1781721201},{"t":74,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":73,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":72,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":71,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":70,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":69,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":68,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":67,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":66,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":65,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":3000,"ts":1781720425},{"t":64,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":63,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":62,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":61,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":60,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":59,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":58,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":57,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":56,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":55,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781719537},{"t":54,"b":"0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2","cro":300,"ts":1781719477},{"t":53,"b":"0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2","cro":300,"ts":1781719412},{"t":52,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781717875},{"t":51,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":50,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":49,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":48,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":47,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":46,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":45,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":44,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":43,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":42,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":3000,"ts":1781716746},{"t":41,"b":"0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed","cro":400,"ts":1781715419},{"t":40,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":1500,"ts":1781715084},{"t":39,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":1500,"ts":1781715084},{"t":38,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":1500,"ts":1781715084},{"t":37,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":1500,"ts":1781715084},{"t":36,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":1500,"ts":1781715084},{"t":35,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781710138},{"t":34,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":600,"ts":1781710049},{"t":33,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":600,"ts":1781710049},{"t":32,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":600,"ts":1781709592},{"t":31,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":600,"ts":1781709592},{"t":30,"b":"0x965a73574acb12b9b48f3ff43415eea791fd70bd","cro":300,"ts":1781703575},{"t":29,"b":"0x7886acebc8401bd6b1cf397d84b85d01416e4c06","cro":900,"ts":1781703048},{"t":28,"b":"0x7886acebc8401bd6b1cf397d84b85d01416e4c06","cro":900,"ts":1781703048},{"t":27,"b":"0x7886acebc8401bd6b1cf397d84b85d01416e4c06","cro":900,"ts":1781703048},{"t":26,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":25,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":24,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":23,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":22,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":21,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":20,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":19,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":18,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":17,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":16,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":15,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":14,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":13,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":4200,"ts":1781702074},{"t":12,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":600,"ts":1781702059},{"t":11,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":600,"ts":1781702059},{"t":10,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":900,"ts":1781701849},{"t":9,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":900,"ts":1781701849},{"t":8,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":900,"ts":1781701849},{"t":7,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":600,"ts":1781701623},{"t":6,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":600,"ts":1781701623},{"t":5,"b":"0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06","cro":800,"ts":1781701443},{"t":4,"b":"0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06","cro":800,"ts":1781701443},{"t":3,"b":"0x478ffba8ea4945fb9327812231dfb1c6cafd2c49","cro":600,"ts":1781701242},{"t":2,"b":"0x478ffba8ea4945fb9327812231dfb1c6cafd2c49","cro":600,"ts":1781701242},{"t":1,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781701211}];
+
+    async function appendExternalSales(sales) {
+      if (typeof V3_SALES === 'undefined' || !V3_SALES.length) return;
+      const meta = (typeof COLLECTION_META !== 'undefined' && COLLECTION_META['Quantum Cryptonauts V3']) || {};
+      const assets = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[meta.contract]) || [];
+      const byId = {}; assets.forEach(a => { byId[a.i] = a; });
+      let rate = 0;
+      try {
+        const ctrl = new AbortController();
+        const to = setTimeout(() => ctrl.abort(), 4000);
+        const cg = await (await fetch('https://api.coingecko.com/api/v3/simple/price?ids=crypto-com-chain&vs_currencies=usd', { signal: ctrl.signal })).json();
+        clearTimeout(to);
+        rate = (cg && cg['crypto-com-chain'] && cg['crypto-com-chain'].usd) || 0;
+      } catch (e) { }
+      V3_SALES.slice(0, 12).forEach(m => {
+        const a = byId[m.t] || {};
+        const thumb = a.c ? ('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=120&h=120&fit=cover&q=70&output=jpg') : 'assets/v3-logo.jpg';
+        sales.push({
+          col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg',
+          thumb: thumb,
+          link: meta.croviaUrl || 'https://crovia.app',
+          asset: a.n || ('#' + m.t),
+          price: rate ? sbPrice(Math.round(m.cro * rate), 'USD') : sbPrice(m.cro, 'CRO'),
+          seller: 'Mint', buyer: sbShort(m.b),
+          t: new Date(m.ts * 1000).toISOString(), ts: m.ts * 1000
+        });
+      });
+    }
 
     async function loadSales() {
       const feed = document.getElementById('salesFeed');
@@ -3100,23 +3135,26 @@ body::after {
             const amt = parseFloat(n.amountDecimal);
             const usd = parseFloat(n.listing && n.listing.salePriceDecimalUSD);
             if (!(amt > 0) && !(usd > 0)) return;
+            const cover = (n.asset && n.asset.cover && n.asset.cover.url) || '';
             sales.push({
               col: c.title, colImg: c.image,
-              assetId: n.asset && n.asset.id,
+              thumb: cover ? (cover + '?d=lg-logo') : c.image,
+              link: (n.asset && n.asset.id) ? ('https://crypto.com/nft/collectible/' + n.asset.id) : 'https://crypto.com/nft',
               asset: (n.asset && n.asset.name) || '',
-              cover: (n.asset && n.asset.cover && n.asset.cover.url) || '',
               price: sbPrice(n.amountDecimal, n.listing && n.listing.currency, n.listing && n.listing.salePriceDecimalUSD),
               seller: sbUser(n.user), buyer: sbUser(n.toUser),
               t: n.createdAt, ts: new Date(n.createdAt).getTime() || 0
             });
           });
         });
+        // Collections externes (Crovia/Cronos) : injecte les mints comme des ventes.
+        await appendExternalSales(sales);
         sales.sort((a, b) => b.ts - a.ts);
         const top = sales.slice(0, 50);
         if (!top.length) { feed.innerHTML = '<p class="sb-empty">No recent sales found.</p>'; if (countEl) countEl.textContent = ''; return; }
         feed.innerHTML = top.map(s => {
-          const thumb = s.cover ? (s.cover + '?d=lg-logo') : s.colImg;
-          const link = s.assetId ? ('https://crypto.com/nft/collectible/' + s.assetId) : 'https://crypto.com/nft';
+          const thumb = s.thumb || s.colImg;
+          const link = s.link || 'https://crypto.com/nft';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
             + '<img class="sb-thumb" src="' + escHtml(thumb) + '" alt="" loading="lazy" decoding="async">'
             + '<div class="sb-main">'
