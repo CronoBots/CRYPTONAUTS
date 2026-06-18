@@ -2347,8 +2347,11 @@ body::after {
       color: var(--muted);
     }
     @media screen and (max-width: 600px) {
-      .saga-stat { min-width: calc(50% - 7px); padding: 14px 8px; }
+      .saga-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+      .saga-stat { min-width: 0; padding: 14px 8px; }
       .saga-stat .v { font-size: 1.4rem; }
+      .tab-bar { gap: 6px; }
+      .tab-btn { padding: 9px 13px; font-size: 0.72rem; letter-spacing: 0.04em; }
     }
 
     /* ── Séparation nette des sections ── */
@@ -3108,6 +3111,7 @@ body::after {
     // Vues séparées : une seule section affichée à la fois (Home / Collections / Stats / Leaderboard / Artist / collection).
     const VIEWS = ['home', 'collections', 'stats', 'leaderboard', 'artist'];
     let spotlightLoaded = false;
+    let collectionsAnimated = false;
     function syncNav(name) {
       document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
         a.classList.toggle('is-active', a.dataset.nav === name);
@@ -3126,6 +3130,10 @@ body::after {
       syncNav(name === 'collection' ? 'collections' : name);
       window.scrollTo(0, 0);
       if (name === 'home' && !spotlightLoaded) { spotlightLoaded = true; loadSpotlight(); }
+      if (name === 'collections' && !collectionsAnimated) {
+        collectionsAnimated = true;
+        document.querySelectorAll('.stat-chip .v[data-count]').forEach(c => animateCount(c, parseInt(c.dataset.count, 10) || 0));
+      }
     }
 
     // Spotlight : mur d'œuvres en mouvement (chargé en direct depuis crypto.com).
@@ -3502,21 +3510,7 @@ body::after {
           });
         });
 
-        // Compteurs animés des cartes (déclenchés à l'entrée dans le viewport)
-        const chipCounters = document.querySelectorAll('.stat-chip .v[data-count]');
-        if ('IntersectionObserver' in window) {
-          const io = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-              if (entry.isIntersecting) {
-                animateCount(entry.target, parseInt(entry.target.dataset.count, 10) || 0);
-                io.unobserve(entry.target);
-              }
-            });
-          }, { threshold: 0.4 });
-          chipCounters.forEach(c => io.observe(c));
-        } else {
-          chipCounters.forEach(c => { c.textContent = (parseInt(c.dataset.count, 10) || 0).toLocaleString('fr-FR'); });
-        }
+        // Compteurs des cartes : animés en bloc à la 1re ouverture de la vue Collections (cf. showView).
 
         // Fermeture de la modale détaillée d'une collection
         const collectionModal = document.getElementById('collectionModal');
