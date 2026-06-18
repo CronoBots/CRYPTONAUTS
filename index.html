@@ -2290,26 +2290,65 @@ body::after {
     .links-group:last-child { margin-bottom: 0; }
     .links-h { font-family: var(--font-body); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 0 12px; }
 
-    /* ── Interview : article complet (onglet Artist) ── */
-    .iv-article { max-width: 760px; margin: 0 auto; text-align: left; }
-    .iv-article p { color: var(--muted); line-height: 1.78; margin: 0 0 4px; font-size: 1.02rem; text-transform: none; }
-    .iv-cover { margin: 0 0 20px; border-radius: 16px; overflow: hidden; border: 1px solid var(--hairline); }
-    .iv-cover img { width: 100%; display: block; }
-    .iv-article p.iv-kicker { font-family: var(--font-body); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gold); margin: 0 0 14px; }
-    .iv-article p.iv-lede { color: #eaf2ff; font-size: 1.12rem; line-height: 1.6; margin: 0 0 26px; padding-bottom: 22px; border-bottom: 1px solid var(--hairline); }
-    .iv-q { font-family: var(--font-display); font-size: 1.05rem; color: #fff; margin: 26px 0 8px; line-height: 1.3; text-transform: none; }
-    .iv-feature { margin: 30px 0; }
-    .iv-feature img { width: 100%; display: block; border-radius: 16px; border: 1px solid var(--hairline); }
-    .iv-feature figcaption { font-size: 0.82rem; color: var(--muted); text-align: center; margin-top: 10px; }
+    /* ── Interview : pièce éditoriale premium (onglet Artist) ── */
+    .iv-article { max-width: 768px; margin: 0 auto; text-align: left; counter-reset: ivq; }
+    .iv-article p { color: var(--muted); line-height: 1.8; margin: 0; font-size: 1.04rem; text-transform: none; }
+    /* Reveal au scroll (observer dédié, indépendant de .reveal) */
+    .iv-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.3, 1); }
+    .iv-reveal.iv-in { opacity: 1; transform: none; }
+    /* Cover hero */
+    .iv-hero { position: relative; margin: 0 0 22px; border-radius: 18px; overflow: hidden; border: 1px solid var(--hairline); aspect-ratio: 16 / 9; }
+    .iv-hero img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.3, 1); }
+    .iv-hero:hover img { transform: scale(1.05); }
+    .iv-hero-grad { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(3,4,10,0.92) 0%, rgba(3,4,10,0.28) 46%, transparent 72%); }
+    .iv-hero-cap { position: absolute; left: 24px; right: 24px; bottom: 20px; display: flex; flex-direction: column; gap: 6px; }
+    .iv-hero-kick { font-family: var(--font-body); font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gold); }
+    .iv-hero-title { font-family: var(--font-display); font-size: clamp(1.6rem, 5vw, 2.6rem); color: #fff; line-height: 1; text-shadow: 0 2px 24px rgba(0,0,0,0.5); }
+    /* Meta chips */
+    .iv-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 22px; }
+    .iv-chip { font-family: var(--font-body); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(233,240,255,0.78); padding: 6px 12px; border-radius: 999px; border: 1px solid var(--hairline); background: rgba(255,255,255,0.03); }
+    /* Lede */
+    .iv-article p.iv-lede { color: #eaf2ff; font-size: 1.18rem; line-height: 1.62; margin: 0 0 8px; padding-bottom: 24px; border-bottom: 1px solid var(--hairline); }
+    /* Q&A numérotées */
+    .iv-qa { margin: 28px 0 0; }
+    .iv-q { position: relative; font-family: var(--font-display); font-size: 1.12rem; color: #fff; margin: 0 0 10px; line-height: 1.32; text-transform: none; padding-left: 52px; }
+    .iv-q::before { counter-increment: ivq; content: counter(ivq, decimal-leading-zero); position: absolute; left: 0; top: 1px; font-size: 0.92rem; letter-spacing: 0.06em; color: var(--primary-color); opacity: 0.9; }
+    .iv-q::after { content: ''; position: absolute; left: 2px; top: 22px; width: 30px; height: 1px; background: linear-gradient(90deg, var(--primary-color), transparent); }
+    .iv-a { padding-left: 52px; }
+    .iv-qa:first-of-type .iv-a::first-letter { font-family: var(--font-display); float: left; font-size: 3.1rem; line-height: 0.82; padding: 4px 10px 0 0; color: #fff; }
+    /* Pull-quotes */
+    .iv-pull { position: relative; margin: 36px 0; padding: 6px 0 6px 28px; border-left: 3px solid var(--primary-color); font-family: var(--font-display); font-size: clamp(1.3rem, 3.2vw, 1.7rem); line-height: 1.4; color: #eaf2ff; text-transform: none; }
+    .iv-pull::before { content: '“'; position: absolute; left: 12px; top: -8px; font-size: 2.4rem; color: rgba(102,191,255,0.4); }
+    /* Feature & galerie + zoom au survol */
+    .iv-shot { overflow: hidden; border-radius: 16px; border: 1px solid var(--hairline); cursor: zoom-in; background: rgba(20,22,38,0.5); }
+    .iv-shot img { width: 100%; display: block; transition: transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1); }
+    .iv-shot:hover img { transform: scale(1.07); }
+    .iv-feature { margin: 34px 0; }
+    .iv-feature figcaption { font-size: 0.82rem; color: var(--muted); text-align: center; margin-top: 11px; }
     .iv-feature figcaption em { color: #cfe9ff; }
-    .iv-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 30px 0 0; }
-    .iv-gallery img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 12px; border: 1px solid var(--hairline); }
-    .iv-article p.iv-caption { font-size: 0.82rem; color: var(--muted); text-align: center; margin: 10px 0 0; }
-    .iv-article p.iv-source { margin: 34px 0 0; padding-top: 18px; border-top: 1px solid var(--hairline); font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
+    .iv-gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 34px 0; }
+    .iv-gallery .iv-shot { border-radius: 12px; }
+    .iv-gallery .iv-shot img { aspect-ratio: 1; object-fit: cover; }
+    .iv-gallery figcaption.iv-caption { grid-column: 1 / -1; font-size: 0.82rem; color: var(--muted); text-align: center; margin: 2px 0 0; }
+    /* Source */
+    .iv-article p.iv-source { margin: 38px 0 0; padding-top: 20px; border-top: 1px solid var(--hairline); font-size: 0.84rem; color: var(--muted); line-height: 1.6; }
     .iv-source a { color: var(--primary-color); }
+    /* Lightbox */
+    .iv-lightbox { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(2,3,8,0.93); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); cursor: zoom-out; animation: ivLbIn 0.25s ease; }
+    .iv-lightbox[hidden] { display: none; }
+    .iv-lightbox img { max-width: min(94vw, 1100px); max-height: 90vh; border-radius: 12px; box-shadow: 0 30px 80px rgba(0,0,0,0.6); }
+    @keyframes ivLbIn { from { opacity: 0; } to { opacity: 1; } }
     @media (max-width: 600px) {
+      .iv-hero { aspect-ratio: 4 / 3; }
+      .iv-hero-cap { left: 16px; right: 16px; bottom: 14px; }
       .iv-gallery { grid-template-columns: 1fr 1fr; }
-      .iv-article p.iv-lede { font-size: 1.02rem; }
+      .iv-q, .iv-a { padding-left: 40px; }
+      .iv-article p.iv-lede { font-size: 1.06rem; }
+      .iv-pull { font-size: 1.2rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .iv-reveal { opacity: 1; transform: none; transition: none; }
+      .iv-hero img, .iv-shot img { transition: none; }
     }
 
     @media (prefers-reduced-motion: reduce) { .tab-panel.is-active { animation: none; } }
@@ -2700,74 +2739,122 @@ body::after {
         </div>
         <div class="tab-panel" data-panel="interview">
           <article class="iv-article">
-            <figure class="iv-cover">
+            <figure class="iv-hero iv-reveal">
               <img src="assets/interview/cover.jpg" alt="Fran Rodríguez, photographed for Crypto.com NFT" loading="lazy" decoding="async">
+              <div class="iv-hero-grad" aria-hidden="true"></div>
+              <figcaption class="iv-hero-cap">
+                <span class="iv-hero-kick">Crypto.com NFT · Creator Community</span>
+                <span class="iv-hero-title">The Interview</span>
+              </figcaption>
             </figure>
-            <p class="iv-kicker">Crypto.com NFT · Creator Community · 17 Dec 2021 · 7 min read</p>
-            <p class="iv-lede">“Creator Community” highlights some of the most interesting creators with collectibles available on the Crypto.com NFT platform.</p>
+            <div class="iv-meta iv-reveal">
+              <span class="iv-chip">17 Dec 2021</span>
+              <span class="iv-chip">7 min read</span>
+              <span class="iv-chip">Medium</span>
+            </div>
+            <p class="iv-lede iv-reveal">“Creator Community” highlights some of the most interesting creators with collectibles available on the Crypto.com NFT platform.</p>
 
-            <h4 class="iv-q">Where are you from, and what was your upbringing like?</h4>
-            <p>I was born in a small industrial town in northern Spain, then I went to live in Madrid for 10 years. Now, I live in Barcelona. I grew up in a very normal, working-class family, but there were always books and music — and I was brought up in a very patient and sensitive way. I guess that influenced me to dedicate myself to something related to art.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">Where are you from, and what was your upbringing like?</h4>
+              <p class="iv-a">I was born in a small industrial town in northern Spain, then I went to live in Madrid for 10 years. Now, I live in Barcelona. I grew up in a very normal, working-class family, but there were always books and music — and I was brought up in a very patient and sensitive way. I guess that influenced me to dedicate myself to something related to art.</p>
+            </div>
 
-            <h4 class="iv-q">When did you first know you wanted to be a professional artist?</h4>
-            <p>I always wanted to dedicate myself to something related to art and creativity, since what I liked to do most was to draw and tell stories. From a very young age, I was clear about my inability to dedicate myself to anything else. I always dreamed of being able to live without having to get up early — without having to do things out of obligation. Now I can say that I have achieved it. That makes me very happy.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">When did you first know you wanted to be a professional artist?</h4>
+              <p class="iv-a">I always wanted to dedicate myself to something related to art and creativity, since what I liked to do most was to draw and tell stories. From a very young age, I was clear about my inability to dedicate myself to anything else. I always dreamed of being able to live without having to get up early — without having to do things out of obligation. Now I can say that I have achieved it. That makes me very happy.</p>
+            </div>
 
-            <h4 class="iv-q">Are you self-taught, or did you receive any training?</h4>
-            <p>I studied graphic design in college and then I did several online and classroom courses. But I must say that almost everything I know, I know thanks to spending hours and hours of sleepless nights — for several years — reading in forums, watching tutorials and asking people who knew more than me. I strongly believe in self-learning. On the internet, we have access to all human knowledge for free. It’s just a matter of getting started.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">Are you self-taught, or did you receive any training?</h4>
+              <p class="iv-a">I studied graphic design in college and then I did several online and classroom courses. But I must say that almost everything I know, I know thanks to spending hours and hours of sleepless nights — for several years — reading in forums, watching tutorials and asking people who knew more than me. I strongly believe in self-learning. On the internet, we have access to all human knowledge for free. It’s just a matter of getting started.</p>
+            </div>
 
-            <figure class="iv-feature">
-              <img src="assets/interview/clouds.jpg" alt="Surreal collage of a silhouette before clouds and stars, by Fran Rodríguez" loading="lazy" decoding="async">
+            <blockquote class="iv-pull iv-reveal">On the internet, we have access to all human knowledge for free. It’s just a matter of getting started.</blockquote>
+
+            <figure class="iv-feature iv-reveal">
+              <div class="iv-shot"><img src="assets/interview/clouds.jpg" alt="Surreal collage of a silhouette before clouds and stars, by Fran Rodríguez" loading="lazy" decoding="async"></div>
               <figcaption>Fran works as <em>lacabezaenlasnubes</em> — “head in the clouds.”</figcaption>
             </figure>
 
-            <h4 class="iv-q">Tell us about your professional experience.</h4>
-            <p>I started working in advertising and marketing agencies as an art director in Madrid. After 10 years, I had a small existential crisis and decided I didn’t want to continue working for brands. It was a revelation. I quit my job and started working as a freelancer. The beginning was hard, but in a few years I managed to make a name for myself and projects started to come out. I have been living exclusively from my artistic work for 10 years. I accept some commissions, from time to time, because I love to design album covers — but I live from my personal work.</p>
-
-            <h4 class="iv-q">How were you monetising your art before NFTs?</h4>
-            <p>I was selling prints of my work. I also sold the rights to some of my work to be used in magazines or as book or album covers. I live on passive income that my work generates around the world.</p>
-
-            <h4 class="iv-q">How did you get into NFTs?</h4>
-            <p>I saw several artist friends starting to talk about NFTs on Instagram in February and March this year. I asked them and they told me. I spent several days studying and decided to give it a try. It’s the best decision I’ve ever made in my life.</p>
-
-            <h4 class="iv-q">What do you like most about working in the NFT space?</h4>
-            <p>I like the freedom it gives artists — the opportunity to work and live off their artistic work without having to depend on other artists or brands or managers; I believe in decentralisation. I didn’t know anything about crypto seven months ago, but now I can say that these months have been some of the most exciting and interesting of my life. I have learned a lot and met some brilliant people.</p>
-
-            <h4 class="iv-q">Do you collect NFTs yourself?</h4>
-            <p>Yes, I am starting a modest collection… I love being able to support artists I connect with.</p>
-
-            <div class="iv-gallery">
-              <img src="assets/interview/art-1.jpg" alt="Two figures on an orange dune beneath a floating shape, by Fran Rodríguez" loading="lazy" decoding="async">
-              <img src="assets/interview/art-2.jpg" alt="A levitating astronaut over a dune at sunset, by Fran Rodríguez" loading="lazy" decoding="async">
-              <img src="assets/interview/art-3.jpg" alt="Arches opening onto desert dunes at dusk, by Fran Rodríguez" loading="lazy" decoding="async">
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">Tell us about your professional experience.</h4>
+              <p class="iv-a">I started working in advertising and marketing agencies as an art director in Madrid. After 10 years, I had a small existential crisis and decided I didn’t want to continue working for brands. It was a revelation. I quit my job and started working as a freelancer. The beginning was hard, but in a few years I managed to make a name for myself and projects started to come out. I have been living exclusively from my artistic work for 10 years. I accept some commissions, from time to time, because I love to design album covers — but I live from my personal work.</p>
             </div>
-            <p class="iv-caption">Stills from “Postcards From a Dream” and “Quantum Landscapes” by Fran Rodríguez.</p>
 
-            <h4 class="iv-q">Tell us about the NFTs in your first collection.</h4>
-            <p>As the title indicates, they are postcards sent from dreams. They reflect various recurring dreams and visions that I have had, both asleep and awake — in a meditative and absorbed state. I would like those who see, and hopefully buy, the pieces to be transported to mental places where they are happy — and for them to look at reality with another perspective.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">How were you monetising your art before NFTs?</h4>
+              <p class="iv-a">I was selling prints of my work. I also sold the rights to some of my work to be used in magazines or as book or album covers. I live on passive income that my work generates around the world.</p>
+            </div>
 
-            <h4 class="iv-q">What do you consider “good” art?</h4>
-            <p>For me, art has to be honest. Really honest. It must not respond to any practical or commercial purpose, nor be affected by fashions or trends. I like art that offers me an alternative way of seeing things and living — art that creates, somehow, a parallel universe.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">How did you get into NFTs?</h4>
+              <p class="iv-a">I saw several artist friends starting to talk about NFTs on Instagram in February and March this year. I asked them and they told me. I spent several days studying and decided to give it a try. It’s the best decision I’ve ever made in my life.</p>
+            </div>
 
-            <h4 class="iv-q">What’s your favourite artistic movement?</h4>
-            <p>Surrealism and, in general, any movement or artist who tries to reflect in their work their mind — their way of seeing and imagining the world. In short, all psychedelic art.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What do you like most about working in the NFT space?</h4>
+              <p class="iv-a">I like the freedom it gives artists — the opportunity to work and live off their artistic work without having to depend on other artists or brands or managers; I believe in decentralisation. I didn’t know anything about crypto seven months ago, but now I can say that these months have been some of the most exciting and interesting of my life. I have learned a lot and met some brilliant people.</p>
+            </div>
 
-            <h4 class="iv-q">What’s more important: technique or message?</h4>
-            <p>Message, no doubt. The technique, the way something is made, seems to me totally secondary. The emotion it conveys, the impact and the story it wants to tell is what is important.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">Do you collect NFTs yourself?</h4>
+              <p class="iv-a">Yes, I am starting a modest collection… I love being able to support artists I connect with.</p>
+            </div>
 
-            <h4 class="iv-q">What do you try to say with your art?</h4>
-            <p>I try to transmit curiosity, amazement and fascination for nature — for the cosmos. That’s all that matters to me. I want people who see my work to feel a part of the magic I feel when I contemplate a sky or a mountain.</p>
+            <blockquote class="iv-pull iv-reveal">I like the freedom it gives artists — the opportunity to work and live off your art, without depending on anyone.</blockquote>
 
-            <h4 class="iv-q">What are the common themes of your work?</h4>
-            <p>Outer space, nature and the human figure facing the immensity of the cosmos. Mysterious shapes, geometries and people with their backs turned.</p>
+            <figure class="iv-gallery iv-reveal">
+              <div class="iv-shot"><img src="assets/interview/art-1.jpg" alt="Two figures on an orange dune beneath a floating shape, by Fran Rodríguez" loading="lazy" decoding="async"></div>
+              <div class="iv-shot"><img src="assets/interview/art-2.jpg" alt="A levitating astronaut over a dune at sunset, by Fran Rodríguez" loading="lazy" decoding="async"></div>
+              <div class="iv-shot"><img src="assets/interview/art-3.jpg" alt="Arches opening onto desert dunes at dusk, by Fran Rodríguez" loading="lazy" decoding="async"></div>
+              <figcaption class="iv-caption">Stills from “Postcards From a Dream” and “Quantum Landscapes” by Fran Rodríguez.</figcaption>
+            </figure>
 
-            <h4 class="iv-q">What inspires you, in general?</h4>
-            <p>Nature. The universe. Everything that is not me inspires me — how the cosmos affects my mind, how it transforms it. I love the outdoors. Hiking. Music is a huge source of inspiration for me. I listen to music all the time, about eight or nine hours a day — in my studio, walking, cooking…</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">Tell us about the NFTs in your first collection.</h4>
+              <p class="iv-a">As the title indicates, they are postcards sent from dreams. They reflect various recurring dreams and visions that I have had, both asleep and awake — in a meditative and absorbed state. I would like those who see, and hopefully buy, the pieces to be transported to mental places where they are happy — and for them to look at reality with another perspective.</p>
+            </div>
 
-            <h4 class="iv-q">Who is your audience?</h4>
-            <p>Any person who is self-absorbed, daydreaming all the time. Space lovers, psychonauts seeking altered states of consciousness and, in general, minds looking for something beyond the ordinary.</p>
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What do you consider “good” art?</h4>
+              <p class="iv-a">For me, art has to be honest. Really honest. It must not respond to any practical or commercial purpose, nor be affected by fashions or trends. I like art that offers me an alternative way of seeing things and living — art that creates, somehow, a parallel universe.</p>
+            </div>
 
-            <p class="iv-source">Source — <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">“Creator Community: Fran Rodríguez”</a>, Crypto.com NFT (Medium), 17 December 2021. Interview &amp; artwork © Fran Rodríguez.</p>
+            <blockquote class="iv-pull iv-reveal">For me, art has to be honest. Really honest. I like art that creates, somehow, a parallel universe.</blockquote>
+
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What’s your favourite artistic movement?</h4>
+              <p class="iv-a">Surrealism and, in general, any movement or artist who tries to reflect in their work their mind — their way of seeing and imagining the world. In short, all psychedelic art.</p>
+            </div>
+
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What’s more important: technique or message?</h4>
+              <p class="iv-a">Message, no doubt. The technique, the way something is made, seems to me totally secondary. The emotion it conveys, the impact and the story it wants to tell is what is important.</p>
+            </div>
+
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What do you try to say with your art?</h4>
+              <p class="iv-a">I try to transmit curiosity, amazement and fascination for nature — for the cosmos. That’s all that matters to me. I want people who see my work to feel a part of the magic I feel when I contemplate a sky or a mountain.</p>
+            </div>
+
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What are the common themes of your work?</h4>
+              <p class="iv-a">Outer space, nature and the human figure facing the immensity of the cosmos. Mysterious shapes, geometries and people with their backs turned.</p>
+            </div>
+
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">What inspires you, in general?</h4>
+              <p class="iv-a">Nature. The universe. Everything that is not me inspires me — how the cosmos affects my mind, how it transforms it. I love the outdoors. Hiking. Music is a huge source of inspiration for me. I listen to music all the time, about eight or nine hours a day — in my studio, walking, cooking…</p>
+            </div>
+
+            <div class="iv-qa iv-reveal">
+              <h4 class="iv-q">Who is your audience?</h4>
+              <p class="iv-a">Any person who is self-absorbed, daydreaming all the time. Space lovers, psychonauts seeking altered states of consciousness and, in general, minds looking for something beyond the ordinary.</p>
+            </div>
+
+            <p class="iv-source iv-reveal">Source — <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">“Creator Community: Fran Rodríguez”</a>, Crypto.com NFT (Medium), 17 December 2021. Interview &amp; artwork © Fran Rodríguez.</p>
           </article>
+          <div class="iv-lightbox" id="ivLightbox" hidden aria-hidden="true"><img src="" alt=""></div>
         </div>
         <div class="tab-panel" data-panel="universe">
           <div class="tab-text">
@@ -3574,6 +3661,37 @@ body::after {
             });
           });
         }
+
+        // Interview : révélation au défilement (observer dédié) + lightbox des images
+        (function () {
+          const ivEls = document.querySelectorAll('.iv-reveal');
+          const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          if (ivEls.length) {
+            if (!('IntersectionObserver' in window) || reduce) {
+              ivEls.forEach(e => e.classList.add('iv-in'));
+            } else {
+              const ivObs = new IntersectionObserver((ents) => {
+                ents.forEach(e => { if (e.isIntersecting) { e.target.classList.add('iv-in'); ivObs.unobserve(e.target); } });
+              }, { threshold: 0.12, rootMargin: '0px 0px -8% 0px' });
+              ivEls.forEach(e => ivObs.observe(e));
+            }
+          }
+          const lb = document.getElementById('ivLightbox');
+          if (lb) {
+            const lbImg = lb.querySelector('img');
+            const close = () => { lb.hidden = true; document.documentElement.style.overflow = ''; };
+            document.querySelectorAll('.iv-shot img').forEach(img => {
+              img.addEventListener('click', () => {
+                lbImg.src = img.currentSrc || img.src;
+                lbImg.alt = img.alt || '';
+                lb.hidden = false;
+                document.documentElement.style.overflow = 'hidden';
+              });
+            });
+            lb.addEventListener('click', close);
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !lb.hidden) close(); });
+          }
+        })();
 
         // Révélations au défilement (sections + leaderboard)
         const revealEls = document.querySelectorAll('.reveal');
