@@ -2243,11 +2243,13 @@ body::after {
     .nav-links a.is-active { color: #fff; }
     .nav-links a.is-active::after { width: 100%; }
 
+    /* overflow:visible -> le logo à cheval n'est pas rogné (l'image reste à la taille
+       de la bannière, donc elle ne déborde pas). */
     .cv-banner {
       position: relative;
       width: 100%;
-      height: clamp(230px, 34vw, 380px);
-      overflow: hidden;
+      height: clamp(220px, 32vw, 360px);
+      overflow: visible;
       background: linear-gradient(135deg, #0b1030, #161526);
     }
     .cv-banner-img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s ease; }
@@ -2275,9 +2277,9 @@ body::after {
     .cv-title {
       position: absolute; z-index: 2; inset: 0; pointer-events: none;
       display: flex; align-items: center; justify-content: center; text-align: center;
-      margin: 0; padding: 46px 26px 26px;
-      font-size: clamp(1.7rem, 4.6vw, 3rem); line-height: 1.1;
-      text-shadow: 0 3px 26px rgba(0, 0, 0, 0.9);
+      margin: 0; padding: 40px 26px 32px;
+      font-size: clamp(1.4rem, 3.4vw, 2.4rem); line-height: 1.14; letter-spacing: 0.015em;
+      text-shadow: 0 3px 26px rgba(0, 0, 0, 0.92);
     }
     /* Logo à cheval : moitié dans la bannière, moitié en dessous, à droite */
     .cv-logo {
@@ -2296,10 +2298,10 @@ body::after {
       letter-spacing: 0.16em; text-transform: uppercase; color: #fff; margin-bottom: 8px;
     }
     .cv-sold[hidden] { display: none; }
-    .cv-desc { color: var(--muted); line-height: 1.65; max-width: 720px; margin: 8px 0 16px; font-size: 0.95rem; }
+    .cv-desc { color: var(--muted); line-height: 1.68; max-width: 680px; margin: 12px 0 20px; font-size: 0.95rem; }
     .cv-link[hidden] { display: none; }
 
-    .cv-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 44px; }
+    .cv-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 32px 0 48px; }
     .cv-stat { text-align: center; padding: 16px 8px; border-radius: 14px; background: rgba(20, 22, 38, 0.5); border: 1px solid var(--hairline); }
     .cv-stat .v { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 16px rgba(102, 191, 255, 0.35); }
     .cv-stat .l { display: block; margin-top: 7px; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
@@ -2321,10 +2323,11 @@ body::after {
     #cvList { padding: 0; }
 
     @media screen and (max-width: 600px) {
-      .cv-title { padding: 34px 14px 16px; }
-      .cv-logo { width: 86px; height: 86px; right: 16px; border-radius: 15px; }
-      .cv-meta { padding: 56px 0 0; min-height: 0; }
-      .cv-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .cv-title { padding: 30px 16px 28px; font-size: 1.25rem; letter-spacing: 0.01em; }
+      .cv-logo { width: 76px; height: 76px; right: 16px; border-radius: 14px; }
+      .cv-meta { padding: 46px 0 0; min-height: 0; }
+      .cv-desc { margin: 10px 0 18px; }
+      .cv-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 22px 0 38px; }
       #cvNfts { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
     /* ════════ SPOTLIGHT : mur d'œuvres en mouvement ════════ */
