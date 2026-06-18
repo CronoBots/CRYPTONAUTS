@@ -2026,10 +2026,11 @@ body::after {
     }
     @media screen and (max-width: 600px) {
       .navbar { padding: 11px 16px; }
-      .nav-links { gap: 12px; }
-      .nav-links a { font-size: 0.68rem; letter-spacing: 0.02em; }
+      .nav-links { gap: 16px; flex: 1; min-width: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+      .nav-links::-webkit-scrollbar { display: none; }
+      .nav-links a { font-size: 0.72rem; letter-spacing: 0.02em; white-space: nowrap; }
       .nav-x { display: none; }
-      .navbar .brand { font-size: 0.95rem; }
+      .navbar .brand { font-size: 0.95rem; flex-shrink: 0; }
       .hero { min-height: auto; padding: 30px 16px 44px; }
       .hero-astronaut { width: min(280px, 72%); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
@@ -2532,10 +2533,10 @@ body::after {
       background: radial-gradient(ellipse at 50% 0%, rgba(102, 191, 255, 0.10), transparent 62%);
     }
     /* ════════ PAGE DÉTAILLÉE D'UNE COLLECTION ════════ */
-    #collectionView { display: none; }
-    body.view-collection .hero,
-    body.view-collection main { display: none; }
-    body.view-collection #collectionView { display: block; }
+    /* Vues séparées : on n'affiche qu'une section à la fois (pilotée par data-view) */
+    .hidden-view { display: none !important; }
+    .nav-links a.is-active { color: #fff; }
+    .nav-links a.is-active::after { width: 100%; }
 
     .cv-banner {
       position: relative;
@@ -2612,6 +2613,38 @@ body::after {
       .cv-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
       #cvNfts { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
+    /* ════════ SPOTLIGHT : mur d'œuvres en mouvement ════════ */
+    .spot-wall {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+      mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+    }
+    .spot-row { display: flex; gap: 16px; width: max-content; animation: spotScroll 75s linear infinite; will-change: transform; }
+    .spot-rev { animation-direction: reverse; }
+    .spot-wall:hover .spot-row { animation-play-state: paused; }
+    @keyframes spotScroll { to { transform: translateX(-50%); } }
+    .spot-nft {
+      width: 150px; height: 150px; flex-shrink: 0; border-radius: 16px; overflow: hidden;
+      border: 1px solid var(--hairline); background: rgba(20, 22, 38, 0.5);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .spot-nft img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .spot-nft:hover {
+      transform: translateY(-6px) scale(1.04) rotate(-1.2deg);
+      border-color: rgba(102, 191, 255, 0.55);
+      box-shadow: 0 16px 38px rgba(102, 191, 255, 0.22);
+    }
+    .spot-skel { background: linear-gradient(100deg, rgba(255, 255, 255, 0.04) 30%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.04) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
+    @media (prefers-reduced-motion: reduce) { .spot-row { animation: none; } }
+    @media screen and (max-width: 600px) {
+      .spot-nft { width: 118px; height: 118px; border-radius: 13px; }
+      .spot-wall { gap: 12px; }
+      .spot-row { gap: 12px; }
+    }
   </style>
 </head>
 <body>
@@ -2630,10 +2663,11 @@ body::after {
   <nav class="navbar" id="navbar">
     <a href="#home" class="brand">Cryptonauts</a>
     <div class="nav-links">
-      <a href="#collections">Collections</a>
-      <a href="#stats">Stats</a>
-      <a href="#leaderboard">Leaderboard</a>
-      <a href="#artist">Artist</a>
+      <a href="#home" data-nav="home">Home</a>
+      <a href="#collections" data-nav="collections">Collections</a>
+      <a href="#stats" data-nav="stats">Stats</a>
+      <a href="#leaderboard" data-nav="leaderboard">Leaderboard</a>
+      <a href="#artist" data-nav="artist">Artist</a>
       <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="nav-x" aria-label="Cryptonauts on X">
         <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
       </a>
@@ -2641,7 +2675,7 @@ body::after {
     <span class="live-pill"><span class="live-dot"></span>Live</span>
   </nav>
 
-  <header id="home" class="hero">
+  <header id="home" class="hero" data-view="home">
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-copy">
@@ -2674,7 +2708,19 @@ body::after {
   </header>
 
   <main>
-    <section class="section reveal" id="collections">
+    <section class="section reveal spot-section" id="spotlight" data-view="home">
+      <div class="section-head">
+        <span class="eyebrow">Spotlight</span>
+        <h2 class="section-title">Straight from the galaxy</h2>
+        <p class="section-sub">A living wall of Cryptonauts artworks — tap any to open it on crypto.com.</p>
+      </div>
+      <div class="spot-wall" id="spotWall" aria-label="Featured Cryptonauts">
+        <div class="spot-row" id="spotRowA"></div>
+        <div class="spot-row spot-rev" id="spotRowB"></div>
+      </div>
+    </section>
+
+    <section class="section reveal hidden-view" id="collections" data-view="collections">
       <div class="section-head">
         <span class="eyebrow">The collections</span>
         <h2 class="section-title">Eleven worlds, one crew</h2>
@@ -2683,7 +2729,7 @@ body::after {
       <div id="collections-grid"></div>
     </section>
 
-    <section class="section reveal" id="stats">
+    <section class="section reveal hidden-view" id="stats" data-view="stats">
       <div class="section-head">
         <span class="eyebrow">By the numbers</span>
         <h2 class="section-title">The saga in figures</h2>
@@ -2698,7 +2744,7 @@ body::after {
       <div class="stats-table" id="statsTable"></div>
     </section>
 
-    <section class="section reveal" id="artist">
+    <section class="section reveal hidden-view" id="artist" data-view="artist">
       <div class="section-head">
         <span class="eyebrow">The artist</span>
         <h2 class="section-title">Fran Rodríguez</h2>
@@ -2785,7 +2831,7 @@ body::after {
     </section>
   </main>
 
-  <section id="collectionView" aria-label="Collection detail">
+  <section id="collectionView" data-view="collection" class="hidden-view" aria-label="Collection detail">
     <div class="cv-banner">
       <img class="cv-banner-img" src="" alt="" decoding="async">
       <div class="cv-banner-grad"></div>
@@ -3059,7 +3105,60 @@ body::after {
       return bannerCache[id];
     }
 
-    function showHome() { document.body.classList.remove('view-collection'); }
+    // Vues séparées : une seule section affichée à la fois (Home / Collections / Stats / Leaderboard / Artist / collection).
+    const VIEWS = ['home', 'collections', 'stats', 'leaderboard', 'artist'];
+    let spotlightLoaded = false;
+    function syncNav(name) {
+      document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
+        a.classList.toggle('is-active', a.dataset.nav === name);
+      });
+    }
+    function showView(name) {
+      document.body.dataset.view = name;
+      document.querySelectorAll('[data-view]').forEach(el => {
+        const match = el.dataset.view === name;
+        el.classList.toggle('hidden-view', !match);
+        if (match) {
+          if (el.classList.contains('reveal')) el.classList.add('in-view');
+          el.querySelectorAll('.reveal').forEach(r => r.classList.add('in-view'));
+        }
+      });
+      syncNav(name === 'collection' ? 'collections' : name);
+      window.scrollTo(0, 0);
+      if (name === 'home' && !spotlightLoaded) { spotlightLoaded = true; loadSpotlight(); }
+    }
+
+    // Spotlight : mur d'œuvres en mouvement (chargé en direct depuis crypto.com).
+    async function loadSpotlight() {
+      const wall = document.getElementById('spotWall');
+      if (!wall) return;
+      const rowA = document.getElementById('spotRowA');
+      const rowB = document.getElementById('spotRowB');
+      const skel = '<span class="spot-nft spot-skel"></span>'.repeat(8);
+      rowA.innerHTML = skel; rowB.innerHTML = skel;
+      try {
+        const res = await fetch(NFT_GQL, {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ variables: { id: 'aabff17f9874020416137984b9d2b8db', first: 28, skip: 0 }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name cover{url} main{url}}}}' })
+        });
+        const data = await res.json();
+        const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
+        if (!assets.length) { const s = document.getElementById('spotlight'); if (s) s.classList.add('hidden-view'); return; }
+        const tile = a => {
+          const u = ((a.cover && a.cover.url) || (a.main && a.main.url) || '') + '?d=lg-logo';
+          return '<a class="spot-nft" href="https://crypto.com/nft/collectible/' + a.id
+            + '" target="_blank" rel="noopener" title="' + escHtml(a.name) + '">'
+            + '<img src="' + u + '" alt="' + escHtml(a.name) + '" loading="lazy" decoding="async"></a>';
+        };
+        const half = Math.ceil(assets.length / 2);
+        const a1 = assets.slice(0, half).map(tile).join('');
+        const a2 = assets.slice(half).map(tile).join('');
+        rowA.innerHTML = a1 + a1;   // dupliqué pour une boucle sans couture
+        rowB.innerHTML = a2 + a2;
+      } catch (e) {
+        const s = document.getElementById('spotlight'); if (s) s.classList.add('hidden-view');
+      }
+    }
 
     function showCollectionView(idx) {
       const view = document.getElementById('collectionView');
@@ -3097,8 +3196,7 @@ body::after {
       grid.innerHTML = '<span class="nft skeleton"></span>'.repeat(12);
       document.getElementById('cvMore').hidden = true;
 
-      document.body.classList.add('view-collection');
-      window.scrollTo(0, 0);
+      showView('collection');
 
       if (cv.id) {
         fetchBanner(cv.id).then(b => {
@@ -3137,9 +3235,11 @@ body::after {
     }
 
     function handleRoute() {
-      const m = (location.hash || '').match(/^#c\\/(\\d+)$/);
-      if (m) showCollectionView(parseInt(m[1], 10));
-      else showHome();
+      const h = location.hash || '';
+      const m = h.match(/^#c\\/(\\d+)$/);
+      if (m) { showCollectionView(parseInt(m[1], 10)); return; }
+      const name = h.replace('#', '') || 'home';
+      showView(VIEWS.includes(name) ? name : 'home');
     }
 
     // Tableau récapitulatif des stats de chaque collection (section Stats).
@@ -3211,8 +3311,9 @@ body::after {
         const additionalOwners = rankedOwners.slice(10);
 
         const section = document.createElement('section');
-        section.className = 'leaderboard-section section reveal';
+        section.className = 'leaderboard-section section reveal hidden-view';
         section.id = 'leaderboard';
+        section.dataset.view = 'leaderboard';
         section.innerHTML = \`
           <div class="section-head">
             <span class="eyebrow">◆ Global Ranking</span>
