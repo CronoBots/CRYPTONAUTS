@@ -2725,7 +2725,6 @@ body::after {
     <div class="nav-links">
       <a href="#home" data-nav="home">Home</a>
       <a href="#collections" data-nav="collections">Collections</a>
-      <a href="#stats" data-nav="stats">Stats</a>
       <a href="#leaderboard" data-nav="leaderboard">Leaderboard</a>
       <a href="#artist" data-nav="artist">Artist</a>
       <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="nav-x" aria-label="Cryptonauts on X">
@@ -2785,22 +2784,13 @@ body::after {
         <h2 class="section-title">Eleven worlds, one crew</h2>
         <p class="section-sub">Eleven chapters of the Cryptonauts saga — every one sold out. Tap any collection to explore its items and holders.</p>
       </div>
-      <div id="collections-grid"></div>
-    </section>
-
-    <section class="section reveal hidden-view" id="stats" data-view="stats">
-      <div class="section-head">
-        <span class="eyebrow">By the numbers</span>
-        <h2 class="section-title">The saga in figures</h2>
-        <p class="section-sub">Live market data from the crypto.com NFT chain, across all eleven sold-out collections.</p>
-      </div>
       <div class="saga-stats">
         <div class="saga-stat"><span class="v">$194K</span><span class="l">Traded volume</span></div>
         <div class="saga-stat"><span class="v">3,914</span><span class="l">Secondary sales</span></div>
         <div class="saga-stat"><span class="v">2,002</span><span class="l">Items minted</span></div>
         <div class="saga-stat"><span class="v">11</span><span class="l">Sold-out drops</span></div>
       </div>
-      <div class="stats-table" id="statsTable"></div>
+      <div id="collections-grid"></div>
     </section>
 
     <section class="section reveal hidden-view" id="artist" data-view="artist">
@@ -3155,7 +3145,7 @@ body::after {
     }
 
     // Vues séparées : une seule section affichée à la fois (Home / Collections / Stats / Leaderboard / Artist / collection).
-    const VIEWS = ['home', 'collections', 'stats', 'leaderboard', 'artist'];
+    const VIEWS = ['home', 'collections', 'leaderboard', 'artist'];
     let spotlightLoaded = false;
     let collectionsAnimated = false;
     function syncNav(name) {
@@ -3513,9 +3503,6 @@ body::after {
 
         // Bandeau de statistiques (compteurs animés)
         buildStatsBand();
-
-        // Tableau récapitulatif par collection (section Stats)
-        buildStatsTable();
 
         // Routage : page détaillée d'une collection (#c/<i>) ↔ accueil
         const cvBack = document.querySelector('#collectionView .cv-back');
