@@ -287,6 +287,10 @@ function writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData) {
     };
   });
 
+  // Collection externe (Crovia / Cronos) — ajoutée en tête (la plus récente). Données on-chain,
+  // owners en adresses (cronoscan) ; volontairement absente de globalOwnersData (leaderboard global).
+  allCollectionsData.unshift({"id":"collection-v3","title":"Quantum Cryptonauts V3","image":"assets/v3-logo.jpg","alt":"Quantum Cryptonauts V3 COLLECTION ICON","ownersCount":12,"external":"crovia","contract":"0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","croviaUrl":"https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","owners":[{"name":"0x2b8b…ae40","count":32,"url":"https://cronoscan.com/address/0x2b8b37dd17fa67833b01e30229502169d1a8ae40"},{"name":"0x1355…884b","count":24,"url":"https://cronoscan.com/address/0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b"},{"name":"0x740c…da0d","count":8,"url":"https://cronoscan.com/address/0x740cd1001bf468e03a2cef898c4ce880f228da0d"},{"name":"0xac96…c1ee","count":8,"url":"https://cronoscan.com/address/0xac96bdcd69f708a5f660425af5d1248aa27fc1ee"},{"name":"0x1833…1048","count":6,"url":"https://cronoscan.com/address/0x183379144e7c8581f24b02b7eedd4e9995bb1048"},{"name":"0xedce…7eae","count":5,"url":"https://cronoscan.com/address/0xedce0151656e82150a0835e9b9cbd1ec53a17eae"},{"name":"0x7886…4c06","count":3,"url":"https://cronoscan.com/address/0x7886acebc8401bd6b1cf397d84b85d01416e4c06"},{"name":"0x64c1…b5c2","count":3,"url":"https://cronoscan.com/address/0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2"},{"name":"0x478f…2c49","count":2,"url":"https://cronoscan.com/address/0x478ffba8ea4945fb9327812231dfb1c6cafd2c49"},{"name":"0x8147…fb06","count":2,"url":"https://cronoscan.com/address/0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06"},{"name":"0xe6e7…34ed","count":2,"url":"https://cronoscan.com/address/0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed"},{"name":"0x965a…70bd","count":1,"url":"https://cronoscan.com/address/0x965a73574acb12b9b48f3ff43415eea791fd70bd"}]});
+
   // Prepare globalOwnersData (sans url ni rank : reconstruits/recalculés côté client)
   const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, count }) => {
     const owner = { name, count };
@@ -2920,14 +2924,14 @@ body::after {
     <section class="section reveal hidden-view" id="collections" data-view="collections">
       <div class="section-head">
         <span class="eyebrow">The collections</span>
-        <h2 class="section-title">Eleven worlds, one crew</h2>
-        <p class="section-sub">Eleven chapters of the Cryptonauts saga — every one sold out. Tap any collection to explore its items and holders.</p>
+        <h2 class="section-title">Twelve worlds, one crew</h2>
+        <p class="section-sub">Twelve chapters of the Cryptonauts saga — every one sold out, across crypto.com and Crovia. Tap any collection to explore its items and holders.</p>
       </div>
       <div class="saga-stats">
         <div class="saga-stat"><span class="v">$194K</span><span class="l">Traded volume</span></div>
         <div class="saga-stat"><span class="v">3,914</span><span class="l">Secondary sales</span></div>
-        <div class="saga-stat"><span class="v">2,002</span><span class="l">Items minted</span></div>
-        <div class="saga-stat"><span class="v">11</span><span class="l">Sold-out drops</span></div>
+        <div class="saga-stat"><span class="v">2,098</span><span class="l">Items minted</span></div>
+        <div class="saga-stat"><span class="v">12</span><span class="l">Sold-out drops</span></div>
       </div>
       <div id="collections-grid"></div>
     </section>
@@ -3053,7 +3057,7 @@ body::after {
         <span class="cv-release"></span>
         <span class="cv-sold" hidden>Sold out</span>
         <p class="cv-desc"></p>
-        <a class="cv-link btn btn-primary" target="_blank" rel="noopener">View on crypto.com
+        <a class="cv-link btn btn-primary" target="_blank" rel="noopener"><span class="cv-link-label">View on crypto.com</span>
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
       </div>
@@ -3120,7 +3124,7 @@ body::after {
     const globalOwnersData = ${JSON.stringify(globalOwnersData)};
 
     function validateUrl(url) {
-      return url.startsWith('https://crypto.com/nft/profile/') ? url : '#';
+      return (url && (url.startsWith('https://crypto.com/nft/profile/') || url.startsWith('https://cronoscan.com/address/'))) ? url : '#';
     }
 
     function validateTwitterUrl(url) {
@@ -3134,6 +3138,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
+      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", items: 96, soldOut: true, desc: "Fran Rodríguez's newest chapter — and the first Cryptonauts collection minted on Cronos, on the Crovia marketplace. 96 one-of-a-kind quantum travelers, each born from quantum randomness and cosmic code. The saga crosses chains." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
       "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
@@ -3150,6 +3155,7 @@ body::after {
     // Statistiques de marché réelles (crypto.com GraphQL — GetCollectionMetric) :
     // floor, volume échangé (USD), nombre de ventes secondaires, supply on-chain.
     const COLLECTION_STATS = {
+      "Quantum Cryptonauts V3": { floor: null, vol: null, sales: null, supply: 96 },
       "Legendary Cryptonauts V2": { floor: 45, vol: 11607, sales: 233, supply: 328 },
       "OG Cryptonauts": { floor: 40, vol: 10455, sales: 219, supply: 210 },
       "Time Travel Cryptonauts II": { floor: 20, vol: 23651, sales: 522, supply: 463 },
@@ -3166,6 +3172,7 @@ body::after {
 
     // Date de sortie sur crypto.com (mint du 1er NFT) — pour l'ordre chronologique.
     const COLLECTION_RELEASE = {
+      "Quantum Cryptonauts V3": "Jun 2026",
       "Legendary Cryptonauts V2": "Mar 2026",
       "OG Cryptonauts": "Jan 2026",
       "Time Travel Cryptonauts II": "Aug 2025",
@@ -3178,6 +3185,10 @@ body::after {
       "Cryptonauts: The dark side of the dune": "Nov 2023",
       "Cryptonauts": "May 2023"
     };
+
+    // Collections externes (Crovia / Cronos) — assets indexés on-chain (id, nom, CID image IPFS).
+    // Vignettes servies redimensionnées via le proxy weserv pour rester légères.
+    const EXTERNAL_ASSETS = {"0x840d5e2df597ab3dcfed4e5fc883c8d87606748d":[{"i":1,"n":"o0x228","c":"bafybeihbke5e64uxgbmbnf2fh3vle43slvblyk4h75c3qwk3jtz7c2uifa"},{"i":2,"n":"o0x13","c":"bafybeia4gnskzhfkkjls7xddia6v2q3prwpiqq45qiou2dzwtmouiqyhem"},{"i":3,"n":"o0x95","c":"bafybeifbkvfxbxejpc3wu6psxtmjweptdjo2jd7huxcm2326jq66gsviim"},{"i":4,"n":"o0x169","c":"bafybeibvr26e5ynyzxvq4uysfcuydouyitp4onp2jhvrabg5uouatey2ge"},{"i":5,"n":"o0x103","c":"bafybeigxavpexwhajyo5ya3xsmmzseohynn3su5uz3bvdoozwzhqfgpgme"},{"i":6,"n":"o0x174","c":"bafybeiblvlctu3yh3vsxdj5jvqo2uxiaoik7omy7y6rkgagydclqsrnaw4"},{"i":7,"n":"o0x244","c":"bafkreie4475tnwzseck56s5jo75jdnk5eo7p2nmy4wb3hhkyuzea4tsua4"},{"i":8,"n":"o0x114","c":"bafybeieqwv353aeipoapvzemzgolphscsjrm6bjjjzzgby4xs5sbu32qoa"},{"i":9,"n":"o0x229","c":"bafybeiblezpvjkyscmpvog7jtmgobrn2pqv6r2gcmq6m4fjxitxrew4hf4"},{"i":10,"n":"O0x253","c":"bafybeidfmgyw6krfm4pwsa2tueglttvl43unlbkc5zavxh22gvlcrhuole"},{"i":11,"n":"o0x180","c":"bafybeih5oltbocfwhdmzrqpzegukm64coxci3hshxkjnzeizboqghtz53q"},{"i":12,"n":"o0x22","c":"bafybeifxv3m43pka4cvu6cpkzwkdjjiwpbwkpcpm4no5cnmvoh5dgrzj7i"},{"i":13,"n":"o0x122","c":"bafybeih7atwygzapzrmnaxkxszude4xqh7lv5qxxvavdg2ghbfaar2krk4"},{"i":14,"n":"O0x290","c":"bafybeiflrrlylaxnq3ejqlsn6acrc4hxrvsbfnnqpi3eonvg77qsjk6s5a"},{"i":15,"n":"o0x140","c":"bafkreibr55paorntn6fnjus5bsomrblg4jwscfpmdrjjflzpaesiqjo2qy"},{"i":16,"n":"o0x57","c":"bafybeif3r6xajv6fklleeeamcskp2sa2x7j7zqc4qd5cmz3zawb56fzl34"},{"i":17,"n":"o0x19","c":"bafybeigikqvj26hufybqpy3nydukt4q3phebl2ge4a3oyskbk27qvzmfim"},{"i":18,"n":"o0x242","c":"bafybeic2jxh3uucfb3ajdv4cddo2lpdnmqvxarheymsjnokjs5mcko7wdi"},{"i":19,"n":"o0x240","c":"bafybeibyoqzwmulq7v2p3dhbaxfy4euqukmkvu2la26rpuveqbnipbqomq"},{"i":20,"n":"o0x198","c":"bafybeidn5caop5hkgrnpkxq6iatbu5y27ghnf7vsneplikobwjsq56tdve"},{"i":21,"n":"o0x05","c":"bafybeiav2th6iyzyvnsurhq3ttdirw5oiqs4kmptje4cqvxq47nljjkvzi"},{"i":22,"n":"o0x201","c":"bafybeidx6dbxzerhvsdmp77mbhcvk7q4wke4wxtx6sdkesuopvf3nfdc3i"},{"i":23,"n":"o0x237","c":"bafybeife6enjrnjdundmtk5aukrb46fkisqcjb5nskt4z2xen72iquj2ca"},{"i":24,"n":"o0x136","c":"bafybeifzts6bkdz6col5is45wfu5ozjkyzops7fqjw7rua6p6bf2l4kj3e"},{"i":25,"n":"o0x183","c":"bafybeiefrkondvcejvir2d6yzkrxx2avnuqfexl2gqxnsstmky74bkkqge"},{"i":26,"n":"o0x52","c":"bafybeieqbhzipy5l27ls523q2ibrbvzoy3icwz73pywd4xzwnxxj7ow72u"},{"i":27,"n":"o0x55","c":"bafybeieglldr7criskx4swkqmjh2zc2swatd3znsjgorbqcgwcm6thudz4"},{"i":28,"n":"o0x130","c":"bafybeifup6emxxfeiocvjfl5byqv6r6gpjh4qw6jwc6v2rhgd6japufcni"},{"i":29,"n":"O0x287","c":"bafybeidz3ftzk3svi3m5vpmsl7bqechlnjkqprwk6heukilzq2ysjyteha"},{"i":30,"n":"o0x185","c":"bafybeicc7wpxujhsfcrble4aq2ggigrqkxltqdmjpdybtr4kqzoguuant4"},{"i":31,"n":"o0x74","c":"bafybeif7nqt7jtea43kc6tqvqn6avt77sjltrkzhasqi363acxsagwkrke"},{"i":32,"n":"o0x194","c":"bafybeidhdnyokcknn5kq63hlkt3elfoooiyetdx7av25bcmm26ayg5m6vu"},{"i":33,"n":"o0x207","c":"bafybeig2t6npeuafk4gwe6btmv6lr3ctuqlr53gvlacmtxbfzgyjxqsn34"},{"i":34,"n":"o0x42","c":"bafybeidb7mfjg422drg4hypqwyugbi3l5b3l75bhiqq5zsclkejqzcq2uq"},{"i":35,"n":"o0x238","c":"bafybeicf7atj3i5vjxuku6y2x2f4plvbfsubnbryk5gzbrjblwqthu453a"},{"i":36,"n":"o0x82","c":"bafybeihzrv6vslmulwjo5pcpiachehibcjwq2urm6x5legdlqkzovxyrey"},{"i":37,"n":"o0x156","c":"bafybeieo3t77lq4njxqqkvsrp4tmvtthxjkod5jhi2doqlkiae5f75orge"},{"i":38,"n":"o0x78","c":"bafybeiefqfcdltlietklh3qoc32f6iky7cye4uvcfp3cutyxfdm6ufipza"},{"i":39,"n":"o0x155","c":"bafybeih42xkca3c5vhim4var6kmicytdkslr73fcd5omxihrv3l6dozzd4"},{"i":40,"n":"o0x26","c":"bafybeicxoz5akeuerln6cjzlzfhz54zxeggq6maoixbt76uemyxhjvoegu"},{"i":41,"n":"o0x192","c":"bafybeiheytnwatarevqxuhjenvvrlko6sr24uk3n54bhtryf7a4ksl3wvu"},{"i":42,"n":"o0x246","c":"bafkreigfmijidtpeeodnovsmerle2h6a5hhqnunoi44run4aoyf47tmjyi"},{"i":43,"n":"o0x108","c":"bafybeifpp4znnuh7vbo2wuwz3dkdc36gkidndhraiqc5yhesl7tu7qbbxi"},{"i":44,"n":"O0x291","c":"bafybeia7sopqpazt3hi5o6i2nmarsyxkbanxukqgynu4utb7otdfsvyx7q"},{"i":45,"n":"o0x200","c":"bafybeicb7n4i4zf2qtln45x46vchftmtcozkw4b6ijpv3nay6kuxje6ymy"},{"i":46,"n":"o0x142","c":"bafkreidnjzkbcwn4cdatam3vz3k2x73pcpl5japlg7jl3nqcqejfdauika"},{"i":47,"n":"O0x250","c":"bafkreieqfajqtexqxqrt7z3qpxv7d7ohwm2lguz7i7pk5kaeqy2dcxf2x4"},{"i":48,"n":"o0x17","c":"bafybeib7tdapggbt3wf5t2z6cxrqikk2q5t7yov37xloxpxr3npo6sb6ri"},{"i":49,"n":"O0x283","c":"bafybeig6injacjy6taswfpho34vzy4jrhwywlspyfmqa3afywy4we7dk7m"},{"i":50,"n":"o0x01","c":"bafybeiglmepctpeguvnpwfrk7v53zvlnqdswa42mxcsjyw75sywggigxwe"},{"i":51,"n":"o0x97","c":"bafybeig5sgc73ql3b6anzeoa5ngvvw5agjd3slang4bvkh5yypbt5kideu"},{"i":52,"n":"o0x120","c":"bafybeiharvxyz7imvvh75jak6qiyz2nzdtiwx4a3j5tme2cexfjngnqmgq"},{"i":53,"n":"o0x91","c":"bafybeibdaizd6napeumzmqqgpntwsy2njfwak2djni7igdi2ww2munc6bi"},{"i":54,"n":"O0x285","c":"bafybeiflgbyu5byjhgfahgtsl54tflhv67cltu2wvh2wkrbghkrpnnw4a4"},{"i":55,"n":"o0x53","c":"bafybeifsmkvemoaxoxv3l4hrmqcr5ngjei2omkxuby3s3nbyeva422t2fi"},{"i":56,"n":"o0x232","c":"bafybeiflbdl22blocbfxxq6eyuo65xbz5qqwauy6jhsgw4qym75k3pbm6u"},{"i":57,"n":"o0x243","c":"bafybeibjavb7dslg2hf6ctbvyct7d6trh4vfi5t7safv72io3cbp7r7aom"},{"i":58,"n":"O0x286","c":"bafybeihlmipjim4vvvhdzrlv3lpr7zpczeyhjbfy24r77uasye5vz74pne"},{"i":59,"n":"o0x247","c":"bafybeif3wx4bvpevukzehmrbiya7huwjoqlwiess4wdyx5flcpbfhnqtv4"},{"i":60,"n":"o0x49","c":"bafybeicrvfhqsitx5uon4nrqfsvplpkwlls3gjw6tfwxb5shr2i43wzz2y"},{"i":61,"n":"o0x85","c":"bafybeid3ag2n53pyhkazjugxliro56lztuhc4auavpkxjbennmjowt6su4"},{"i":62,"n":"o0x172","c":"bafybeiazv2t3etsmg3uaovrzmb5w46azzel7khm2wm2nc3gyhpz67fr53a"},{"i":63,"n":"o0x45","c":"bafybeievsd45ef2z7pchqbmzfpv2lsyqxbo2uyfvevsdidmwerdydtgwza"},{"i":64,"n":"o0x83","c":"bafybeianfpox2gwr65elazxbt3ktgl7fsooi2ovamfqkk55bmrbubmxrru"},{"i":65,"n":"o0x230","c":"bafybeigdzt5bwcwzv266qpfjbrrytnpyr6pjbd5pujl27pajabrb4o4o3y"},{"i":66,"n":"o0x178","c":"bafybeidtqabqze4ipeilyz47v6seutzwruxcdwu2s62auj6mk2cu67ye4u"},{"i":67,"n":"o0x116","c":"bafybeieglqagxo2kn4owxwinb6hdceohzp2vwdtlyndak2jxvwk5dz2j3m"},{"i":68,"n":"o0x248","c":"bafybeidqdny32tyrzs2xpqdt2nyvaevmsq6ua5dddmvdme26taqiwyp22a"},{"i":69,"n":"o0x187","c":"bafybeiagxmxoizt5zrkvdwrqcg2ncmaoi6hf7gfenaakfch7t4gapq6p4e"},{"i":70,"n":"o0x168","c":"bafybeihujmo3azexhmqzerbjeo4xpzpcp4s6uxnockffbwv6r7rdt2jcva"},{"i":71,"n":"o0x149","c":"bafybeihqygjpfzwkws5327oxf7asiy6izkm7h4xjl2r536nbcrq4sbyzoi"},{"i":72,"n":"O0x268","c":"bafybeignim3jczzsl4wodop7t67me6wvlxdtgb5emc5v2cpbiyyp4ol4tu"},{"i":73,"n":"o0x03","c":"bafybeiherowubwvyzsm4qnush6v7yae32elf7ofn43cp66fxnnujvg4exy"},{"i":74,"n":"o0x124","c":"bafybeihwgbkpjrfp7dfrvaxg3o2s6srkxpuv7xfo3fl66opkcc2admbtga"},{"i":75,"n":"o0x137","c":"bafybeibqsw3ai3ocncogzuqobt4du7dv6ueh23c7thil7fva27w22jf7ce"},{"i":76,"n":"o0x160","c":"bafybeievqbynjboct7dy4gs45iqufjzziqm3l6qiehoeeif4eeasq623c4"},{"i":77,"n":"o0x47","c":"bafybeierzfr5zjmfkin64l6e4rlgecnkp6cdo3slqt2dw2qolvan24gbje"},{"i":78,"n":"o0x16","c":"bafybeicnxkigurtnrjixhvkvmiy3oxfg36mbflzuqq4izerjvuynfdr37y"},{"i":79,"n":"o0x54","c":"bafybeif64xn5sr3n746oaanfpvxg47qk5n4ld4mxkw4qu7hz4f7xyvmttm"},{"i":80,"n":"O0x296","c":"bafybeievzechajelwyxao5e5z26kyiehdzbead47yslqayyclb5gxwanle"},{"i":81,"n":"o0x104","c":"bafybeiec2kxqgpn6n2ysu2xza2qoxj6iqqwnnt74c2jjqogju6pnwvmk3a"},{"i":82,"n":"O0x267","c":"bafybeih7ptlninw2qgnbp27prfiumzfispgaej7iiqgz6rfvzrzjn5pveu"},{"i":83,"n":"o0x218","c":"bafybeidqxyx6rjcaym6nh7loqyoubiwb2anz2h7fekgnsuk7leakljc2wm"},{"i":84,"n":"o0x196","c":"bafybeihqrehprstsxybt4pysfcjps7eoxrcfmqgdqwkdervcwkpey44zxe"},{"i":85,"n":"o0x141","c":"bafybeic2zjmepgwluxh6dueqcopvn5yh4quewchwmltn37gojaiyzazjlu"},{"i":86,"n":"o0x153","c":"bafybeidky4xkt4z6tcoqdpde4wlhycyhhdi5hxabth4lo3vthsqd6x6gde"},{"i":87,"n":"o0x204","c":"bafkreibzb5t6vt6xp22nbcmvj2ge47pr7hti3uqel4myhi6cjoz5wyz2km"},{"i":88,"n":"O0x299","c":"bafybeia2477t4amunfyt3vnfwbx36p3nouycgyppz6gxxyms4gauwwgiqe"},{"i":89,"n":"O0x288","c":"bafybeibcu5fox2rkt5uubin5npwgqi4nni7pk4ukvunhgsbikxqck6voyu"},{"i":90,"n":"o0x220","c":"bafybeif4jyyoxwksq7a7ykdawkgmj7bjaqpvvig73e6vmfwtnzfmbrr7ui"},{"i":91,"n":"O0x265","c":"bafybeiaqtzngrx74rj2tnvmu5qrw7bg22xsqlvwgtz4sc7uptorzz3tgvq"},{"i":92,"n":"o0x223","c":"bafybeignez4aegepqgnvrbhlabbdbi7wkg6dx2mlqpm7qikn6acmrfmcom"},{"i":93,"n":"o0x177","c":"bafkreicmqm3n6eeuvbmzeizf7canq2hapw5efi3reeqoeqfawt4h4p4ate"},{"i":94,"n":"O0x252","c":"bafybeifj2ecviqmbrhcr6j4auhzgmbk66ozscp7pi72mphpprvzil2yv7a"},{"i":95,"n":"o0x99","c":"bafybeibbnim6gvtnprdx7wl7x6vushs6h23xgyud5gblcdfye72zo2t2kq"},{"i":96,"n":"O0x264","c":"bafybeid7ineep2bjo3gjz5fsrvefal3kaynkctclider7p3oj7zlrzjuai"}]};
 
     // Format compact des montants en dollars ($45 · $11.6K · $194K).
     function fmtMoney(n) {
@@ -3203,7 +3214,7 @@ body::after {
         a.setAttribute('aria-label', 'View ' + collection.title);
         a.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
         a.innerHTML = \`
-          <div class="col-bg" data-cid="\${meta.id || ''}"></div>
+          <div class="col-bg" data-cid="\${meta.id || ''}"\${collection.external ? \` style="background-image:url('\${collection.image}')"\` : ''}></div>
           <div class="col-grad"></div>
           <img class="col-logo" src="\${collection.image}" alt="\${collection.alt}" loading="lazy" decoding="async">
           <div class="col-title-wrap">
@@ -3481,15 +3492,25 @@ body::after {
       const logo = view.querySelector('.cv-logo');
       logo.src = collection.image; logo.alt = title;
       view.querySelector('.cv-desc').textContent = meta.desc || '';
+      const isExternal = !!collection.external;
       const link = view.querySelector('.cv-link');
-      if (meta.id) { link.href = 'https://crypto.com/nft/collection/' + meta.id; link.hidden = false; } else { link.hidden = true; }
+      const linkLabel = link.querySelector('.cv-link-label');
+      if (meta.id) {
+        link.href = 'https://crypto.com/nft/collection/' + meta.id;
+        if (linkLabel) linkLabel.textContent = 'View on crypto.com';
+        link.hidden = false;
+      } else if (collection.croviaUrl) {
+        link.href = collection.croviaUrl;
+        if (linkLabel) linkLabel.textContent = 'Trade on Crovia';
+        link.hidden = false;
+      } else { link.hidden = true; }
       const sold = view.querySelector('.cv-sold'); if (sold) sold.hidden = !meta.soldOut;
       const setStat = (k, v) => { const e = view.querySelector('.cv-' + k); if (e) e.textContent = v; };
       setStat('holders', (collection.ownersCount || 0).toLocaleString('fr-FR'));
       setStat('items', (st.supply || 0).toLocaleString('fr-FR'));
       setStat('floor', fmtMoney(st.floor));
       setStat('vol', fmtMoney(st.vol));
-      setStat('sales', (st.sales || 0).toLocaleString('fr-FR'));
+      setStat('sales', isExternal ? '—' : (st.sales || 0).toLocaleString('fr-FR'));
       view.querySelector('.cv-items-count').textContent = st.supply ? '(' + st.supply.toLocaleString('fr-FR') + ')' : '';
       view.querySelector('.cv-holders-count').textContent = '(' + (collection.ownersCount || 0).toLocaleString('fr-FR') + ')';
       view.querySelector('#cvList').innerHTML = buildOwnerRowsHTML(collection.owners);
@@ -3510,9 +3531,26 @@ body::after {
         });
         grid.innerHTML = '';
         cvLoadMore(idx);
+      } else if (isExternal) {
+        if (collection.image) { bannerImg.src = collection.image; view.classList.add('has-banner'); }
+        renderExternalAssets(collection, grid);
       } else {
         grid.innerHTML = '<p class="cm-empty">No items available.</p>';
       }
+    }
+
+    // Grille NFT d'une collection externe (Crovia/Cronos) : assets pré-indexés,
+    // vignettes IPFS redimensionnées via weserv. Chaque carte renvoie vers Crovia.
+    function renderExternalAssets(collection, grid) {
+      const list = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[collection.contract]) || [];
+      if (!list.length) { grid.innerHTML = '<p class="cm-empty">No items available.</p>'; return; }
+      const thumb = c => c ? ('https://images.weserv.nl/?url=ipfs.io/ipfs/' + c + '&w=320&h=320&fit=cover&q=72&output=jpg') : collection.image;
+      const href = collection.croviaUrl || '#';
+      grid.innerHTML = list.map(a =>
+        '<a class="nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
+        + '<span class="nft-img"><img src="' + escHtml(thumb(a.c)) + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
+        + '<span class="nft-name">' + escHtml(a.n) + '</span></a>'
+      ).join('');
     }
 
     async function cvLoadMore(idx) {
@@ -3735,6 +3773,7 @@ body::after {
 
         // URL du profil reconstruite depuis le nom (non stockée dans les données → plus léger)
         collectionsData.forEach(collection => {
+          if (collection.external) return; // collections externes : owners déjà munis de leur URL (cronoscan)
           collection.owners.forEach(owner => {
             owner.url = 'https://crypto.com/nft/profile/' + owner.name;
             owner.twitter = owner.twitter ? validateTwitterUrl(owner.twitter) : '';
