@@ -2899,8 +2899,8 @@ body::after {
       <div class="hero-copy">
         <span class="eyebrow">Crypto.com NFT</span>
         <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
-        <p class="hero-tagline">Eleven collections. One galaxy of holders.</p>
-        <p class="hero-sub">A live ranking of every Cryptonauts collection on crypto.com — who holds the most across the galaxy, refreshed every day.</p>
+        <p class="hero-tagline">Twelve collections. One galaxy of holders.</p>
+        <p class="hero-sub">A live ranking of every Cryptonauts collection across crypto.com and Crovia — who holds the most across the galaxy, refreshed every day.</p>
         <div class="hero-metrics" id="heroStats"></div>
         <div class="hero-cta">
           <a href="#collections" class="btn btn-primary">
@@ -2927,7 +2927,7 @@ body::after {
 
   <main>
     <section class="ethos reveal" data-view="home">
-      <p class="ethos-line">Not a drop — a living saga. Eleven sold-out worlds, forged piece by piece by Fran Rodríguez, and written <span class="ethos-gold">holder by holder</span>.</p>
+      <p class="ethos-line">Not a drop — a living saga. Twelve worlds, forged piece by piece by Fran Rodríguez, and written <span class="ethos-gold">holder by holder</span>.</p>
     </section>
 
     <section class="section reveal spot-section" id="spotlight" data-view="home">
@@ -2946,7 +2946,7 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">The collections</span>
         <h2 class="section-title">Twelve worlds, one crew</h2>
-        <p class="section-sub">Twelve chapters of the Cryptonauts saga — every one sold out, across crypto.com and Crovia. Tap any collection to explore its items and holders.</p>
+        <p class="section-sub">Twelve chapters of the Cryptonauts saga — eleven sold out on crypto.com, the twelfth minting now on Crovia. Tap any collection to explore its items and holders.</p>
       </div>
       <div class="saga-stats">
         <div class="saga-stat"><span class="v">$194K</span><span class="l">Traded volume</span></div>
@@ -3251,9 +3251,9 @@ body::after {
         a.innerHTML = \`
           <div class="col-bg" data-cid="\${meta.id || ''}"\${collection.external ? \` style="background-image:url('\${collection.image}')"\` : ''}></div>
           <div class="col-grad"></div>
-          <img class="col-logo" src="\${collection.image}" alt="\${collection.alt}" loading="lazy" decoding="async">
+          <img class="col-logo" src="\${collection.image}" alt="\${escHtml(collection.alt)}" loading="lazy" decoding="async">
           <div class="col-title-wrap">
-            <h3 class="col-title">\${collection.title}</h3>
+            <h3 class="col-title">\${escHtml(collection.title)}</h3>
             \${rel ? \`<span class="col-date">\${rel}</span>\` : ''}
           </div>
           <div class="col-stats">
@@ -3278,7 +3278,7 @@ body::after {
         prev = o.count;
         const rc = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
         const tw = o.twitter ? \`<a href="\${validateTwitterUrl(o.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">\${getTwitterHandle(o.twitter)}</a>\` : '';
-        return \`<li class="\${rc}"><div class="lb-left"><span class="rank">\${rank}</span><a class="lb-name" href="\${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">\${o.name}</a>\${tw}</div><span class="lb-count"><span class="n">\${o.count}</span><span class="t">NFT\${o.count > 1 ? 's' : ''}</span></span></li>\`;
+        return \`<li class="\${rc}"><div class="lb-left"><span class="rank">\${rank}</span><a class="lb-name" href="\${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">\${escHtml(o.name)}</a>\${tw}</div><span class="lb-count"><span class="n">\${o.count}</span><span class="t">NFT\${o.count > 1 ? 's' : ''}</span></span></li>\`;
       }).join('');
     }
 
@@ -3735,7 +3735,7 @@ body::after {
                 <li class="\${owner.rankClass}">
                   <div class="left-container">
                     <span class="rank">\${owner.rank}</span>
-                    <a href="\${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">\${owner.name}</a>
+                    <a href="\${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">\${escHtml(owner.name)}</a>
                     \${owner.twitter ? \`<a href="\${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">\${getTwitterHandle(owner.twitter)}</a>\` : ''}
                   </div>
                   <span class="count-container"><span class="count-number">\${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span>
@@ -3749,7 +3749,7 @@ body::after {
                   <li class="\${owner.rankClass}">
                     <div class="left-container">
                       <span class="rank">\${owner.rank}</span>
-                      <a href="\${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">\${owner.name}</a>
+                      <a href="\${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">\${escHtml(owner.name)}</a>
                       \${owner.twitter ? \`<a href="\${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">\${getTwitterHandle(owner.twitter)}</a>\` : ''}
                     </div>
                     <span class="count-container"><span class="count-number">\${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span>
