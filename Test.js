@@ -3129,31 +3129,6 @@ body::after {
     </div>
   </footer>
 
-  <div id="collectionModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="cmTitle">
-    <div class="modal-box">
-      <button class="modal-close" id="collectionModalClose" aria-label="Close">&times;</button>
-      <div class="cm-header">
-        <img class="cm-cover" src="" alt="" loading="lazy" decoding="async">
-        <h2 class="cm-title" id="cmTitle"></h2>
-        <div class="cm-stats">
-          <div class="cm-stat"><span class="v cm-holders">0</span><span class="l">Holders</span></div>
-          <div class="cm-stat"><span class="v cm-floor">—</span><span class="l">Floor</span></div>
-          <div class="cm-stat"><span class="v cm-vol">—</span><span class="l">Volume</span></div>
-          <div class="cm-stat"><span class="v cm-sales">0</span><span class="l">Sales</span></div>
-        </div>
-        <p class="cm-desc"></p>
-        <a class="cm-link" target="_blank" rel="noopener" hidden>
-          View on crypto.com
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
-      </div>
-      <h3 class="cm-sec">Items</h3>
-      <div class="cm-nfts" id="cmNfts"></div>
-      <h3 class="cm-sec">Holders</h3>
-      <ul class="cm-list"></ul>
-    </div>
-  </div>
-
   <script>
     const collectionsData = ${JSON.stringify(allCollectionsData)};
     const globalOwnersData = ${JSON.stringify(globalOwnersData)};
@@ -3290,8 +3265,6 @@ body::after {
 
     // Aperçu des NFT d'une collection, chargé en direct depuis le GraphQL crypto.com.
     const NFT_GQL = 'https://crypto.com/nft-api/graphql';
-    const nftCache = {};
-    let nftActiveId = null;
     function nftCardsHTML(assets) {
       return (assets || []).map(a => {
         const base = (a.cover && a.cover.url) || (a.main && a.main.url) || '';
@@ -3300,33 +3273,6 @@ body::after {
           + \`<span class="nft-img">\${thumb ? \`<img src="\${thumb}" alt="\${escHtml(a.name)}" loading="lazy" decoding="async">\` : ''}</span>\`
           + \`<span class="nft-name">\${escHtml(a.name)}</span></a>\`;
       }).join('');
-    }
-    function renderNfts(el, assets) {
-      el.innerHTML = (assets && assets.length) ? nftCardsHTML(assets) : '<p class="cm-empty">No preview available.</p>';
-    }
-    async function loadCollectionNfts(collectionId) {
-      const el = document.getElementById('cmNfts');
-      if (!el) return;
-      nftActiveId = collectionId;
-      if (!collectionId) { el.innerHTML = ''; return; }
-      if (nftCache[collectionId]) { renderNfts(el, nftCache[collectionId]); return; }
-      el.innerHTML = '<span class="nft skeleton"></span>'.repeat(8);
-      try {
-        const res = await fetch(NFT_GQL, {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            variables: { id: collectionId, first: 24, skip: 0 },
-            query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name cover{url} main{url}}}}'
-          })
-        });
-        const data = await res.json();
-        const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
-        nftCache[collectionId] = assets;
-        if (nftActiveId === collectionId) renderNfts(el, assets);
-      } catch (e) {
-        if (nftActiveId === collectionId) el.innerHTML = '<p class="cm-empty">Could not load items.</p>';
-      }
     }
 
     // ───────── Page détaillée d'une collection (vue plein écran, routage #c/<i>) ─────────
@@ -3650,54 +3596,6 @@ body::after {
       showView(VIEWS.includes(name) ? name : 'home');
     }
 
-    // Tableau récapitulatif des stats de chaque collection (section Stats).
-    function buildStatsTable() {
-      const el = document.getElementById('statsTable');
-      if (!el || typeof collectionsData === 'undefined') return;
-      const rows = collectionsData.map(c => {
-        const st = COLLECTION_STATS[c.title] || {};
-        const total = c.owners.reduce((s, o) => s + (o.count || 0), 0);
-        return { title: c.title, image: c.image, release: COLLECTION_RELEASE[c.title] || '', holders: c.ownersCount || 0, items: st.supply || total, floor: st.floor, vol: st.vol || 0 };
-      });
-      el.innerHTML = '<div class="st-row st-head"><span class="st-name">Collection</span><span>Items</span><span>Holders</span><span>Floor</span><span>Volume</span></div>'
-        + rows.map(r => \`<div class="st-row">\`
-          + \`<span class="st-name"><img src="\${r.image}" alt="" loading="lazy" decoding="async"><span class="st-meta"><span class="st-title">\${escHtml(r.title)}</span>\${r.release ? \`<span class="st-rel">\${r.release}</span>\` : ''}</span></span>\`
-          + \`<span data-l="Items">\${(r.items || 0).toLocaleString('fr-FR')}</span>\`
-          + \`<span data-l="Holders">\${r.holders.toLocaleString('fr-FR')}</span>\`
-          + \`<span data-l="Floor">\${fmtMoney(r.floor)}</span>\`
-          + \`<span data-l="Volume">\${fmtMoney(r.vol)}</span></div>\`).join('');
-    }
-
-    function openCollectionModal(collection) {
-      const modal = document.getElementById('collectionModal');
-      if (!modal) return;
-      const cover = modal.querySelector('.cm-cover');
-      cover.src = collection.image;
-      cover.alt = collection.title;
-      modal.querySelector('.cm-title').textContent = collection.title;
-      const st = COLLECTION_STATS[collection.title] || {};
-      modal.querySelector('.cm-holders').textContent = (collection.ownersCount || 0).toLocaleString('fr-FR');
-      modal.querySelector('.cm-floor').textContent = fmtMoney(st.floor);
-      modal.querySelector('.cm-vol').textContent = fmtMoney(st.vol);
-      modal.querySelector('.cm-sales').textContent = (st.sales || 0).toLocaleString('fr-FR');
-      const meta = COLLECTION_META[collection.title] || {};
-      const descEl = modal.querySelector('.cm-desc');
-      const linkEl = modal.querySelector('.cm-link');
-      if (descEl) { descEl.textContent = meta.desc || ''; descEl.hidden = !meta.desc; }
-      if (linkEl) {
-        if (meta.id) { linkEl.href = 'https://crypto.com/nft/collection/' + meta.id; linkEl.hidden = false; }
-        else { linkEl.hidden = true; }
-      }
-      modal.querySelector('.cm-list').innerHTML = buildOwnerRowsHTML(collection.owners);
-      loadCollectionNfts(meta.id);
-      modal.hidden = false;
-      const box = modal.querySelector('.modal-box');
-      if (box) box.scrollTop = 0;
-      document.documentElement.style.overflow = 'hidden';
-      const closeBtn = modal.querySelector('.modal-close');
-      if (closeBtn) closeBtn.focus();
-    }
-
     function renderGlobalOwners(owners) {
       try {
         const sortedOwners = [...owners].sort((a, b) => b.count - a.count);
@@ -3916,21 +3814,6 @@ body::after {
             if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.click(); }
           });
         });
-
-        // Compteurs des cartes : animés en bloc à la 1re ouverture de la vue Collections (cf. showView).
-
-        // Fermeture de la modale détaillée d'une collection
-        const collectionModal = document.getElementById('collectionModal');
-        if (collectionModal) {
-          const closeCollectionModal = () => {
-            collectionModal.hidden = true;
-            document.documentElement.style.overflow = '';
-          };
-          const cmClose = document.getElementById('collectionModalClose');
-          if (cmClose) cmClose.addEventListener('click', closeCollectionModal);
-          collectionModal.addEventListener('click', (e) => { if (e.target === collectionModal) closeCollectionModal(); });
-          document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !collectionModal.hidden) closeCollectionModal(); });
-        }
 
         const showMoreButton = document.getElementById('show-more-owners');
         if (showMoreButton) {
