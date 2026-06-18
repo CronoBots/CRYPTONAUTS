@@ -2282,6 +2282,28 @@ body::after {
     .lc-head svg { color: var(--primary-color); flex-shrink: 0; }
     .lc-sub { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.02em; }
 
+    /* Citation de l'artiste */
+    .artist-quote {
+      max-width: 760px;
+      margin: 0 auto 32px;
+      padding: 0 20px;
+      text-align: center;
+    }
+    .artist-quote p {
+      font-family: var(--font-display);
+      font-size: clamp(1.15rem, 2.6vw, 1.7rem);
+      line-height: 1.36;
+      color: #eaf2ff;
+      margin: 0 0 14px;
+    }
+    .artist-quote cite {
+      font-style: normal;
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
     /* Stats marché de la modale + chiffres de la saga */
     .cm-stats { flex-wrap: wrap; }
     .saga-stats {
@@ -2521,8 +2543,12 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">The artist</span>
         <h2 class="section-title">Fran Rodríguez</h2>
-        <p class="section-sub">An expanding universe by surreal Spanish artist Fran Rodríguez — thirteen curated drops on crypto.com and a fully sold-out saga.</p>
+        <p class="section-sub">Barcelona-based surreal digital-collage artist. Two decades freelance, with album artwork for Tame Impala, Weezer and Coldplay — and the mind behind the Cryptonauts saga: thirteen curated, fully sold-out drops on crypto.com.</p>
       </div>
+      <blockquote class="artist-quote">
+        <p>“Art has to be honest. Really honest. I like art that offers an alternative way of seeing things.”</p>
+        <cite>Fran Rodríguez — crypto.com Creator Community</cite>
+      </blockquote>
       <div class="artist-links">
         <a href="https://crypto.com/nft/profile/cabezaenlasnubes?tab=created" target="_blank" rel="noopener" class="link-card">
           <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Crypto.com NFT</span>
@@ -2536,6 +2562,10 @@ body::after {
           <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> Instagram</span>
           <span class="lc-sub">@lacabezaenlasnubes</span>
         </a>
+        <a href="https://lacabezaenlasnubes.myshopify.com" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg> Shop</span>
+          <span class="lc-sub">Prints &amp; merch</span>
+        </a>
         <a href="https://discord.com/invite/TyTazHHgdV" target="_blank" rel="noopener" class="link-card">
           <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M20.317 4.369a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.249a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.077.077 0 00-.079-.036A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.2 14.2 0 001.226-1.994.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.245.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.893.077.077 0 00-.041.106c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.029 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.057c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg> Discord</span>
           <span class="lc-sub">Join the crew</span>
@@ -2543,6 +2573,10 @@ body::after {
         <a href="https://linktr.ee/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
           <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M9 15l6-6M10 7h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> Linktree</span>
           <span class="lc-sub">Every official link</span>
+        </a>
+        <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener" class="link-card">
+          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg> Interview</span>
+          <span class="lc-sub">crypto.com Creator Community</span>
         </a>
       </div>
     </section>
