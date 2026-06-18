@@ -36,7 +36,7 @@
       --collection-bg: #1a1a1a;
       --shadow: 0 2px 4px rgba(255,255,255,0.1);
       --font-display: 'Geomanist-Bold', system-ui, sans-serif;
-      --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-body: 'Geomanist-Bold', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     }
 
     @font-face {
@@ -2155,6 +2155,75 @@ body::after {
         text-transform: uppercase;
       }
     }
+    /* ── Onglets de la section artiste ── */
+    .tabs { max-width: 860px; margin: 0 auto; }
+    .tab-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
+    .tab-btn {
+      padding: 10px 22px;
+      border-radius: 999px;
+      border: 1px solid var(--hairline);
+      background: rgba(20, 22, 38, 0.5);
+      color: var(--muted);
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .tab-btn:hover { color: #fff; border-color: rgba(102, 191, 255, 0.4); }
+    .tab-btn.is-active {
+      color: #03040a;
+      background: var(--primary-color);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 22px rgba(102, 191, 255, 0.4);
+    }
+    .tab-panel { display: none; }
+    .tab-panel.is-active { display: block; animation: tabIn 0.4s ease; }
+    @keyframes tabIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+    .tab-text { max-width: 680px; margin: 0 auto; text-align: center; }
+    .tab-text p { color: var(--muted); line-height: 1.75; margin: 0 0 16px; font-size: 1.02rem; text-transform: none; }
+    .tab-text em { color: #cfe9ff; font-style: italic; }
+    .tab-text strong { color: #fff; }
+    .iv {
+      margin: 0 0 16px;
+      padding: 18px 22px;
+      border-left: 2px solid rgba(102, 191, 255, 0.5);
+      background: rgba(102, 191, 255, 0.05);
+      border-radius: 0 12px 12px 0;
+      color: #eaf2ff;
+      font-size: 1.05rem;
+      line-height: 1.45;
+      text-align: left;
+      text-transform: none;
+    }
+    .tab-text .btn { margin-top: 8px; }
+    .tab-tagline {
+      font-family: var(--font-display);
+      font-size: clamp(1.15rem, 3vw, 1.7rem);
+      color: #eaf2ff;
+      margin: 22px 0 0;
+      text-transform: none;
+    }
+    .tab-panel .artist-links { margin-top: 4px; }
+    @media (prefers-reduced-motion: reduce) { .tab-panel.is-active { animation: none; } }
+
+    /* Stats : nom de collection + année de sortie */
+    .st-meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+    .st-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .st-rel { font-family: var(--font-body); font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+    .st-name { white-space: normal; }
+
+    /* Ambiance cosmique des sections artiste & stats */
+    #artist, #stats { position: relative; overflow: hidden; }
+    #artist::before, #stats::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: radial-gradient(ellipse at 50% 0%, rgba(102, 191, 255, 0.10), transparent 62%);
+    }
   </style>
 </head>
 <body>
@@ -2247,11 +2316,38 @@ body::after {
         <h2 class="section-title">Fran Rodríguez</h2>
         <p class="section-sub">Barcelona-based surreal digital-collage artist. Two decades freelance, with album artwork for Tame Impala, Weezer and Coldplay — and the mind behind the Cryptonauts saga: thirteen curated, fully sold-out drops on crypto.com.</p>
       </div>
-      <blockquote class="artist-quote">
-        <p>“Art has to be honest. Really honest. I like art that offers an alternative way of seeing things.”</p>
-        <cite>Fran Rodríguez — crypto.com Creator Community</cite>
-      </blockquote>
-      <div class="artist-links">
+      <div class="tabs" id="artistTabs">
+        <div class="tab-bar" role="tablist" aria-label="Artist sections">
+          <button class="tab-btn is-active" role="tab" aria-selected="true" data-tab="story">Story</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="interview">Interview</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="universe">Universe</button>
+          <button class="tab-btn" role="tab" aria-selected="false" data-tab="links">Links</button>
+        </div>
+        <div class="tab-panel is-active" data-panel="story">
+          <div class="tab-text">
+            <p>Fran Rodríguez — known online as <em>lacabezaenlasnubes</em>, “head in the clouds” — is a digital-collage artist based in Barcelona, born in a small industrial town in northern Spain. Raised in a working-class family that prized books and music, he has been a full-time freelance artist for around twenty years.</p>
+            <p>Largely self-taught through online forums, he spent a decade in Madrid as an advertising art director before going freelance. He has created album and concert artwork for <strong>Tame Impala, Weezer, Coldplay and Tycho</strong>, and exhibits and sells internationally — entering the NFT space in 2021 with “Postcards From a Dream”, then “Quantum Landscapes”.</p>
+            <p>His work is surreal and psychedelic: dreamscapes and meditation, outer space and nature, the human figure before the immensity of the cosmos.</p>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="interview">
+          <div class="tab-text">
+            <blockquote class="iv">“Art has to be honest. Really honest. I like art that offers an alternative way of seeing things.”</blockquote>
+            <blockquote class="iv">“I like the freedom NFTs give artists — the opportunity to work and live off your art without depending on managers.”</blockquote>
+            <blockquote class="iv">“Message, no doubt. The technique seems totally secondary.”</blockquote>
+            <a class="btn btn-ghost" href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">Read the full interview
+              <svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </a>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="universe">
+          <div class="tab-text">
+            <p>The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across <strong>thirteen curated, fully sold-out drops</strong> on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
+            <p class="tab-tagline">“Like a mind altering substance, without the risk.”</p>
+          </div>
+        </div>
+        <div class="tab-panel" data-panel="links">
+          <div class="artist-links">
         <a href="https://crypto.com/nft/profile/cabezaenlasnubes?tab=created" target="_blank" rel="noopener" class="link-card">
           <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Crypto.com NFT</span>
           <span class="lc-sub">Artist profile &amp; drops</span>
@@ -2288,6 +2384,8 @@ body::after {
           <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg> Interview</span>
           <span class="lc-sub">crypto.com Creator Community</span>
         </a>
+          </div>
+        </div>
       </div>
     </section>
   </main>
@@ -2380,6 +2478,21 @@ body::after {
     };
     const SAGA_STATS = { volume: 193922, sales: 3914, items: 2002 };
 
+    // Date de sortie sur crypto.com (mint du 1er NFT) — pour l'ordre chronologique.
+    const COLLECTION_RELEASE = {
+      "Legendary Cryptonauts V2": "Mar 2026",
+      "OG Cryptonauts": "Jan 2026",
+      "Time Travel Cryptonauts II": "Aug 2025",
+      "Legendary Cryptonauts": "Jun 2025",
+      "TIME TRAVEL Cryptonauts": "Feb 2025",
+      "Quantum Cryptonauts V2": "Dec 2024",
+      "Quantum Cryptonauts": "Jul 2024",
+      "Cryptonauts 2024": "May 2024",
+      "Cryptonauts Golden Crew": "Apr 2024",
+      "Cryptonauts: The dark side of the dune": "Nov 2023",
+      "Cryptonauts": "May 2023"
+    };
+
     // Format compact des montants en dollars ($45 · $11.6K · $194K).
     function fmtMoney(n) {
       if (n == null || n === 0) return '—';
@@ -2411,7 +2524,7 @@ body::after {
             </div>
             <div class="collection-body">
               <h2>${collection.title}</h2>
-              ${collection.date ? `<span class="collection-date">${collection.date}</span>` : ''}
+              ${COLLECTION_RELEASE[collection.title] ? `<span class="collection-date">${COLLECTION_RELEASE[collection.title]}</span>` : ''}
               <div class="collection-stats">
                 <div class="stat-chip"><span class="v" data-count="${collection.ownersCount || 0}">0</span><span class="l">Holders</span></div>
                 <div class="stat-chip"><span class="v" data-count="${total}">0</span><span class="l">Cryptonauts</span></div>
@@ -2497,11 +2610,11 @@ body::after {
       const rows = collectionsData.map(c => {
         const st = COLLECTION_STATS[c.title] || {};
         const total = c.owners.reduce((s, o) => s + (o.count || 0), 0);
-        return { title: c.title, image: c.image, holders: c.ownersCount || 0, items: st.supply || total, floor: st.floor, vol: st.vol || 0 };
-      }).sort((a, b) => b.vol - a.vol);
+        return { title: c.title, image: c.image, release: COLLECTION_RELEASE[c.title] || '', holders: c.ownersCount || 0, items: st.supply || total, floor: st.floor, vol: st.vol || 0 };
+      });
       el.innerHTML = '<div class="st-row st-head"><span class="st-name">Collection</span><span>Items</span><span>Holders</span><span>Floor</span><span>Volume</span></div>'
         + rows.map(r => `<div class="st-row">`
-          + `<span class="st-name"><img src="${r.image}" alt="" loading="lazy" decoding="async">${escHtml(r.title)}</span>`
+          + `<span class="st-name"><img src="${r.image}" alt="" loading="lazy" decoding="async"><span class="st-meta"><span class="st-title">${escHtml(r.title)}</span>${r.release ? `<span class="st-rel">${r.release}</span>` : ''}</span></span>`
           + `<span data-l="Items">${(r.items || 0).toLocaleString('fr-FR')}</span>`
           + `<span data-l="Holders">${r.holders.toLocaleString('fr-FR')}</span>`
           + `<span data-l="Floor">${fmtMoney(r.floor)}</span>`
@@ -2700,6 +2813,24 @@ body::after {
 
         // Tableau récapitulatif par collection (section Stats)
         buildStatsTable();
+
+        // Onglets de la section artiste (Story / Interview / Universe / Links)
+        const artistTabs = document.getElementById('artistTabs');
+        if (artistTabs) {
+          artistTabs.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const id = btn.dataset.tab;
+              artistTabs.querySelectorAll('.tab-btn').forEach(b => {
+                const on = b === btn;
+                b.classList.toggle('is-active', on);
+                b.setAttribute('aria-selected', on ? 'true' : 'false');
+              });
+              artistTabs.querySelectorAll('.tab-panel').forEach(p => {
+                p.classList.toggle('is-active', p.dataset.panel === id);
+              });
+            });
+          });
+        }
 
         // Révélations au défilement (sections + leaderboard)
         const revealEls = document.querySelectorAll('.reveal');
