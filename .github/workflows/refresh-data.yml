@@ -1,0 +1,69 @@
+name: Refresh leaderboard data
+
+# Rafraîchit le classement Cryptonauts (data.json) et le commit si les
+# rangs des holders ont réellement changé. L'index (index.html) charge ce
+# data.json en direct via fetch — plus aucune donnée n'est cuite dans l'index.
+
+on:
+  schedule:
+    - cron: '0 6 * * *'   # tous les jours à 06:00 UTC
+  workflow_dispatch: {}    # bouton « Run workflow » manuel
+
+permissions:
+  contents: write
+
+concurrency:
+  group: refresh-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      # Owners.json (cache des handles Twitter/X) est gitignoré : on le persiste
+      # via le cache des Actions pour éviter de re-scraper X à chaque exécution.
+      - name: Restore Twitter handle cache
+        uses: actions/cache@v4
+        with:
+          path: Owners.json
+          key: owners-json-${{ github.run_id }}
+          restore-keys: |
+            owners-json-
+
+      - name: Build data.json
+        run: node Test.js
+
+      - name: Commit data.json si le classement a changé
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Compare au data.json committé en ignorant generatedAt (qui change
+          # à chaque run) → on ne commit que sur un vrai changement de classement.
+          if node -e '
+            const fs = require("fs"), cp = require("child_process");
+            let prev = {};
+            try { prev = JSON.parse(cp.execSync("git show HEAD:data.json").toString()); } catch (e) {}
+            const next = JSON.parse(fs.readFileSync("data.json", "utf8"));
+            const strip = d => JSON.stringify({ c: d.collectionsData, g: d.globalOwnersData });
+            process.exit(strip(prev) === strip(next) ? 0 : 1);
+          '; then
+            echo "Classement inchangé — aucun commit."
+          else
+            echo "Classement modifié — commit + push."
+            git add data.json
+            git commit -m "data: rafraichit le classement Cryptonauts (auto)"
+            git push
+          fi

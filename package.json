@@ -1,10 +1,11 @@
 {
   "name": "cryptonauts-leaderboards",
   "version": "1.0.0",
-  "description": "Générateur du leaderboard Cryptonauts (index.html) à partir de l'API crypto.com",
+  "description": "Génère le classement des holders Cryptonauts (data.json) depuis l'API crypto.com ; index.html le charge en direct via fetch.",
   "private": true,
   "scripts": {
-    "build": "node Test.js"
+    "build": "node Test.js",
+    "refresh-data": "node Test.js"
   },
   "dependencies": {
     "axios": "^1.17.0"
