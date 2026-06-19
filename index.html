@@ -1932,7 +1932,7 @@ body::after {
     }
 
     /* Nav : libellés monumentaux en majuscules, centrés */
-    .navbar { border-bottom: 1px solid var(--hairline); }
+    .navbar { border-bottom: 1px solid transparent; }
     .nav-social a::after { display: none; }
     .live-pill { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; }
 
@@ -2644,15 +2644,25 @@ body::after {
     .sb-refresh:hover svg { transform: rotate(-180deg); }
     .sb-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr)); gap: 9px; }
     .sb-row {
-      display: grid; grid-template-columns: 54px 1fr auto; gap: 15px; align-items: center;
-      padding: 11px 16px; border-radius: 15px;
-      border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(16, 19, 33, 0.5);
+      position: relative; overflow: hidden;
+      display: grid; grid-template-columns: 60px 1fr auto; gap: 15px; align-items: center;
+      padding: 12px 18px 12px 16px; border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(16, 14, 11, 0.55);
       transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
     }
-    .sb-row:hover { transform: translateY(-2px); border-color: rgba(255, 106, 26, 0.4); background: rgba(20, 26, 46, 0.7); text-decoration: none; }
-    .sb-thumb { width: 54px; height: 54px; border-radius: 11px; object-fit: cover; background: rgba(255, 255, 255, 0.04); flex-shrink: 0; }
-    .sb-main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-    .sb-name { font-family: var(--font-display); font-size: 0.98rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Filet d'accent orange à gauche, qui s'illumine au survol. */
+    .sb-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--primary-color), rgba(255,106,26,0.2)); opacity: 0.5; transition: opacity 0.2s ease; }
+    .sb-row:hover { transform: translateY(-2px); border-color: rgba(255, 106, 26, 0.45); background: rgba(28, 20, 14, 0.8); text-decoration: none; }
+    .sb-row:hover::before { opacity: 1; }
+    .sb-thumb-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
+    .sb-thumb { width: 60px; height: 60px; border-radius: 13px; object-fit: cover; background: rgba(255, 255, 255, 0.04); }
+    .sb-col-badge { position: absolute; bottom: -5px; right: -5px; width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 2px solid #100c09; background: #100c09; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
+    .sb-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .sb-line1 { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    .sb-name { font-family: var(--font-display); font-size: 0.98rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .sb-tag { flex: none; font-family: var(--font-body); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
+    .sb-tag-sale { background: rgba(255, 106, 26, 0.14); color: #ff8a4c; border: 1px solid rgba(255, 106, 26, 0.36); }
+    .sb-tag-mint { background: rgba(232, 192, 105, 0.14); color: var(--gold); border: 1px solid rgba(232, 192, 105, 0.36); }
     .sb-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); min-width: 0; }
     .sb-col { color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
     .sb-parties { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -2663,8 +2673,10 @@ body::after {
     .sb-empty { text-align: center; color: rgba(236, 228, 212, 0.55); padding: 40px 0; }
     .sb-skel { height: 76px; border-radius: 15px; background: linear-gradient(100deg, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.03) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; border: none; }
     @media screen and (max-width: 600px) {
-      .sb-row { grid-template-columns: 46px 1fr auto; gap: 11px; padding: 10px 12px; }
-      .sb-thumb { width: 46px; height: 46px; }
+      .sb-row { grid-template-columns: 52px 1fr auto; gap: 11px; padding: 10px 12px 10px 11px; }
+      .sb-thumb-wrap { width: 52px; height: 52px; }
+      .sb-thumb { width: 52px; height: 52px; border-radius: 11px; }
+      .sb-col-badge { width: 21px; height: 21px; bottom: -4px; right: -4px; }
       .sb-name { font-size: 0.9rem; }
       .sb-meta { font-size: 0.72rem; gap: 2px 8px; }
       .sb-col { max-width: 150px; }
@@ -3350,10 +3362,13 @@ body::after {
         feed.innerHTML = top.map(s => {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
+          const isMint = (s.seller === 'Mint');
+          const tag = isMint ? '<span class="sb-tag sb-tag-mint">Mint</span>' : '<span class="sb-tag sb-tag-sale">Sale</span>';
+          const badge = (s.colImg && s.colImg !== thumb) ? '<img class="sb-col-badge" src="' + escHtml(s.colImg) + '" alt="" loading="lazy" decoding="async">' : '';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-            + '<img class="sb-thumb" src="' + escHtml(thumb) + '" alt="" loading="lazy" decoding="async">'
+            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '" alt="" loading="lazy" decoding="async">' + badge + '</span>'
             + '<div class="sb-main">'
-            + '<span class="sb-name">' + escHtml(s.asset || s.col) + '</span>'
+            + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tag + '</div>'
             + '<span class="sb-meta"><span class="sb-col">' + escHtml(s.col) + '</span>'
             + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span></span>'
             + '</div>'
