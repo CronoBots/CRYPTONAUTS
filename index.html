@@ -8,6 +8,8 @@
   <link rel="preload" href="fonts/Geomanist-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="assets/icon.png">
   <link rel="preconnect" href="https://media.nft.crypto.com" crossorigin>
+  <link rel="preconnect" href="https://images.weserv.nl" crossorigin>
+  <link rel="preconnect" href="https://crypto.com">
   <meta name="description" content="Classements en temps réel des holders Cryptonauts (collection NFT crypto.com) : collections, leaderboard global et liens X.">
   <meta property="og:type" content="website">
   <meta property="og:title" content="Cryptonauts Leaderboards">
@@ -1590,6 +1592,17 @@ body::after {
       padding: 40px clamp(22px, 4vw, 72px) 60px;
       box-sizing: border-box;
     }
+    /* Fondu du bas du hero vers le fond de la page : supprime la cassure nette
+       entre la vidéo/halo du hero et le reste de l'accueil. */
+    .hero::after {
+      content: '';
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      height: 200px;
+      z-index: 2;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(3, 4, 10, 0) 0%, #03040a 88%);
+    }
     /* Fond vidéo nébuleuse (style synthverse) */
     .hero-video {
       position: absolute;
@@ -2729,7 +2742,7 @@ body::after {
       </div>
       <div class="hero-visual">
         <div class="hero-frame">
-          <img src="assets/icon-512.png" alt="Quantum Cryptonauts astronaut" class="hero-astronaut" decoding="async">
+          <img src="https://images.weserv.nl/?url=cronobots.github.io/CRYPTONAUTS/assets/icon-512.png&w=512&output=webp&q=82" onerror="this.onerror=null;this.src='assets/icon-512.png'" alt="Quantum Cryptonauts astronaut" class="hero-astronaut" decoding="async" fetchpriority="high">
         </div>
       </div>
     </div>
