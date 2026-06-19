@@ -3317,10 +3317,12 @@ body::after {
       if (!feed) return;
       feed.innerHTML = '<div class="sb-row sb-skel"></div>'.repeat(8);
       if (countEl) countEl.textContent = 'Loading…';
-      const cols = (typeof collectionsData !== 'undefined' ? collectionsData : []).map(c => {
-        const meta = COLLECTION_META[c.title] || {};
-        return { title: c.title, id: meta.id, image: c.image };
-      }).filter(c => c.id);
+      // Liste des collections depuis COLLECTION_META (statique) — indépendante du
+      // chargement async de collectionsData (data.json). Sinon, à la 1re ouverture,
+      // cols pouvait être vide → seuls les mints V3 apparaissaient (~12 ventes).
+      const cols = Object.keys(COLLECTION_META)
+        .map(title => ({ title, id: (COLLECTION_META[title] || {}).id }))
+        .filter(c => c.id);
       try {
         const results = await Promise.all(cols.map(c =>
           fetch(NFT_GQL, {
@@ -3333,6 +3335,9 @@ body::after {
         ));
         const sales = [];
         results.forEach(({ c, edges }) => {
+          // Logo de la collection résolu au rendu (collectionsData est prêt à ce stade).
+          const cd = (typeof collectionsData !== 'undefined') ? collectionsData.find(x => x.title === c.title) : null;
+          const colImg = cd ? cd.image : '';
           (edges || []).forEach(e => {
             const n = e && e.node; if (!n) return;
             const amt = parseFloat(n.amountDecimal);
@@ -3340,8 +3345,8 @@ body::after {
             if (!(amt > 0) && !(usd > 0)) return;
             const cover = (n.asset && n.asset.cover && n.asset.cover.url) || '';
             sales.push({
-              col: c.title, colImg: c.image,
-              thumb: cover ? (cover + '?d=lg-logo') : c.image,
+              col: c.title, colImg: colImg,
+              thumb: cover ? (cover + '?d=lg-logo') : colImg,
               link: (n.asset && n.asset.id) ? nftUrl(c.id, n.asset.id) : 'https://crypto.com/nft',
               asset: (n.asset && n.asset.name) || '',
               price: sbPrice(n.amountDecimal, n.listing && n.listing.currency, n.listing && n.listing.salePriceDecimalUSD),
