@@ -265,7 +265,7 @@ body::after {
     }
 
     .leaderboard-section {
-      margin-top: 40px;
+      margin-top: 0;
     }
 
     .leaderboard-section h1 {
@@ -1954,6 +1954,8 @@ body::after {
 
     /* Titres de section : glow retenu */
     .section-title { text-shadow: 0 0 22px rgba(255, 106, 26, 0.22); letter-spacing: 0.04em; text-transform: uppercase; }
+    /* Titre Spotlight légèrement réduit (il tient sur deux phrases). */
+    .spot-section .section-title { font-size: clamp(1.7rem, 4.2vw, 2.9rem); }
     .section-sub { color: var(--muted); }
     .collection-body h2 { text-shadow: none; }
     .cm-title { text-shadow: none; }
@@ -2138,13 +2140,6 @@ body::after {
       .saga-stat .v { font-size: 1.4rem; }
       .tab-bar { gap: 6px; }
       .tab-btn { padding: 9px 13px; font-size: 0.72rem; letter-spacing: 0.04em; }
-    }
-
-    /* ── Séparation nette des sections ── */
-    #stats, #leaderboard, #artist, .leaderboard-section {
-      border-top: 1px solid var(--hairline);
-      margin-top: 52px;
-      padding-top: 56px;
     }
 
     /* ── Aperçu des NFT dans la modale ── */
@@ -2524,13 +2519,19 @@ body::after {
     /* Une ligne par collection : libellé léger + rangée d'œuvres défilante. */
     .spot-line { position: relative; }
     .spot-name {
-      display: block; margin: 0 0 7px; padding-left: 7.5%;
+      display: inline-flex; align-items: center; gap: 9px;
+      margin: 0 0 8px 7.5%;
       font-family: var(--font-body); font-size: 0.62rem; font-weight: 500;
-      letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); opacity: 0.6;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); opacity: 0.62;
+      text-decoration: none; transition: opacity 0.2s ease, color 0.2s ease;
+    }
+    a.spot-name:hover { opacity: 1; color: var(--primary-color); }
+    .spot-name-logo {
+      width: 19px; height: 19px; border-radius: 5px; object-fit: cover; flex: none;
+      border: 1px solid var(--hairline); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
     }
     .spot-row { display: flex; gap: 14px; width: max-content; animation: spotScroll 60s linear infinite; will-change: transform; }
     .spot-line:nth-child(even) .spot-row { animation-direction: reverse; }
-    .spot-wall:hover .spot-row { animation-play-state: paused; }
     @keyframes spotScroll { to { transform: translateX(-50%); } }
     .spot-nft {
       width: 112px; height: 112px; flex-shrink: 0; border-radius: 14px; overflow: hidden;
@@ -2550,7 +2551,7 @@ body::after {
       .spot-nft { width: 84px; height: 84px; border-radius: 11px; }
       .spot-wall { gap: 14px; }
       .spot-row { gap: 10px; }
-      .spot-name { font-size: 0.56rem; padding-left: 8%; }
+      .spot-name { font-size: 0.56rem; margin-left: 8%; }
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: none; margin: 0 auto; }
@@ -2724,10 +2725,6 @@ body::after {
         </div>
       </div>
     </div>
-    <a href="#collections" class="scroll-cue" aria-label="Scroll to collections">
-      <span>Scroll</span>
-      <svg class="chev" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
   </header>
 
   <main>
@@ -2735,6 +2732,7 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">Spotlight</span>
         <h2 class="section-title">Twelve collections.<br>One galaxy of holders.</h2>
+        <p class="section-sub">A living wall of Cryptonauts artworks.</p>
       </div>
       <div class="spot-wall" id="spotWall" aria-label="Featured Cryptonauts"></div>
     </section>
@@ -2961,9 +2959,9 @@ body::after {
 
     <section class="section reveal hidden-view" id="salesbot" data-view="salesbot">
       <div class="section-head">
-        <span class="eyebrow"><span class="sb-live"></span> Live feed</span>
+        <span class="eyebrow">Live feed</span>
         <h2 class="section-title">Sales Bot</h2>
-        <p class="section-sub">The latest sales and mints across every Cryptonauts collection — on crypto.com and Crovia — newest first.</p>
+        <p class="section-sub">The latest sales and mints across every Cryptonauts collection.</p>
       </div>
       <div class="sb-wrap">
         <div class="sb-bar">
@@ -3391,13 +3389,15 @@ body::after {
       // Squelette : une ligne par collection (nom + rangée).
       wall.innerHTML = cols.map((c, i) =>
         '<div class="spot-line" data-i="' + i + '">'
-        + '<span class="spot-name">' + escHtml(c.title) + '</span>'
+        + '<a class="spot-name" data-title="' + escHtml(c.title) + '">' + escHtml(c.title) + '</a>'
         + '<div class="spot-row">' + '<span class="spot-nft spot-skel"></span>'.repeat(7) + '</div>'
         + '</div>'
       ).join('');
 
       const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
 
+      // Moins de vignettes sur petit écran (assez pour une boucle fluide) → chargement plus léger.
+      const COUNT = (window.innerWidth <= 600) ? 7 : 12;
       const fillLine = async (line, c) => {
         const row = line.querySelector('.spot-row');
         let tiles = [];
@@ -3405,16 +3405,16 @@ body::after {
           if (c.meta.external || !c.meta.id) {
             const arr = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[c.meta.contract]) || [];
             const href = c.meta.croviaUrl || 'https://crovia.app';
-            tiles = shuffle(arr).slice(0, 12).map(a =>
+            tiles = shuffle(arr).slice(0, COUNT).map(a =>
               '<a class="spot-nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
-              + '<img src="' + escHtml('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=240&h=240&fit=cover&q=72&output=jpg') + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
+              + '<img src="' + escHtml('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=168&h=168&fit=cover&q=66&output=webp') + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
           } else {
             const st = COLLECTION_STATS[c.title] || {};
             const supply = st.supply || 30;
-            const skip = Math.floor(Math.random() * Math.max(1, supply - 12));
+            const skip = Math.floor(Math.random() * Math.max(1, supply - COUNT));
             const res = await fetch(NFT_GQL, {
               method: 'POST', headers: { 'content-type': 'application/json' },
-              body: JSON.stringify({ variables: { id: c.meta.id, first: 12, skip }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
+              body: JSON.stringify({ variables: { id: c.meta.id, first: COUNT, skip }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
             });
             const data = await res.json();
             const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
@@ -3428,6 +3428,14 @@ body::after {
         const html = tiles.join('');
         row.innerHTML = html + html; // dupliqué pour une boucle sans couture
         row.style.animationDuration = Math.max(28, tiles.length * 5) + 's';
+        // Optimisation du libellé : logo de la collection + lien vers la page complète.
+        const nameEl = line.querySelector('.spot-name');
+        if (nameEl) {
+          const idx = (typeof collectionsData !== 'undefined') ? collectionsData.findIndex(x => x.title === c.title) : -1;
+          const logo = (idx >= 0 && collectionsData[idx].image) ? collectionsData[idx].image : null;
+          if (idx >= 0) nameEl.setAttribute('href', '#c/' + idx);
+          if (logo) nameEl.innerHTML = '<img class="spot-name-logo" src="' + escHtml(logo) + '" alt="" loading="lazy" decoding="async"><span>' + escHtml(c.title) + '</span>';
+        }
       };
 
       // Chargement à l'approche (lignes empilées) pour ne pas tout charger d'un coup.
@@ -3578,7 +3586,7 @@ body::after {
         section.dataset.view = 'leaderboard';
         section.innerHTML = `
           <div class="section-head">
-            <span class="eyebrow">◆ Global Ranking</span>
+            <span class="eyebrow">Global Ranking</span>
             <h2 class="section-title">Leaderboard</h2>
             <p class="section-sub">The top holders across every Cryptonauts collection, combined.</p>
           </div>
