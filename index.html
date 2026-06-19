@@ -3295,9 +3295,9 @@ body::after {
       const byId = {}; assets.forEach(a => { byId[a.i] = a; });
       V3_SALES.slice(0, 12).forEach(m => {
         const a = byId[m.t] || {};
-        const thumb = a.c ? ('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=120&h=120&fit=cover&q=70&output=jpg') : 'assets/v3-logo.jpg';
+        const thumb = a.c ? ('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=120&h=120&fit=cover&q=70&output=jpg') : 'assets/v3-logo.jpg?v=2';
         sales.push({
-          col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg',
+          col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg?v=2',
           thumb: thumb,
           link: meta.croviaUrl || 'https://crovia.app',
           asset: a.n || ('#' + m.t),
