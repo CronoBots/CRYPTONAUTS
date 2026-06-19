@@ -544,7 +544,7 @@ body::after {
       background: none;
       padding: 0;
       box-shadow: none;
-      max-width: 1080px;
+      max-width: none;
       margin: 0 auto;
     }
 
@@ -579,6 +579,8 @@ body::after {
 
     #global-owners, #additional-owners {
       padding: 0;
+      columns: 460px;
+      column-gap: 18px;
     }
 
     #global-owners li,
@@ -600,6 +602,7 @@ body::after {
       opacity: 1;
       will-change: transform;
       z-index: 1;
+      break-inside: avoid;
     }
 
     #global-owners li::before,
@@ -1924,7 +1927,7 @@ body::after {
       position: relative;
       z-index: 3;
       width: 100%;
-      max-width: 1560px;
+      max-width: 1760px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
@@ -2332,7 +2335,7 @@ body::after {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(216px, 1fr));
       gap: 16px;
-      max-width: 1120px;
+      max-width: 1280px;
       margin: 0 auto;
     }
     .link-card {
@@ -2538,7 +2541,7 @@ body::after {
       }
     }
     /* ── Onglets de la section artiste ── */
-    .tabs { max-width: 1120px; margin: 0 auto; }
+    .tabs { max-width: 1280px; margin: 0 auto; }
     .tab-bar { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-bottom: 28px; }
     .tab-btn {
       padding: 10px 22px;
@@ -2593,7 +2596,7 @@ body::after {
     .links-h { font-family: var(--font-body); font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); text-align: center; margin: 0 0 12px; }
 
     /* ── Interview : pièce éditoriale premium (onglet Artist) ── */
-    .iv-article { max-width: 1120px; margin: 0 auto; text-align: left; counter-reset: ivq; }
+    .iv-article { max-width: 1280px; margin: 0 auto; text-align: left; counter-reset: ivq; }
     .iv-article p { color: var(--muted); line-height: 1.8; margin: 0; font-size: 1.04rem; text-transform: none; }
     /* Layout magazine : colonne de texte lisible centrée ; visuels (hero/feature/gallery) pleine largeur */
     .iv-meta, .iv-qa, .iv-pull { max-width: 720px; margin-left: auto; margin-right: auto; }
@@ -2727,7 +2730,8 @@ body::after {
     .cv-back:active { transform: scale(0.97); }
 
     .cv-inner { max-width: none; margin: 0 auto; padding: 0 clamp(18px, 4vw, 72px) 44px; }
-    #cvList { max-width: 1100px; margin: 0 auto; }
+    #cvList { max-width: none; margin: 0 auto; columns: 440px; column-gap: 18px; }
+    #cvList li { break-inside: avoid; }
     /* Titre centré horizontalement ET verticalement dans la bannière.
        pointer-events:none -> ne bloque pas les clics du bouton retour situé dessous. */
     .cv-title {
@@ -2896,7 +2900,7 @@ body::after {
       70% { box-shadow: 0 0 0 7px rgba(52, 226, 154, 0); }
       100% { box-shadow: 0 0 0 0 rgba(52, 226, 154, 0); }
     }
-    .sb-wrap { max-width: 940px; margin: 0 auto; }
+    .sb-wrap { max-width: none; margin: 0 auto; }
     .sb-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
     .sb-count { font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(233, 240, 255, 0.55); }
     .sb-refresh {
@@ -2909,7 +2913,7 @@ body::after {
     .sb-refresh:hover { background: rgba(102, 191, 255, 0.14); border-color: rgba(102, 191, 255, 0.5); color: #fff; }
     .sb-refresh svg { transition: transform 0.5s ease; }
     .sb-refresh:hover svg { transform: rotate(-180deg); }
-    .sb-feed { display: flex; flex-direction: column; gap: 9px; }
+    .sb-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 430px), 1fr)); gap: 9px; }
     .sb-row {
       display: grid; grid-template-columns: 54px 1fr auto; gap: 15px; align-items: center;
       padding: 11px 16px; border-radius: 15px;
