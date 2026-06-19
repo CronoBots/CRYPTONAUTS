@@ -1511,7 +1511,6 @@ body::after {
     }
     .navbar.scrolled {
       background: rgba(3, 4, 10, 0.85);
-      border-color: rgba(255, 106, 26, 0.22);
       padding: 12px clamp(18px, 4vw, 72px);
     }
     .nav-links {
@@ -2793,7 +2792,7 @@ body::after {
               <p>Fran Rodríguez — known online as <em>lacabezaenlasnubes</em>, “head in the clouds” — is a digital-collage artist based in Barcelona, born in a small industrial town in northern Spain. Raised in a working-class family that prized books and music, he has been a full-time freelance artist for around twenty years.</p>
               <p>Largely self-taught through online forums, he spent a decade in Madrid as an advertising art director before going freelance. He has created album and concert artwork for <strong>Tame Impala, Weezer, Coldplay and Tycho</strong>, and exhibits and sells internationally — entering the NFT space in 2021 with “Postcards From a Dream”, then “Quantum Landscapes”.</p>
               <p>His work is surreal and psychedelic: dreamscapes and meditation, outer space and nature, the human figure before the immensity of the cosmos.</p>
-            </div>
+            </div>
 
             <h3 class="iv-label iv-reveal"><span>The interview</span></h3>
             <div class="iv-meta iv-reveal">
@@ -2806,7 +2805,7 @@ body::after {
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">Where are you from, and what was your upbringing like?</h4>
               <p class="iv-a">I was born in a small industrial town in northern Spain, then I went to live in Madrid for 10 years. Now, I live in Barcelona. I grew up in a very normal, working-class family, but there were always books and music — and I was brought up in a very patient and sensitive way. I guess that influenced me to dedicate myself to something related to art.</p>
-            </div>
+            </div>
 
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">Are you self-taught, or did you receive any training?</h4>
@@ -2818,36 +2817,36 @@ body::after {
             <figure class="iv-feature iv-reveal">
               <div class="iv-shot"><img src="assets/interview/clouds.jpg" alt="Surreal collage of a silhouette before clouds and stars, by Fran Rodríguez" loading="lazy" decoding="async"></div>
               <figcaption>Fran works as <em>lacabezaenlasnubes</em> — “head in the clouds.”</figcaption>
-            </figure>
+            </figure>
 
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">How did you get into NFTs?</h4>
               <p class="iv-a">I saw several artist friends starting to talk about NFTs on Instagram in February and March this year. I asked them and they told me. I spent several days studying and decided to give it a try. It’s the best decision I’ve ever made in my life.</p>
-            </div>
+            </div>
 
             <figure class="iv-gallery iv-reveal">
               <div class="iv-shot"><img src="assets/interview/art-1.jpg" alt="Two figures on an orange dune beneath a floating shape, by Fran Rodríguez" loading="lazy" decoding="async"></div>
               <div class="iv-shot"><img src="assets/interview/art-2.jpg" alt="A levitating astronaut over a dune at sunset, by Fran Rodríguez" loading="lazy" decoding="async"></div>
               <div class="iv-shot"><img src="assets/interview/art-3.jpg" alt="Arches opening onto desert dunes at dusk, by Fran Rodríguez" loading="lazy" decoding="async"></div>
               <figcaption class="iv-caption">Stills from “Postcards From a Dream” and “Quantum Landscapes” by Fran Rodríguez.</figcaption>
-            </figure>
+            </figure>
 
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">What do you consider “good” art?</h4>
               <p class="iv-a">For me, art has to be honest. Really honest. It must not respond to any practical or commercial purpose, nor be affected by fashions or trends. I like art that offers me an alternative way of seeing things and living — art that creates, somehow, a parallel universe.</p>
             </div>
 
-            <blockquote class="iv-pull iv-reveal">For me, art has to be honest. Really honest. I like art that creates, somehow, a parallel universe.</blockquote>
+            <blockquote class="iv-pull iv-reveal">For me, art has to be honest. Really honest. I like art that creates, somehow, a parallel universe.</blockquote>
 
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">What do you try to say with your art?</h4>
               <p class="iv-a">I try to transmit curiosity, amazement and fascination for nature — for the cosmos. That’s all that matters to me. I want people who see my work to feel a part of the magic I feel when I contemplate a sky or a mountain.</p>
-            </div>
+            </div>
 
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">What inspires you, in general?</h4>
               <p class="iv-a">Nature. The universe. Everything that is not me inspires me — how the cosmos affects my mind, how it transforms it. I love the outdoors. Hiking. Music is a huge source of inspiration for me. I listen to music all the time, about eight or nine hours a day — in my studio, walking, cooking…</p>
-            </div>
+            </div>
 
             <a class="iv-cta iv-reveal" href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">
               <span class="iv-cta-ic"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12l4 4v10H4z"/><path d="M8 10h8M8 14h6"/></svg></span>
@@ -3725,20 +3724,8 @@ body::after {
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
         const sbRefreshBtn = document.getElementById('sbRefresh');
         if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', loadSales);
-        // Vidéo de fond du hero (~4,8 Mo) : on ne la charge QUE sur grand écran,
-        // hors data-saver / reduced-motion, et APRÈS le premier rendu. Sinon le
-        // poster (155 Ko) suffit → mobile et connexions lentes économisent ~4,8 Mo.
-        const heroVideo = document.querySelector('.hero-video');
-        if (heroVideo) {
-          const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-          const conn = navigator.connection || {};
-          const lightMode = reduce || conn.saveData || window.matchMedia('(max-width: 700px)').matches;
-          if (!lightMode) {
-            const startVideo = () => { if (heroVideo.src) return; heroVideo.src = 'assets/nebula.mp4'; heroVideo.play().catch(() => {}); };
-            const sched = () => (window.requestIdleCallback ? requestIdleCallback(startVideo, { timeout: 2500 }) : setTimeout(startVideo, 900));
-            if (document.readyState === 'complete') sched(); else window.addEventListener('load', sched, { once: true });
-          }
-        }
+        // Vidéo de fond du hero retirée pour l'instant (sera retravaillée plus tard) :
+        // seul le poster statique (assets/nebula-poster.jpg) reste affiché.
         window.addEventListener('hashchange', handleRoute);
         handleRoute();
 
