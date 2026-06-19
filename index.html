@@ -3696,7 +3696,14 @@ body::after {
       // Bandeau de statistiques (compteurs animés)
       buildStatsBand();
 
-      // Re-résout un éventuel lien profond #c/<i> maintenant que les données existent
+      // Les .col-bg viennent d'être créées : on réarme le garde-fou pour que le
+      // handleRoute ci-dessous (re)charge bien les bannières si la vue courante
+      // est « collections » (sinon un handleRoute précoce, exécuté avant ce rendu
+      // asynchrone, aurait consommé le flag sans trouver de .col-bg → fonds vides).
+      collectionsAnimated = false;
+
+      // Re-résout la route maintenant que les données/le DOM existent
+      // (lien profond #c/<i> ET chargement des bannières de la galerie).
       handleRoute();
     }
 

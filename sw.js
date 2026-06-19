@@ -2,13 +2,15 @@
  *
  * Stratégie :
  *  - navigation / index.html  → network-first (données fraîches), repli cache hors-ligne
+ *  - data.json (classement)   → network-first : DOIT rester frais (rafraîchi par
+ *                               la GitHub Action), repli cache uniquement hors-ligne
  *  - autres ressources même origine → cache-first (police, images, icônes)
  *  - ressources externes (CDN crypto.com) → réseau direct, non mises en cache
  *
  * Le nom du cache est versionné : incrémentez CACHE_VERSION à chaque
  * changement de la liste précachée pour forcer la mise à jour.
  */
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE = 'cryptonauts-' + CACHE_VERSION;
 
 const PRECACHE = [
@@ -55,7 +57,13 @@ self.addEventListener('fetch', (event) => {
   const isNavigation = req.mode === 'navigate' ||
     url.pathname.endsWith('/') || url.pathname.endsWith('index.html');
 
-  if (isNavigation) {
+  // data.json porte le classement rafraîchi par la GitHub Action : il NE DOIT PAS
+  // être servi cache-first (sinon les visiteurs récurrents restent bloqués sur un
+  // ancien classement / d'anciennes références d'images). Réseau d'abord, cache
+  // seulement en repli hors-ligne — comme la navigation.
+  const isData = url.origin === self.location.origin && url.pathname.endsWith('data.json');
+
+  if (isNavigation || isData) {
     // Network-first : on veut le leaderboard le plus à jour quand on est en ligne.
     event.respondWith(
       fetch(req)
