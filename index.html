@@ -1976,6 +1976,8 @@ body::after {
       box-shadow: none;
     }
     .install-btn:hover { box-shadow: 0 0 22px rgba(102, 191, 255, 0.4); }
+    /* Sur PC, installer la PWA n'a aucun intérêt : le bouton n'apparaît que sur mobile. */
+    @media (min-width: 601px) { .install-btn { display: none !important; } }
 
     @media screen and (max-width: 600px) {
       .sep { margin: 0 12px; }
@@ -2536,7 +2538,7 @@ body::after {
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: none; margin: 0 auto; }
     .col-row {
-      position: relative; display: block; height: 134px;
+      position: relative; display: block; height: 268px;
       border-radius: 18px; overflow: hidden; text-decoration: none;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: linear-gradient(135deg, #0b1030, #161526);
@@ -2554,24 +2556,24 @@ body::after {
     .col-row:hover .col-bg { transform: scale(1.06); opacity: 0.72; }
     .col-grad { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3, 4, 10, 0.94) 0%, rgba(3, 4, 10, 0.62) 26%, rgba(3, 4, 10, 0.58) 74%, rgba(3, 4, 10, 0.94) 100%); }
     .col-logo {
-      position: absolute; z-index: 2; left: 22px; top: 50%; transform: translateY(-50%);
-      width: 96px; height: 96px; border-radius: 16px; object-fit: cover;
+      position: absolute; z-index: 2; left: 30px; top: 50%; transform: translateY(-50%);
+      width: 184px; height: 184px; border-radius: 24px; object-fit: cover;
       border: 1px solid rgba(102, 191, 255, 0.32);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(11, 16, 48, 0.5);
       transition: box-shadow 0.25s ease, border-color 0.25s ease;
     }
     .col-row:hover .col-logo { border-color: rgba(102, 191, 255, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 22px rgba(102, 191, 255, 0.3); }
     .col-title-wrap {
-      position: absolute; z-index: 2; inset: 0; padding: 0 372px 0 128px;
-      display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 6px;
+      position: absolute; z-index: 2; inset: 0; padding: 0 488px 0 248px;
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 10px;
     }
-    .col-title { margin: 0; font-size: clamp(1.05rem, 2vw, 1.5rem); line-height: 1.14; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9); }
-    .col-date { font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(233, 240, 255, 0.72); }
-    .col-stats { position: absolute; z-index: 2; right: 48px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 12px; }
-    .col-stat { text-align: center; min-width: 42px; }
-    .col-stat + .col-stat { border-left: 1px solid var(--hairline); padding-left: 12px; }
-    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.08rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(102, 191, 255, 0.35); }
-    .col-stat .cl { display: block; margin-top: 4px; font-size: 0.55rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+    .col-title { margin: 0; font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.12; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9); }
+    .col-date { font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(233, 240, 255, 0.72); }
+    .col-stats { position: absolute; z-index: 2; right: 56px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 18px; }
+    .col-stat { text-align: center; min-width: 58px; }
+    .col-stat + .col-stat { border-left: 1px solid var(--hairline); padding-left: 18px; }
+    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(102, 191, 255, 0.35); }
+    .col-stat .cl { display: block; margin-top: 7px; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
     .col-arrow { position: absolute; z-index: 2; right: 18px; top: 50%; transform: translateY(-50%); color: rgba(233, 240, 255, 0.5); transition: color 0.25s ease, transform 0.25s ease; }
     .col-row:hover .col-arrow { color: var(--primary-color); transform: translateY(-50%) translateX(3px); }
     @media (prefers-reduced-motion: reduce) { .col-row { animation: none; opacity: 1; translate: none; } }
