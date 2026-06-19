@@ -289,7 +289,7 @@ function writeCryptonautsHTML(collectionsData, globalOwnerNFTs, ownersData) {
 
   // Collection externe (Crovia / Cronos) — ajoutée en tête (la plus récente). Données on-chain,
   // owners en adresses (cronoscan) ; volontairement absente de globalOwnersData (leaderboard global).
-  allCollectionsData.unshift({"id":"collection-v3","title":"Quantum Cryptonauts V3","image":"assets/v3-logo.jpg","alt":"Quantum Cryptonauts V3 COLLECTION ICON","ownersCount":12,"external":"crovia","contract":"0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","croviaUrl":"https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","owners":[{"name":"0x2b8b…ae40","count":32,"url":"https://cronoscan.com/address/0x2b8b37dd17fa67833b01e30229502169d1a8ae40"},{"name":"0x1355…884b","count":32,"url":"https://cronoscan.com/address/0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b"},{"name":"0x740c…da0d","count":8,"url":"https://cronoscan.com/address/0x740cd1001bf468e03a2cef898c4ce880f228da0d"},{"name":"0xac96…c1ee","count":8,"url":"https://cronoscan.com/address/0xac96bdcd69f708a5f660425af5d1248aa27fc1ee"},{"name":"0x1833…1048","count":6,"url":"https://cronoscan.com/address/0x183379144e7c8581f24b02b7eedd4e9995bb1048"},{"name":"0xedce…7eae","count":5,"url":"https://cronoscan.com/address/0xedce0151656e82150a0835e9b9cbd1ec53a17eae"},{"name":"0x7886…4c06","count":3,"url":"https://cronoscan.com/address/0x7886acebc8401bd6b1cf397d84b85d01416e4c06"},{"name":"0x64c1…b5c2","count":3,"url":"https://cronoscan.com/address/0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2"},{"name":"0x478f…2c49","count":2,"url":"https://cronoscan.com/address/0x478ffba8ea4945fb9327812231dfb1c6cafd2c49"},{"name":"0x8147…fb06","count":2,"url":"https://cronoscan.com/address/0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06"},{"name":"0xe6e7…34ed","count":2,"url":"https://cronoscan.com/address/0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed"},{"name":"0x965a…70bd","count":1,"url":"https://cronoscan.com/address/0x965a73574acb12b9b48f3ff43415eea791fd70bd"}]});
+  allCollectionsData.unshift({"id":"collection-v3","title":"Quantum Cryptonauts V3","image":"assets/v3-logo.jpg","banner":"assets/v3-banner.jpg","alt":"Quantum Cryptonauts V3 COLLECTION ICON","ownersCount":12,"external":"crovia","contract":"0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","croviaUrl":"https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","owners":[{"name":"0x2b8b…ae40","count":32,"url":"https://cronoscan.com/address/0x2b8b37dd17fa67833b01e30229502169d1a8ae40"},{"name":"0x1355…884b","count":32,"url":"https://cronoscan.com/address/0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b"},{"name":"0x740c…da0d","count":8,"url":"https://cronoscan.com/address/0x740cd1001bf468e03a2cef898c4ce880f228da0d"},{"name":"0xac96…c1ee","count":8,"url":"https://cronoscan.com/address/0xac96bdcd69f708a5f660425af5d1248aa27fc1ee"},{"name":"0x1833…1048","count":6,"url":"https://cronoscan.com/address/0x183379144e7c8581f24b02b7eedd4e9995bb1048"},{"name":"0xedce…7eae","count":5,"url":"https://cronoscan.com/address/0xedce0151656e82150a0835e9b9cbd1ec53a17eae"},{"name":"0x7886…4c06","count":3,"url":"https://cronoscan.com/address/0x7886acebc8401bd6b1cf397d84b85d01416e4c06"},{"name":"0x64c1…b5c2","count":3,"url":"https://cronoscan.com/address/0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2"},{"name":"0x478f…2c49","count":2,"url":"https://cronoscan.com/address/0x478ffba8ea4945fb9327812231dfb1c6cafd2c49"},{"name":"0x8147…fb06","count":2,"url":"https://cronoscan.com/address/0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06"},{"name":"0xe6e7…34ed","count":2,"url":"https://cronoscan.com/address/0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed"},{"name":"0x965a…70bd","count":1,"url":"https://cronoscan.com/address/0x965a73574acb12b9b48f3ff43415eea791fd70bd"}]});
 
   // Prepare globalOwnersData (sans url ni rank : reconstruits/recalculés côté client)
   const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, count }) => {
@@ -2600,6 +2600,17 @@ body::after {
     .iv-article p { color: var(--muted); line-height: 1.8; margin: 0; font-size: 1.04rem; text-transform: none; }
     /* Layout magazine : colonne de texte lisible centrée ; visuels (hero/feature/gallery) pleine largeur */
     .iv-meta, .iv-qa, .iv-pull { max-width: 720px; margin-left: auto; margin-right: auto; }
+    /* Page artiste unifiée : bio, labels de section, liens */
+    .iv-bio { max-width: 720px; margin: 0 auto; }
+    .iv-bio p { margin: 0 0 16px; }
+    .iv-bio p:last-child { margin-bottom: 0; }
+    .iv-bio p:first-child { font-size: 1.12rem; color: #d8e6ff; }
+    .iv-label { max-width: 720px; margin: 48px auto 22px; display: flex; align-items: center; gap: 18px; font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+    .iv-label::before, .iv-label::after { content: ''; flex: 1; height: 1px; background: var(--hairline); }
+    .iv-label span { white-space: nowrap; }
+    .iv-links { margin-top: 14px; }
+    .iv-links .links-group { margin-bottom: 26px; }
+    .iv-links .links-group:last-child { margin-bottom: 0; }
     /* Reveal au scroll (observer dédié, indépendant de .reveal) */
     .iv-reveal { opacity: 0; transform: translateY(26px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2, 0.7, 0.3, 1); }
     .iv-reveal.iv-in { opacity: 1; transform: none; }
@@ -3051,30 +3062,29 @@ body::after {
         <h2 class="section-title">Fran Rodríguez</h2>
         <p class="section-sub">Barcelona-based surreal digital-collage artist. Two decades freelance, with album artwork for Tame Impala, Weezer and Coldplay — and the mind behind the Cryptonauts saga: thirteen curated, fully sold-out drops on crypto.com.</p>
       </div>
-      <div class="tabs" id="artistTabs">
-        <div class="tab-bar" role="tablist" aria-label="Artist sections">
-          <button class="tab-btn is-active" role="tab" aria-selected="true" data-tab="story">Story</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="interview">Interview</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="universe">Universe</button>
-          <button class="tab-btn" role="tab" aria-selected="false" data-tab="links">Links</button>
-        </div>
-        <div class="tab-panel is-active" data-panel="story">
-          <div class="tab-text">
-            <p>Fran Rodríguez — known online as <em>lacabezaenlasnubes</em>, “head in the clouds” — is a digital-collage artist based in Barcelona, born in a small industrial town in northern Spain. Raised in a working-class family that prized books and music, he has been a full-time freelance artist for around twenty years.</p>
-            <p>Largely self-taught through online forums, he spent a decade in Madrid as an advertising art director before going freelance. He has created album and concert artwork for <strong>Tame Impala, Weezer, Coldplay and Tycho</strong>, and exhibits and sells internationally — entering the NFT space in 2021 with “Postcards From a Dream”, then “Quantum Landscapes”.</p>
-            <p>His work is surreal and psychedelic: dreamscapes and meditation, outer space and nature, the human figure before the immensity of the cosmos.</p>
-          </div>
-        </div>
-        <div class="tab-panel" data-panel="interview">
-          <article class="iv-article">
+      <article class="iv-article">
             <figure class="iv-hero iv-reveal">
               <img src="assets/interview/cover.jpg" alt="Fran Rodríguez, photographed for Crypto.com NFT" loading="lazy" decoding="async">
               <div class="iv-hero-grad" aria-hidden="true"></div>
               <figcaption class="iv-hero-cap">
-                <span class="iv-hero-kick">Crypto.com NFT · Creator Community</span>
-                <span class="iv-hero-title">The Interview</span>
+                <span class="iv-hero-kick">lacabezaenlasnubes · Barcelona</span>
+                <span class="iv-hero-title">Head in the clouds</span>
               </figcaption>
             </figure>
+
+            <div class="iv-bio iv-reveal">
+              <p>Fran Rodríguez — known online as <em>lacabezaenlasnubes</em>, “head in the clouds” — is a digital-collage artist based in Barcelona, born in a small industrial town in northern Spain. Raised in a working-class family that prized books and music, he has been a full-time freelance artist for around twenty years.</p>
+              <p>Largely self-taught through online forums, he spent a decade in Madrid as an advertising art director before going freelance. He has created album and concert artwork for <strong>Tame Impala, Weezer, Coldplay and Tycho</strong>, and exhibits and sells internationally — entering the NFT space in 2021 with “Postcards From a Dream”, then “Quantum Landscapes”.</p>
+              <p>His work is surreal and psychedelic: dreamscapes and meditation, outer space and nature, the human figure before the immensity of the cosmos.</p>
+            </div>
+
+            <h3 class="iv-label iv-reveal"><span>The universe</span></h3>
+            <div class="iv-bio iv-reveal">
+              <p>The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across <strong>thirteen curated, fully sold-out drops</strong> on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
+            </div>
+            <blockquote class="iv-pull iv-reveal">Like a mind-altering substance, without the risk.</blockquote>
+
+            <h3 class="iv-label iv-reveal"><span>The interview</span></h3>
             <div class="iv-meta iv-reveal">
               <span class="iv-chip">17 Dec 2021</span>
               <span class="iv-chip">7 min read</span>
@@ -3186,6 +3196,54 @@ body::after {
               <svg class="iv-cta-ar" viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
             <p class="iv-source iv-reveal">Source — <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">“Creator Community: Fran Rodríguez”</a>, Crypto.com NFT (Medium), 17 December 2021. Interview &amp; artwork © Fran Rodríguez.</p>
+
+            <h3 class="iv-label iv-reveal"><span>Find Fran online</span></h3>
+            <div class="iv-links iv-reveal">
+              <div class="links-group"><h4 class="links-h">Cryptonauts &amp; art</h4>
+                <div class="artist-links">
+                  <a href="https://crypto.com/nft/profile/cabezaenlasnubes?tab=created" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Crypto.com NFT</span>
+                    <span class="lc-sub">Artist profile &amp; drops</span>
+                  </a>
+                  <a href="https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 7l8-4 8 4v10l-8 4-8-4z"/></svg> Crovia</span>
+                    <span class="lc-sub">Quantum Cryptonauts V3</span>
+                  </a>
+                  <a href="https://franrodriguezart.com/" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" stroke-linecap="round"/></svg> Website</span>
+                    <span class="lc-sub">Portfolio &amp; prints</span>
+                  </a>
+                  <a href="https://lacabezaenlasnubes.cargo.site/" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg> Portfolio</span>
+                    <span class="lc-sub">lacabezaenlasnubes</span>
+                  </a>
+                </div>
+              </div>
+              <div class="links-group"><h4 class="links-h">Social &amp; community</h4>
+                <div class="artist-links">
+                  <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X / Twitter</span>
+                    <span class="lc-sub">@cryptonautscdc</span>
+                  </a>
+                  <a href="https://instagram.com/lacabezaenlasnubes" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> Instagram</span>
+                    <span class="lc-sub">@lacabezaenlasnubes</span>
+                  </a>
+                  <a href="https://lacabezaenlasnubes.myshopify.com" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg> Shop</span>
+                    <span class="lc-sub">Prints &amp; merch</span>
+                  </a>
+                  <a href="https://discord.com/invite/TyTazHHgdV" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M20.317 4.369a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.249a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.077.077 0 00-.079-.036A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.2 14.2 0 001.226-1.994.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.245.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.893.077.077 0 00-.041.106c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.029 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.057c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg> Discord</span>
+                    <span class="lc-sub">Join the crew</span>
+                  </a>
+                  <a href="https://linktr.ee/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
+                    <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M9 15l6-6M10 7h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> Linktree</span>
+                    <span class="lc-sub">Every official link</span>
+                  </a>
+                </div>
+              </div>
+            </div>
           </article>
           <div class="iv-progress" id="ivProgress" aria-hidden="true"></div>
           <div class="iv-lightbox" id="ivLightbox" hidden aria-hidden="true">
@@ -3201,61 +3259,6 @@ body::after {
             </button>
             <span class="iv-lb-count" id="ivLbCount"></span>
           </div>
-        </div>
-        <div class="tab-panel" data-panel="universe">
-          <div class="tab-text">
-            <p>The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across <strong>thirteen curated, fully sold-out drops</strong> on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
-            <p class="tab-tagline">“Like a mind altering substance, without the risk.”</p>
-          </div>
-        </div>
-        <div class="tab-panel" data-panel="links">
-          <div class="links-group"><h4 class="links-h">Cryptonauts &amp; art</h4>
-          <div class="artist-links">
-        <a href="https://crypto.com/nft/profile/cabezaenlasnubes?tab=created" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7l8-4 8 4v10l-8 4-8-4z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg> Crypto.com NFT</span>
-          <span class="lc-sub">Artist profile &amp; drops</span>
-        </a>
-        <a href="https://franrodriguezart.com/" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18" stroke-linecap="round"/></svg> Website</span>
-          <span class="lc-sub">Portfolio &amp; prints</span>
-        </a>
-        <a href="https://lacabezaenlasnubes.cargo.site/" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.5"/><path d="M21 16l-5-5-9 9"/></svg> Portfolio</span>
-          <span class="lc-sub">lacabezaenlasnubes</span>
-        </a>
-          </div></div>
-          <div class="links-group"><h4 class="links-h">Social &amp; community</h4>
-          <div class="artist-links">
-        <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> X / Twitter</span>
-          <span class="lc-sub">@cryptonautscdc</span>
-        </a>
-        <a href="https://instagram.com/lacabezaenlasnubes" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg> Instagram</span>
-          <span class="lc-sub">@lacabezaenlasnubes</span>
-        </a>
-        <a href="https://lacabezaenlasnubes.myshopify.com" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h12l-1 13H7L6 7z"/><path d="M9 7a3 3 0 016 0"/></svg> Shop</span>
-          <span class="lc-sub">Prints &amp; merch</span>
-        </a>
-        <a href="https://discord.com/invite/TyTazHHgdV" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="currentColor"><path d="M20.317 4.369a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.249a18.27 18.27 0 00-5.487 0 12.6 12.6 0 00-.617-1.25.077.077 0 00-.079-.036A19.74 19.74 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.2 14.2 0 001.226-1.994.076.076 0 00-.041-.106 13.1 13.1 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.009c.12.099.245.198.373.292a.077.077 0 01-.006.127 12.3 12.3 0 01-1.873.893.077.077 0 00-.041.106c.36.698.772 1.363 1.225 1.993a.076.076 0 00.084.029 19.84 19.84 0 006.002-3.03.077.077 0 00.032-.057c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.331c-1.182 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg> Discord</span>
-          <span class="lc-sub">Join the crew</span>
-        </a>
-        <a href="https://linktr.ee/cryptonautscdc" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M9 15l6-6M10 7h5v5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.4"/></svg> Linktree</span>
-          <span class="lc-sub">Every official link</span>
-        </a>
-          </div></div>
-          <div class="links-group"><h4 class="links-h">Press</h4>
-          <div class="artist-links">
-        <a href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener" class="link-card">
-          <span class="lc-head"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg> Interview</span>
-          <span class="lc-sub">crypto.com Creator Community</span>
-        </a>
-          </div></div>
-        </div>
-      </div>
     </section>
 
     <section class="section reveal hidden-view" id="salesbot" data-view="salesbot">
@@ -3363,7 +3366,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
-      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", items: 299, soldOut: false, desc: "Fran Rodríguez's newest chapter — and the first Cryptonauts collection minted on Cronos, on the Crovia marketplace. 299 one-of-a-kind quantum travelers, each born from quantum randomness and cosmic code. The saga crosses chains." },
+      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the eleventh collection of the successful Cryptonauts saga — and the first one on Crovia. After 10 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
       "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
@@ -3439,7 +3442,7 @@ body::after {
         a.setAttribute('aria-label', 'View ' + collection.title);
         a.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
         a.innerHTML = \`
-          <div class="col-bg" data-cid="\${meta.id || ''}"\${collection.external ? \` style="background-image:url('\${collection.image}')"\` : ''}></div>
+          <div class="col-bg" data-cid="\${meta.id || ''}"\${collection.external ? \` style="background-image:url('\${collection.banner || collection.image}')"\` : ''}></div>
           <div class="col-grad"></div>
           <img class="col-logo" src="\${collection.image}" alt="\${escHtml(collection.alt)}" loading="lazy" decoding="async">
           <div class="col-title-wrap">
@@ -3761,7 +3764,8 @@ body::after {
         grid.innerHTML = '';
         cvLoadMore(idx);
       } else if (isExternal) {
-        if (collection.image) { bannerImg.src = collection.image; view.classList.add('has-banner'); }
+        const extBanner = collection.banner || collection.image;
+        if (extBanner) { bannerImg.src = extBanner; view.classList.add('has-banner'); }
         renderExternalAssets(collection, grid);
       } else {
         grid.innerHTML = '<p class="cm-empty">No items available.</p>';
@@ -3993,27 +3997,7 @@ body::after {
         window.addEventListener('hashchange', handleRoute);
         handleRoute();
 
-        // Onglets de la section artiste (Story / Interview / Universe / Links)
-        const artistTabs = document.getElementById('artistTabs');
-        if (artistTabs) {
-          artistTabs.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-              const id = btn.dataset.tab;
-              artistTabs.querySelectorAll('.tab-btn').forEach(b => {
-                const on = b === btn;
-                b.classList.toggle('is-active', on);
-                b.setAttribute('aria-selected', on ? 'true' : 'false');
-              });
-              artistTabs.querySelectorAll('.tab-panel').forEach(p => {
-                p.classList.toggle('is-active', p.dataset.panel === id);
-              });
-              // recalcule parallaxe/progression de l'interview après bascule d'onglet
-              window.dispatchEvent(new Event('scroll'));
-            });
-          });
-        }
-
-        // Interview : reveal au défilement + parallaxe cover + progression de lecture + lightbox navigable
+        // Page artiste : reveal au défilement + parallaxe cover + progression de lecture + lightbox navigable
         (function () {
           const article = document.querySelector('.iv-article');
           if (!article) return;
