@@ -2590,6 +2590,56 @@ body::after {
       .col-stat .cl { font-size: 0.44rem; }
       .col-arrow { display: none; }
     }
+    /* ── Carrousel cinématique des collections (une collection par écran) ── */
+    .cc { position: relative; width: 100%; }
+    .cc-viewport { position: relative; border-radius: 22px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 18px 50px rgba(0,0,0,0.45); touch-action: pan-y; user-select: none; }
+    .cc-track { display: flex; transition: transform 0.55s cubic-bezier(0.22, 0.7, 0.25, 1); }
+    .cc-slide { flex: 0 0 100%; position: relative; min-height: clamp(460px, 70vh, 660px); display: flex; cursor: pointer; }
+    .cc-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #0b1030; transform: scale(1.04); transition: transform 6s ease; }
+    .cc-slide.is-active .cc-bg { transform: scale(1.12); }
+    .cc-grad { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(3,4,10,0.28) 0%, rgba(3,4,10,0.55) 42%, rgba(3,4,10,0.93) 100%); }
+    .cc-inner { position: relative; z-index: 2; width: 100%; align-self: flex-end; padding: 40px clamp(28px, 5vw, 72px) 38px; display: flex; flex-direction: column; gap: 20px; }
+    .cc-head { display: flex; align-items: center; gap: 20px; text-decoration: none; }
+    .cc-logo { width: 92px; height: 92px; border-radius: 18px; object-fit: cover; border: 1px solid rgba(102,191,255,0.32); box-shadow: 0 8px 24px rgba(0,0,0,0.55), 0 0 0 4px rgba(11,16,48,0.5); flex: none; }
+    .cc-titles { display: flex; flex-direction: column; gap: 6px; }
+    .cc-title { margin: 0; font-size: clamp(1.6rem, 3.4vw, 2.8rem); line-height: 1.08; color: #fff; text-shadow: 0 2px 22px rgba(0,0,0,0.9); }
+    .cc-date { font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(233,240,255,0.75); }
+    .cc-stats { display: flex; flex-wrap: wrap; gap: 12px 26px; }
+    .cc-stat { min-width: 68px; }
+    .cc-stat .v { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(102,191,255,0.35); }
+    .cc-stat .l { display: block; margin-top: 6px; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .cc-nfts { display: flex; gap: 12px; overflow: hidden; }
+    .cc-nft { flex: 0 0 auto; width: 92px; height: 92px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); display: block; }
+    .cc-nft img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .cc-nft.skel { background: linear-gradient(100deg, rgba(255,255,255,0.05) 30%, rgba(255,255,255,0.13) 50%, rgba(255,255,255,0.05) 70%); background-size: 200% 100%; animation: ccShimmer 1.3s linear infinite; }
+    @keyframes ccShimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+    .cc-cta { align-self: flex-start; display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; border-radius: 999px; background: var(--primary-color); color: #04122b; font-family: var(--font-body); font-weight: 700; font-size: 0.92rem; text-decoration: none; box-shadow: 0 8px 24px rgba(102,191,255,0.35); transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .cc-cta:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(102,191,255,0.5); }
+    .cc-arrow { position: absolute; top: 50%; transform: translateY(-50%); z-index: 5; width: 52px; height: 52px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.18); background: rgba(7,10,26,0.55); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); color: #eaf2ff; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+    .cc-arrow:hover { background: rgba(102,191,255,0.28); }
+    .cc-arrow.prev { left: 18px; } .cc-arrow.next { right: 18px; }
+    .cc-arrow:active { transform: translateY(-50%) scale(0.92); }
+    .cc-dots { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .cc-dot { width: 9px; height: 9px; border-radius: 50%; border: none; padding: 0; background: rgba(255,255,255,0.22); cursor: pointer; transition: background 0.2s ease, transform 0.2s ease; }
+    .cc-dot.is-active { background: var(--primary-color); transform: scale(1.25); box-shadow: 0 0 10px rgba(102,191,255,0.6); }
+    @media (max-width: 600px) {
+      .cc-slide { min-height: 0; }
+      .cc-inner { padding: 24px 16px 22px; gap: 14px; }
+      .cc-head { gap: 13px; }
+      .cc-logo { width: 60px; height: 60px; border-radius: 14px; }
+      .cc-stats { gap: 8px 16px; }
+      .cc-stat { min-width: 52px; }
+      .cc-stat .v { font-size: 1.1rem; }
+      .cc-stat .l { font-size: 0.5rem; }
+      .cc-nft { width: 58px; height: 58px; }
+      .cc-arrow { width: 40px; height: 40px; }
+      .cc-arrow.prev { left: 8px; } .cc-arrow.next { right: 8px; }
+      .cc-cta { width: 100%; justify-content: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .cc-track { transition: none; }
+      .cc-bg, .cc-slide.is-active .cc-bg { transition: none; transform: none; }
+    }
     /* ── Ethos : ligne narrative monumentale (accueil) ── */
     .ethos { max-width: 900px; margin: 0 auto; padding: 60px 24px 34px; text-align: center; }
     .ethos-line {
@@ -3165,6 +3215,141 @@ body::after {
       }
     }
 
+    // ───────── Carrousel cinématique des collections (une collection par écran) ─────────
+    const cc = { idx: 0, n: 0, loaded: {} };
+
+    function renderCollectionsCarousel(list, container) {
+      if (!container || !list || !list.length) return;
+      cc.n = list.length; cc.idx = 0; cc.loaded = {};
+      const slides = list.map((collection, i) => {
+        const meta = COLLECTION_META[collection.title] || {};
+        const st = COLLECTION_STATS[collection.title] || {};
+        const total = collection.owners.reduce((s, o) => s + (o.count || 0), 0);
+        const items = st.supply || total;
+        const rel = COLLECTION_RELEASE[collection.title] || '';
+        const isExt = !!collection.external;
+        const sales = isExt ? '—' : (st.sales != null ? st.sales.toLocaleString('fr-FR') : '—');
+        const skel = '<span class="cc-nft skel"></span>'.repeat(5);
+        return `
+          <div class="cc-slide" data-i="${i}">
+            <div class="cc-bg"${isExt ? ` style="background-image:url('${collection.banner || collection.image}')"` : ''}></div>
+            <div class="cc-grad"></div>
+            <div class="cc-inner">
+              <a class="cc-head" href="#c/${i}" aria-label="Open ${escHtml(collection.title)}">
+                <img class="cc-logo" src="${collection.image}" alt="${escHtml(collection.alt)}" loading="lazy" decoding="async">
+                <span class="cc-titles">
+                  <h3 class="cc-title">${escHtml(collection.title)}</h3>
+                  ${rel ? `<span class="cc-date">${escHtml(rel)}</span>` : ''}
+                </span>
+              </a>
+              <div class="cc-stats">
+                <div class="cc-stat"><span class="v">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="l">Holders</span></div>
+                <div class="cc-stat"><span class="v">${(items || 0).toLocaleString('fr-FR')}</span><span class="l">Items</span></div>
+                <div class="cc-stat"><span class="v">${fmtMoney(st.floor)}</span><span class="l">Floor</span></div>
+                <div class="cc-stat"><span class="v">${fmtMoney(st.vol)}</span><span class="l">Volume</span></div>
+                <div class="cc-stat"><span class="v">${sales}</span><span class="l">Sales</span></div>
+              </div>
+              <div class="cc-nfts">${skel}</div>
+              <a class="cc-cta" href="#c/${i}">Voir la collection
+                <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </a>
+            </div>
+          </div>`;
+      }).join('');
+      const dots = list.map((_, i) => `<button class="cc-dot" type="button" data-i="${i}" aria-label="Collection ${i + 1}"></button>`).join('');
+      container.innerHTML = `
+        <div class="cc">
+          <div class="cc-viewport">
+            <div class="cc-track">${slides}</div>
+            <button class="cc-arrow prev" type="button" aria-label="Previous collection"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M15 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button class="cc-arrow next" type="button" aria-label="Next collection"><svg viewBox="0 0 24 24" width="24" height="24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+          <div class="cc-dots">${dots}</div>
+        </div>`;
+      const root = container.querySelector('.cc');
+      cc.track = root.querySelector('.cc-track');
+      cc.slides = Array.prototype.slice.call(root.querySelectorAll('.cc-slide'));
+      cc.dots = Array.prototype.slice.call(root.querySelectorAll('.cc-dot'));
+      root.querySelector('.cc-arrow.prev').addEventListener('click', () => ccGo(cc.idx - 1));
+      root.querySelector('.cc-arrow.next').addEventListener('click', () => ccGo(cc.idx + 1));
+      cc.dots.forEach(d => d.addEventListener('click', () => ccGo(parseInt(d.dataset.i, 10))));
+
+      // Glisser (souris + tactile) via Pointer Events, avec garde anti-clic-après-swipe.
+      const vp = root.querySelector('.cc-viewport');
+      let downX = null, moved = false;
+      vp.addEventListener('pointerdown', e => { downX = e.clientX; moved = false; });
+      vp.addEventListener('pointermove', e => { if (downX != null && Math.abs(e.clientX - downX) > 8) moved = true; });
+      vp.addEventListener('pointerup', e => {
+        if (downX == null) return;
+        const dx = e.clientX - downX; downX = null;
+        if (Math.abs(dx) > 45) ccGo(cc.idx + (dx < 0 ? 1 : -1));
+      });
+      // Clic sur la diapo (hors flèches/liens) → ouvre la collection.
+      cc.slides.forEach((s, i) => s.addEventListener('click', e => {
+        if (moved || e.target.closest('a, button')) return;
+        location.hash = '#c/' + i;
+      }));
+      // Flèches clavier quand la vue Collections est active.
+      document.addEventListener('keydown', e => {
+        if (document.body.dataset.view !== 'collections') return;
+        if (e.key === 'ArrowLeft') ccGo(cc.idx - 1);
+        else if (e.key === 'ArrowRight') ccGo(cc.idx + 1);
+      });
+
+      ccGo(0);
+    }
+
+    function ccGo(i) {
+      if (!cc.track || !cc.n) return;
+      i = (i % cc.n + cc.n) % cc.n; // boucle gauche/droite
+      cc.idx = i;
+      cc.track.style.transform = 'translateX(' + (-i * 100) + '%)';
+      cc.slides.forEach((s, k) => s.classList.toggle('is-active', k === i));
+      cc.dots.forEach((d, k) => d.classList.toggle('is-active', k === i));
+      ccEnsureLoaded(i);
+      ccEnsureLoaded((i + 1) % cc.n);
+      ccEnsureLoaded((i - 1 + cc.n) % cc.n);
+    }
+
+    // Charge (une fois) la bannière + quelques NFT d'exemple d'une diapo.
+    async function ccEnsureLoaded(i) {
+      if (cc.loaded[i]) return;
+      cc.loaded[i] = true;
+      const collection = collectionsData[i];
+      const slide = cc.slides[i];
+      if (!collection || !slide) return;
+      const meta = COLLECTION_META[collection.title] || {};
+      const bg = slide.querySelector('.cc-bg');
+      const nftsEl = slide.querySelector('.cc-nfts');
+      // Bannière (crypto.com : en direct ; externe : déjà posée en style inline).
+      if (!collection.external && meta.id) {
+        fetchBanner(meta.id).then(b => { if (b.banner && bg) bg.style.backgroundImage = "url('" + b.banner + "')"; });
+      }
+      // NFT d'exemple.
+      try {
+        if (collection.external) {
+          const arr = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[collection.contract]) || [];
+          const sample = arr.slice(0, 5);
+          const href = collection.croviaUrl || '#';
+          nftsEl.innerHTML = sample.length ? sample.map(a =>
+            '<a class="cc-nft" href="' + escHtml(href) + '" target="_blank" rel="noopener"><img src="'
+            + escHtml('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=200&h=200&fit=cover&q=72&output=jpg')
+            + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>').join('') : '';
+        } else if (meta.id) {
+          const res = await fetch(NFT_GQL, {
+            method: 'POST', headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ variables: { id: meta.id, first: 5, skip: 0 }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
+          });
+          const data = await res.json();
+          const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
+          nftsEl.innerHTML = assets.slice(0, 5).map(a => {
+            const u = ((a.cover && a.cover.url) || (a.main && a.main.url) || '') + '?d=lg-logo';
+            return '<a class="cc-nft" href="' + escHtml(nftUrl(meta.id, a.id, a.defaultEditionId)) + '" target="_blank" rel="noopener"><img src="' + escHtml(u) + '" alt="' + escHtml(a.name) + '" loading="lazy" decoding="async"></a>';
+          }).join('');
+        } else { nftsEl.innerHTML = ''; }
+      } catch (e) { cc.loaded[i] = false; nftsEl.innerHTML = ''; }
+    }
+
     // Construit les lignes de propriétaires classées (réutilisé par la modale).
     function buildOwnerRowsHTML(owners) {
       const sorted = [...owners].sort((a, b) => b.count - a.count);
@@ -3688,9 +3873,8 @@ body::after {
         owner.twitter = owner.twitter ? validateTwitterUrl(owner.twitter) : '';
       });
 
-      collectionsData.forEach((collection, i) => {
-        collectionsContainer.appendChild(renderCollection(collection, i));
-      });
+      // Présentation en carrousel cinématique (une collection par écran).
+      renderCollectionsCarousel(collectionsData, collectionsContainer);
 
       const artistSection = document.getElementById('artist');
       main.insertBefore(renderGlobalOwners(globalOwnersData), artistSection);
