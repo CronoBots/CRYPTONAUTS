@@ -24,9 +24,8 @@ jobs:
   refresh:
     runs-on: self-hosted   # PC de l'auteur (IP résidentielle, non bloquée par crypto.com)
     timeout-minutes: 45
-    defaults:
-      run:
-        shell: bash        # Git Bash sur Windows — garde la syntaxe des scripts ci-dessous
+    # Pas de shell bash imposé : le runner Windows n'a pas forcément bash dans son
+    # PATH. Les étapes n'invoquent que node/npm (portable) ou un script Node.
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,23 +52,4 @@ jobs:
         run: node Test.js
 
       - name: Commit data.json si le classement a changé
-        run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          # Compare au data.json committé en ignorant generatedAt (qui change
-          # à chaque run) → on ne commit que sur un vrai changement de classement.
-          if node -e '
-            const fs = require("fs"), cp = require("child_process");
-            let prev = {};
-            try { prev = JSON.parse(cp.execSync("git show HEAD:data.json").toString()); } catch (e) {}
-            const next = JSON.parse(fs.readFileSync("data.json", "utf8"));
-            const strip = d => JSON.stringify({ c: d.collectionsData, g: d.globalOwnersData });
-            process.exit(strip(prev) === strip(next) ? 0 : 1);
-          '; then
-            echo "Classement inchangé — aucun commit."
-          else
-            echo "Classement modifié — commit + push."
-            git add data.json
-            git commit -m "data: rafraichit le classement Cryptonauts (auto)"
-            git push
-          fi
+        run: node .github/commit-data.js
