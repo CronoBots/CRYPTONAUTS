@@ -2822,7 +2822,7 @@ body::after {
             <div class="iv-qa iv-reveal">
               <h4 class="iv-q">How did you get into NFTs?</h4>
               <p class="iv-a">I saw several artist friends starting to talk about NFTs on Instagram in February and March this year. I asked them and they told me. I spent several days studying and decided to give it a try. It’s the best decision I’ve ever made in my life.</p>
-            </div>
+            </div>
 
             <figure class="iv-gallery iv-reveal">
               <div class="iv-shot"><img src="assets/interview/art-1.jpg" alt="Two figures on an orange dune beneath a floating shape, by Fran Rodríguez" loading="lazy" decoding="async"></div>
@@ -3148,6 +3148,28 @@ body::after {
       if (editionId) u += '&edition=' + editionId;
       return u + '&detail-page=MARKETPLACE';
     }
+
+    // ── Images IPFS (collections externes / Crovia) : aucune passerelle n'est fiable
+    // à 100 %, on les sert via weserv (qui met en cache) avec un repli en cascade
+    // sur plusieurs passerelles si l'une échoue.
+    const IPFS_GW = ['nftstorage.link', 'ipfs.io', 'dweb.link'];
+    function ipfsThumb(cid, size, gw) {
+      return 'https://images.weserv.nl/?url=' + encodeURIComponent(IPFS_GW[gw || 0] + '/ipfs/' + cid) + '&w=' + size + '&h=' + size + '&fit=cover&q=68&output=webp';
+    }
+    // Attributs à poser sur un <img> IPFS pour activer le repli automatique.
+    function ipfsAttrs(cid, size) {
+      return 'src="' + ipfsThumb(cid, size, 0) + '" data-ipfs="' + escHtml(cid) + '" data-size="' + size + '" data-gw="0"';
+    }
+    // Bascule sur la passerelle suivante quand une image IPFS échoue (event 'error'
+    // capturé car il ne « bubble » pas).
+    document.addEventListener('error', function (e) {
+      const img = e.target;
+      if (!img || img.tagName !== 'IMG' || !img.dataset || !img.dataset.ipfs) return;
+      const next = parseInt(img.dataset.gw || '0', 10) + 1;
+      if (next >= IPFS_GW.length) return;
+      img.dataset.gw = String(next);
+      img.src = ipfsThumb(img.dataset.ipfs, img.dataset.size || 200, next);
+    }, true);
     function nftCardsHTML(assets, collectionId) {
       return (assets || []).map(a => {
         const base = (a.cover && a.cover.url) || (a.main && a.main.url) || '';
@@ -3252,10 +3274,10 @@ body::after {
       const byId = {}; assets.forEach(a => { byId[a.i] = a; });
       V3_SALES.slice(0, 12).forEach(m => {
         const a = byId[m.t] || {};
-        const thumb = a.c ? ('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=120&h=120&fit=cover&q=70&output=jpg') : 'assets/v3-logo.jpg?v=2';
+        const thumb = a.c ? ipfsThumb(a.c, 120, 0) : 'assets/v3-logo.jpg?v=2';
         sales.push({
           col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg?v=2',
-          thumb: thumb,
+          thumb: thumb, ipfs: a.c || '',
           link: meta.croviaUrl || 'https://crovia.app',
           asset: a.n || ('#' + m.t),
           price: sbPrice(m.cro, 'CRO'),
@@ -3321,7 +3343,7 @@ body::after {
           const tag = isMint ? '<span class="sb-tag sb-tag-mint">Mint</span>' : '<span class="sb-tag sb-tag-sale">Sale</span>';
           const badge = (s.colImg && s.colImg !== thumb) ? '<img class="sb-col-badge" src="' + escHtml(s.colImg) + '" alt="" loading="lazy" decoding="async">' : '';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '" alt="" loading="lazy" decoding="async">' + badge + '</span>'
+            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0"' : '') + ' alt="" loading="lazy" decoding="async">' + badge + '</span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tag + '</div>'
             + '<span class="sb-col">' + escHtml(s.col) + '</span>'
@@ -3377,7 +3399,7 @@ body::after {
             const href = c.meta.croviaUrl || 'https://crovia.app';
             tiles = shuffle(arr).slice(0, COUNT).map(a =>
               '<a class="spot-nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
-              + '<img src="' + escHtml('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=168&h=168&fit=cover&q=66&output=webp') + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
+              + '<img ' + ipfsAttrs(a.c, 168) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
           } else {
             const st = COLLECTION_STATS[c.title] || {};
             const supply = st.supply || 30;
@@ -3489,11 +3511,10 @@ body::after {
     function renderExternalAssets(collection, grid) {
       const list = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[collection.contract]) || [];
       if (!list.length) { grid.innerHTML = '<p class="cm-empty">No items available.</p>'; return; }
-      const thumb = c => c ? ('https://images.weserv.nl/?url=ipfs.io/ipfs/' + c + '&w=320&h=320&fit=cover&q=72&output=jpg') : collection.image;
       const href = collection.croviaUrl || '#';
       grid.innerHTML = list.map(a =>
         '<a class="nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
-        + '<span class="nft-img"><img src="' + escHtml(thumb(a.c)) + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
+        + '<span class="nft-img"><img ' + (a.c ? ipfsAttrs(a.c, 320) : ('src="' + escHtml(collection.image) + '"')) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
         + '<span class="nft-name">' + escHtml(a.n) + '</span></a>'
       ).join('');
     }
