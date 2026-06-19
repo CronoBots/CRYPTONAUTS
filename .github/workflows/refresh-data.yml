@@ -3,10 +3,14 @@ name: Refresh leaderboard data
 # Rafraîchit le classement Cryptonauts (data.json) et le commit si les
 # rangs des holders ont réellement changé. L'index (index.html) charge ce
 # data.json en direct via fetch — plus aucune donnée n'est cuite dans l'index.
+#
+# IMPORTANT : tourne sur un RUNNER SELF-HOSTED installé sur le PC de l'auteur.
+# crypto.com renvoie des 429 (Too Many Requests) aux IP de datacenter de
+# GitHub : l'agrégation ne fonctionne que depuis une IP résidentielle.
 
 on:
   schedule:
-    - cron: '0 6 * * *'   # tous les jours à 06:00 UTC
+    - cron: '0 6 * * *'   # tous les jours à 06:00 UTC (s'exécute quand le runner est en ligne)
   workflow_dispatch: {}    # bouton « Run workflow » manuel
 
 permissions:
@@ -18,8 +22,11 @@ concurrency:
 
 jobs:
   refresh:
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
+    runs-on: self-hosted   # PC de l'auteur (IP résidentielle, non bloquée par crypto.com)
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash        # Git Bash sur Windows — garde la syntaxe des scripts ci-dessous
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -28,7 +35,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
 
       - name: Install deps
         run: npm ci
