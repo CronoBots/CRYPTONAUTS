@@ -3060,7 +3060,7 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">The artist</span>
         <h2 class="section-title">Fran Rodríguez</h2>
-        <p class="section-sub">Barcelona-based surreal digital-collage artist. Two decades freelance, with album artwork for Tame Impala, Weezer and Coldplay — and the mind behind the Cryptonauts saga: thirteen curated, fully sold-out drops on crypto.com.</p>
+        <p class="section-sub">Barcelona-based surreal digital-collage artist. Two decades freelance, with album artwork for Tame Impala, Weezer and Coldplay — and the mind behind the Cryptonauts saga: eleven curated, fully sold-out drops on crypto.com.</p>
       </div>
       <article class="iv-article">
             <figure class="iv-hero iv-reveal">
@@ -3080,7 +3080,7 @@ body::after {
 
             <h3 class="iv-label iv-reveal"><span>The universe</span></h3>
             <div class="iv-bio iv-reveal">
-              <p>The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across <strong>thirteen curated, fully sold-out drops</strong> on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
+              <p>The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across <strong>eleven curated, fully sold-out drops</strong> on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
             </div>
             <blockquote class="iv-pull iv-reveal">Like a mind-altering substance, without the risk.</blockquote>
 
@@ -3366,7 +3366,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
-      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the eleventh collection of the successful Cryptonauts saga — and the first one on Crovia. After 10 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
+      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
       "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
@@ -3486,11 +3486,18 @@ body::after {
 
     // Aperçu des NFT d'une collection, chargé en direct depuis le GraphQL crypto.com.
     const NFT_GQL = 'https://crypto.com/nft-api/graphql';
-    function nftCardsHTML(assets) {
+    // Lien vers la vraie page d'un NFT sur crypto.com (format marketplace qui fonctionne).
+    function nftUrl(collectionId, assetId, editionId) {
+      if (!collectionId || !assetId) return 'https://crypto.com/nft';
+      let u = 'https://crypto.com/nft/collection/' + collectionId + '?tab=items&asset=' + assetId;
+      if (editionId) u += '&edition=' + editionId;
+      return u + '&detail-page=MARKETPLACE';
+    }
+    function nftCardsHTML(assets, collectionId) {
       return (assets || []).map(a => {
         const base = (a.cover && a.cover.url) || (a.main && a.main.url) || '';
         const thumb = base ? base + '?d=lg-logo' : '';
-        return \`<a class="nft" href="https://crypto.com/nft/collectible/\${a.id}" target="_blank" rel="noopener" title="\${escHtml(a.name)}">\`
+        return \`<a class="nft" href="\${escHtml(nftUrl(collectionId, a.id, a.defaultEditionId))}" target="_blank" rel="noopener" title="\${escHtml(a.name)}">\`
           + \`<span class="nft-img">\${thumb ? \`<img src="\${thumb}" alt="\${escHtml(a.name)}" loading="lazy" decoding="async">\` : ''}</span>\`
           + \`<span class="nft-name">\${escHtml(a.name)}</span></a>\`;
       }).join('');
@@ -3634,7 +3641,7 @@ body::after {
             sales.push({
               col: c.title, colImg: c.image,
               thumb: cover ? (cover + '?d=lg-logo') : c.image,
-              link: (n.asset && n.asset.id) ? ('https://crypto.com/nft/collectible/' + n.asset.id) : 'https://crypto.com/nft',
+              link: (n.asset && n.asset.id) ? nftUrl(c.id, n.asset.id) : 'https://crypto.com/nft',
               asset: (n.asset && n.asset.name) || '',
               price: sbPrice(n.amountDecimal, n.listing && n.listing.currency, n.listing && n.listing.salePriceDecimalUSD),
               seller: sbUser(n.user), buyer: sbUser(n.toUser),
@@ -3687,14 +3694,15 @@ body::after {
       try {
         const res = await fetch(NFT_GQL, {
           method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ variables: { id: 'aabff17f9874020416137984b9d2b8db', first: 28, skip: 0 }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name cover{url} main{url}}}}' })
+          body: JSON.stringify({ variables: { id: 'aabff17f9874020416137984b9d2b8db', first: 28, skip: 0 }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
         });
         const data = await res.json();
         const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
         if (!assets.length) { const s = document.getElementById('spotlight'); if (s) s.classList.add('hidden-view'); return; }
+        const SPOT_CID = 'aabff17f9874020416137984b9d2b8db';
         const tile = a => {
           const u = ((a.cover && a.cover.url) || (a.main && a.main.url) || '') + '?d=lg-logo';
-          return '<a class="spot-nft" href="https://crypto.com/nft/collectible/' + a.id
+          return '<a class="spot-nft" href="' + escHtml(nftUrl(SPOT_CID, a.id, a.defaultEditionId))
             + '" target="_blank" rel="noopener" title="' + escHtml(a.name) + '">'
             + '<img src="' + u + '" alt="' + escHtml(a.name) + '" loading="lazy" decoding="async"></a>';
         };
@@ -3795,12 +3803,12 @@ body::after {
       try {
         const res = await fetch(NFT_GQL, {
           method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ variables: { id: cv.id, first: 50, skip: cv.skip }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name cover{url} main{url}}}}' })
+          body: JSON.stringify({ variables: { id: cv.id, first: 50, skip: cv.skip }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
         });
         const data = await res.json();
         if (cv.idx !== idx) { cv.loading = false; moreBtn.disabled = false; return; }
         const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
-        grid.insertAdjacentHTML('beforeend', nftCardsHTML(assets));
+        grid.insertAdjacentHTML('beforeend', nftCardsHTML(assets, cv.id));
         cv.skip += assets.length;
         moreBtn.hidden = assets.length < 50;
       } catch (e) {
