@@ -1859,6 +1859,15 @@ body::after {
       height: 1px;
       background: linear-gradient(90deg, var(--primary-color), transparent);
     }
+    /* Eyebrow encadré (lignes des deux côtés), comme les en-têtes de section. */
+    .eyebrow-lines { justify-content: center; }
+    .eyebrow-lines::before { background: linear-gradient(90deg, transparent, var(--primary-color)); }
+    .eyebrow-lines::after {
+      content: '';
+      width: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, var(--primary-color), transparent);
+    }
 
     /* Hero : titre et accroche affinés */
     .hero-title {
@@ -2505,19 +2514,26 @@ body::after {
     .spot-wall {
       overflow-x: clip;
       overflow-y: visible;
-      padding: 22px 0;
+      padding: 18px 0;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 18px;
       -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
       mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
     }
-    .spot-row { display: flex; gap: 16px; width: max-content; animation: spotScroll 75s linear infinite; will-change: transform; }
-    .spot-rev { animation-direction: reverse; }
+    /* Une ligne par collection : libellé léger + rangée d'œuvres défilante. */
+    .spot-line { position: relative; }
+    .spot-name {
+      display: block; margin: 0 0 7px; padding-left: 7.5%;
+      font-family: var(--font-body); font-size: 0.62rem; font-weight: 500;
+      letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); opacity: 0.6;
+    }
+    .spot-row { display: flex; gap: 14px; width: max-content; animation: spotScroll 60s linear infinite; will-change: transform; }
+    .spot-line:nth-child(even) .spot-row { animation-direction: reverse; }
     .spot-wall:hover .spot-row { animation-play-state: paused; }
     @keyframes spotScroll { to { transform: translateX(-50%); } }
     .spot-nft {
-      width: 150px; height: 150px; flex-shrink: 0; border-radius: 16px; overflow: hidden;
+      width: 112px; height: 112px; flex-shrink: 0; border-radius: 14px; overflow: hidden;
       border: 1px solid var(--hairline); background: rgba(20, 22, 38, 0.5);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
@@ -2531,9 +2547,10 @@ body::after {
     .spot-skel { background: linear-gradient(100deg, rgba(255, 255, 255, 0.04) 30%, rgba(255, 255, 255, 0.09) 50%, rgba(255, 255, 255, 0.04) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; }
     @media (prefers-reduced-motion: reduce) { .spot-row { animation: none; } }
     @media screen and (max-width: 600px) {
-      .spot-nft { width: 118px; height: 118px; border-radius: 13px; }
-      .spot-wall { gap: 12px; }
-      .spot-row { gap: 12px; }
+      .spot-nft { width: 84px; height: 84px; border-radius: 11px; }
+      .spot-wall { gap: 14px; }
+      .spot-row { gap: 10px; }
+      .spot-name { font-size: 0.56rem; padding-left: 8%; }
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: none; margin: 0 auto; }
@@ -2696,21 +2713,11 @@ body::after {
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-copy">
-        <span class="eyebrow">The universe</span>
+        <span class="eyebrow eyebrow-lines">The universe</span>
         <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
         <p class="hero-tagline">Twelve collections. One galaxy of holders.</p>
         <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
         <div class="hero-metrics" id="heroStats"></div>
-        <div class="hero-cta">
-          <a href="#collections" class="btn btn-primary">
-            <svg class="ico" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>
-            Explore collections
-          </a>
-          <a href="#leaderboard" class="btn btn-ghost">
-            View leaderboard
-            <svg class="ico" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </a>
-        </div>
       </div>
       <div class="hero-visual">
         <div class="hero-frame">
@@ -2733,12 +2740,8 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">Spotlight</span>
         <h2 class="section-title">Straight from the galaxy</h2>
-        <p class="section-sub">A living wall of Cryptonauts artworks — tap any to open it on crypto.com.</p>
       </div>
-      <div class="spot-wall" id="spotWall" aria-label="Featured Cryptonauts">
-        <div class="spot-row" id="spotRowA"></div>
-        <div class="spot-row spot-rev" id="spotRowB"></div>
-      </div>
+      <div class="spot-wall" id="spotWall" aria-label="Featured Cryptonauts"></div>
     </section>
 
     <section class="section reveal hidden-view" id="collections" data-view="collections">
@@ -3028,9 +3031,6 @@ body::after {
       <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Install app
     </button>
-    <div class="footer-right">
-      <p>Last updated 2026-06-18</p>
-    </div>
     <div class="footer-social" aria-label="Cryptonauts on social media">
       <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" aria-label="X">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
@@ -3384,35 +3384,66 @@ body::after {
     }
 
     // Spotlight : mur d'œuvres en mouvement (chargé en direct depuis crypto.com).
+    // Spotlight : une ligne défilante PAR collection (œuvres aléatoires + nom léger).
     async function loadSpotlight() {
       const wall = document.getElementById('spotWall');
       if (!wall) return;
-      const rowA = document.getElementById('spotRowA');
-      const rowB = document.getElementById('spotRowB');
-      const skel = '<span class="spot-nft spot-skel"></span>'.repeat(8);
-      rowA.innerHTML = skel; rowB.innerHTML = skel;
-      try {
-        const res = await fetch(NFT_GQL, {
-          method: 'POST', headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({ variables: { id: 'aabff17f9874020416137984b9d2b8db', first: 28, skip: 0 }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
-        });
-        const data = await res.json();
-        const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
-        if (!assets.length) { const s = document.getElementById('spotlight'); if (s) s.classList.add('hidden-view'); return; }
-        const SPOT_CID = 'aabff17f9874020416137984b9d2b8db';
-        const tile = a => {
-          const u = ((a.cover && a.cover.url) || (a.main && a.main.url) || '') + '?d=lg-logo';
-          return '<a class="spot-nft" href="' + escHtml(nftUrl(SPOT_CID, a.id, a.defaultEditionId))
-            + '" target="_blank" rel="noopener" title="' + escHtml(a.name) + '">'
-            + '<img src="' + u + '" alt="' + escHtml(a.name) + '" loading="lazy" decoding="async"></a>';
-        };
-        const half = Math.ceil(assets.length / 2);
-        const a1 = assets.slice(0, half).map(tile).join('');
-        const a2 = assets.slice(half).map(tile).join('');
-        rowA.innerHTML = a1 + a1;   // dupliqué pour une boucle sans couture
-        rowB.innerHTML = a2 + a2;
-      } catch (e) {
-        const s = document.getElementById('spotlight'); if (s) s.classList.add('hidden-view');
+      // Liste des collections (statique via COLLECTION_META) — V3 / Crovia en tête.
+      const cols = Object.keys(COLLECTION_META).map(title => ({ title, meta: COLLECTION_META[title] }));
+      cols.sort((a, b) => (b.meta.external ? 1 : 0) - (a.meta.external ? 1 : 0));
+      if (!cols.length) { const s = document.getElementById('spotlight'); if (s) s.classList.add('hidden-view'); return; }
+
+      // Squelette : une ligne par collection (nom + rangée).
+      wall.innerHTML = cols.map((c, i) =>
+        '<div class="spot-line" data-i="' + i + '">'
+        + '<span class="spot-name">' + escHtml(c.title) + '</span>'
+        + '<div class="spot-row">' + '<span class="spot-nft spot-skel"></span>'.repeat(7) + '</div>'
+        + '</div>'
+      ).join('');
+
+      const shuffle = arr => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); const t = a[i]; a[i] = a[j]; a[j] = t; } return a; };
+
+      const fillLine = async (line, c) => {
+        const row = line.querySelector('.spot-row');
+        let tiles = [];
+        try {
+          if (c.meta.external || !c.meta.id) {
+            const arr = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[c.meta.contract]) || [];
+            const href = c.meta.croviaUrl || 'https://crovia.app';
+            tiles = shuffle(arr).slice(0, 12).map(a =>
+              '<a class="spot-nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
+              + '<img src="' + escHtml('https://images.weserv.nl/?url=ipfs.io/ipfs/' + a.c + '&w=240&h=240&fit=cover&q=72&output=jpg') + '" alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
+          } else {
+            const st = COLLECTION_STATS[c.title] || {};
+            const supply = st.supply || 30;
+            const skip = Math.floor(Math.random() * Math.max(1, supply - 12));
+            const res = await fetch(NFT_GQL, {
+              method: 'POST', headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ variables: { id: c.meta.id, first: 12, skip }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
+            });
+            const data = await res.json();
+            const assets = (data && data.data && data.data.public && data.data.public.assets) || [];
+            tiles = assets.map(a => {
+              const u = ((a.cover && a.cover.url) || (a.main && a.main.url) || '') + '?d=lg-logo';
+              return '<a class="spot-nft" href="' + escHtml(nftUrl(c.meta.id, a.id, a.defaultEditionId)) + '" target="_blank" rel="noopener" title="' + escHtml(a.name) + '"><img src="' + u + '" alt="' + escHtml(a.name) + '" loading="lazy" decoding="async"></a>';
+            });
+          }
+        } catch (e) { tiles = []; }
+        if (!tiles.length) { line.remove(); return; }
+        const html = tiles.join('');
+        row.innerHTML = html + html; // dupliqué pour une boucle sans couture
+        row.style.animationDuration = Math.max(28, tiles.length * 5) + 's';
+      };
+
+      // Chargement à l'approche (lignes empilées) pour ne pas tout charger d'un coup.
+      const lines = Array.prototype.slice.call(wall.querySelectorAll('.spot-line'));
+      if ('IntersectionObserver' in window) {
+        const obs = new IntersectionObserver((ents, o) => {
+          ents.forEach(e => { if (e.isIntersecting) { o.unobserve(e.target); fillLine(e.target, cols[+e.target.dataset.i]); } });
+        }, { rootMargin: '300px 0px' });
+        lines.forEach(l => obs.observe(l));
+      } else {
+        lines.forEach(l => fillLine(l, cols[+l.dataset.i]));
       }
     }
 
