@@ -2657,15 +2657,14 @@ body::after {
     .sb-thumb-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
     .sb-thumb { width: 60px; height: 60px; border-radius: 13px; object-fit: cover; background: rgba(255, 255, 255, 0.04); }
     .sb-col-badge { position: absolute; bottom: -5px; right: -5px; width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 2px solid #100c09; background: #100c09; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
-    .sb-main { min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .sb-main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
     .sb-line1 { display: flex; align-items: center; gap: 8px; min-width: 0; }
     .sb-name { font-family: var(--font-display); font-size: 0.98rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-tag { flex: none; font-family: var(--font-body); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
     .sb-tag-sale { background: rgba(255, 106, 26, 0.14); color: #ff8a4c; border: 1px solid rgba(255, 106, 26, 0.36); }
     .sb-tag-mint { background: rgba(232, 192, 105, 0.14); color: var(--gold); border: 1px solid rgba(232, 192, 105, 0.36); }
-    .sb-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); min-width: 0; }
-    .sb-col { color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 220px; }
-    .sb-parties { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-col { display: block; font-size: 0.76rem; color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-parties { display: block; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sb-arrow { color: rgba(255, 106, 26, 0.8); margin: 0 1px; }
     .sb-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
     .sb-price { font-family: var(--font-display); font-size: 1.02rem; color: #ff6a1a; text-shadow: 0 0 14px rgba(255, 106, 26, 0.3); white-space: nowrap; }
@@ -2678,8 +2677,7 @@ body::after {
       .sb-thumb { width: 52px; height: 52px; border-radius: 11px; }
       .sb-col-badge { width: 21px; height: 21px; bottom: -4px; right: -4px; }
       .sb-name { font-size: 0.9rem; }
-      .sb-meta { font-size: 0.72rem; gap: 2px 8px; }
-      .sb-col { max-width: 150px; }
+      .sb-col, .sb-parties { font-size: 0.72rem; }
       .sb-price { font-size: 0.94rem; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
@@ -2719,9 +2717,7 @@ body::after {
   </nav>
 
   <header id="home" class="hero" data-view="home">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto" poster="assets/nebula-poster.jpg" aria-hidden="true" tabindex="-1">
-      <source src="assets/nebula.mp4" type="video/mp4">
-    </video>
+    <video class="hero-video" muted loop playsinline preload="none" poster="assets/nebula-poster.jpg" aria-hidden="true" tabindex="-1"></video>
     <div class="hero-veil" aria-hidden="true"></div>
     <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-inner">
@@ -3369,8 +3365,8 @@ body::after {
             + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '" alt="" loading="lazy" decoding="async">' + badge + '</span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tag + '</div>'
-            + '<span class="sb-meta"><span class="sb-col">' + escHtml(s.col) + '</span>'
-            + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span></span>'
+            + '<span class="sb-col">' + escHtml(s.col) + '</span>'
+            + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>'
             + '</div>'
             + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span>'
             + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
@@ -3769,12 +3765,19 @@ body::after {
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
         const sbRefreshBtn = document.getElementById('sbRefresh');
         if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', loadSales);
-        // Respecte « prefers-reduced-motion » : fige la vidéo de fond sur une frame.
+        // Vidéo de fond du hero (~4,8 Mo) : on ne la charge QUE sur grand écran,
+        // hors data-saver / reduced-motion, et APRÈS le premier rendu. Sinon le
+        // poster (155 Ko) suffit → mobile et connexions lentes économisent ~4,8 Mo.
         const heroVideo = document.querySelector('.hero-video');
-        if (heroVideo && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          heroVideo.removeAttribute('autoplay');
-          heroVideo.addEventListener('loadeddata', () => { try { heroVideo.currentTime = 3; } catch (e) { } heroVideo.pause(); });
-          heroVideo.pause();
+        if (heroVideo) {
+          const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          const conn = navigator.connection || {};
+          const lightMode = reduce || conn.saveData || window.matchMedia('(max-width: 700px)').matches;
+          if (!lightMode) {
+            const startVideo = () => { if (heroVideo.src) return; heroVideo.src = 'assets/nebula.mp4'; heroVideo.play().catch(() => {}); };
+            const sched = () => (window.requestIdleCallback ? requestIdleCallback(startVideo, { timeout: 2500 }) : setTimeout(startVideo, 900));
+            if (document.readyState === 'complete') sched(); else window.addEventListener('load', sched, { once: true });
+          }
         }
         window.addEventListener('hashchange', handleRoute);
         handleRoute();
