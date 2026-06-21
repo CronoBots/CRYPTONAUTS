@@ -122,7 +122,7 @@ async function mapPool(items, limit, worker) {
 // réel à ~1 requête / MIN_REQUEST_INTERVAL_MS, ce qui reproduit l'enveloppe de
 // l'ancienne version séquentielle (jamais bloquée) tout en évitant d'attendre
 // la réponse avant de lancer la suivante.
-const MIN_REQUEST_INTERVAL_MS = 200; // ≈ 5 req/s : débit de l'ancienne version (jamais bloquée)
+const MIN_REQUEST_INTERVAL_MS = 300; // ≈ 3,3 req/s : marge anti-429 (crypto.com a resserré ses limites)
 let _nextRequestSlot = 0;
 async function rateGate() {
   const now = Date.now();
@@ -135,7 +135,7 @@ async function rateGate() {
 // Helper générique pour les appels GraphQL, avec retry sur erreurs HTTP
 // transitoires (réseau / 429 / 5xx). Les erreurs GraphQL *logiques* ne sont PAS
 // retentées (inutile) — elles remontent immédiatement à l'appelant.
-async function gql(operationName, variables, query, retries = 6) {
+async function gql(operationName, variables, query, retries = 9) {
   let attempt = 0;
   while (true) {
     try {
@@ -159,8 +159,10 @@ async function gql(operationName, variables, query, retries = 6) {
       const retryable = !err.graphqlLogic &&
         (!err.response || status === 429 || status === 403 || (status >= 500 && status < 600));
       if (attempt < retries && retryable) {
-        const base = Math.min(12000, 500 * Math.pow(2, attempt)); // 0.5s,1s,2s,4s,8s,12s
-        await delay(base + Math.floor(Math.random() * 400));
+        // Backoff long (jusqu'à 60 s) : sur un 429, la fenêtre de débit de
+        // crypto.com peut mettre ~1 min à se vider — il faut attendre, pas abandonner.
+        const base = Math.min(60000, 1500 * Math.pow(2, attempt)); // 1.5,3,6,12,24,48,60,60,60s
+        await delay(base + Math.floor(Math.random() * 600));
         attempt++;
         continue;
       }
@@ -582,7 +584,7 @@ async function main() {
       console.log(`\n=== Processing collection: ${url} ===`);
       const r = await processCollection(url, usePagination, globalOwnerNFTs, collectionsData, ownersData);
       if (!r.ok) failedCollections.push(url);
-      await delay(300); // petite respiration entre collections (anti rate-limit)
+      await delay(10000); // pause de 10 s entre collections : laisse la fenêtre anti-429 de crypto.com se vider après la grosse rafale d'une collection
     }
 
     // ── GARDE-FOU n°1 : échec d'au moins une collection ──

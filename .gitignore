@@ -1,8 +1,8 @@
 # Dépendances Node
 node_modules/
 
-# Fichier intermédiaire généré par Test.js (cache des handles Twitter/X)
-Owners.json
+# Owners.json (cache des handles Twitter/X) est désormais COMMITTÉ comme seed :
+# il évite au runner CI de re-scraper 748 profils à chaque run (rafale -> 429).
 
 # PID de la session Remote Control (local à chaque PC)
 .remote-control.pid

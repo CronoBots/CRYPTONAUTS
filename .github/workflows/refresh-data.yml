@@ -23,7 +23,7 @@ concurrency:
 jobs:
   refresh:
     runs-on: self-hosted   # PC de l'auteur (IP résidentielle, non bloquée par crypto.com)
-    timeout-minutes: 45
+    timeout-minutes: 60
     # Pas de shell bash imposé : le runner Windows n'a pas forcément bash dans son
     # PATH. Les étapes n'invoquent que node/npm (portable) ou un script Node.
     steps:
@@ -38,15 +38,9 @@ jobs:
       - name: Install deps
         run: npm ci
 
-      # Owners.json (cache des handles Twitter/X) est gitignoré : on le persiste
-      # via le cache des Actions pour éviter de re-scraper X à chaque exécution.
-      - name: Restore Twitter handle cache
-        uses: actions/cache@v4
-        with:
-          path: Owners.json
-          key: owners-json-${{ github.run_id }}
-          restore-keys: |
-            owners-json-
+      # Owners.json (cache des handles Twitter/X) est désormais committé dans le
+      # repo (seed de 748 propriétaires) → le checkout le fournit, pas besoin de
+      # cache des Actions (qui pouvait restaurer un cache partiel d'un run échoué).
 
       - name: Build data.json
         run: node Test.js
