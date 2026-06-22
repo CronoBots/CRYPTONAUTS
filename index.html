@@ -2420,7 +2420,12 @@ body::after {
       inset: 0;
       z-index: -1;
       pointer-events: none;
-      background: radial-gradient(ellipse at 50% 0%, rgba(255, 106, 26, 0.10), transparent 62%);
+      /* Halo recentré plus bas (38 % au lieu de 0 %) : à 0 %, le pic lumineux du
+         halo se trouvait pile au bord inférieur de la navbar sticky (backdrop-blur),
+         ce qui révélait la « couture » du filtre = une fine ligne sous le menu sur
+         l'onglet Artiste. En descendant le centre, le haut reste sombre → plus de
+         ligne, tout en gardant l'ambiance chaude. */
+      background: radial-gradient(ellipse at 50% 38%, rgba(255, 106, 26, 0.10), transparent 62%);
     }
     /* ════════ PAGE DÉTAILLÉE D'UNE COLLECTION ════════ */
     /* Vues séparées : on n'affiche qu'une section à la fois (pilotée par data-view) */
