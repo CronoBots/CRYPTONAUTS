@@ -3697,6 +3697,76 @@ body::after {
       }
     }
 
+    // Branche les contrôles du leaderboard (recherche + bouton SHOW MORE).
+    // À appeler APRÈS que renderGlobalOwners a inséré la section dans le DOM : le
+    // rendu est asynchrone (après le fetch de data.json), donc au DOMContentLoaded
+    // #searchInput / #show-more-owners n'existent pas encore — les y câbler ne
+    // faisait rien (barre de recherche inerte). C'est la régression introduite par
+    // le découplage des données dans data.json.
+    function wireLeaderboardControls() {
+      const showMoreButton = document.getElementById('show-more-owners');
+      if (showMoreButton) {
+        showMoreButton.setAttribute('role', 'button');
+        showMoreButton.setAttribute('tabindex', '0');
+        showMoreButton.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showMoreButton.click(); }
+        });
+        showMoreButton.addEventListener('click', () => {
+          const additionalOwners = document.getElementById('additional-owners');
+          if (additionalOwners) {
+            const isHidden = additionalOwners.classList.contains('hidden');
+            additionalOwners.classList.toggle('hidden', !isHidden);
+            showMoreButton.textContent = isHidden ? 'SHOW LESS' : 'SHOW MORE';
+            showMoreButton.setAttribute('aria-expanded', isHidden);
+          }
+        });
+      }
+
+      const searchInput = document.getElementById('searchInput');
+      if (searchInput) {
+        searchInput.addEventListener('input', debounce(() => {
+          const filter = searchInput.value.toLowerCase().trim();
+          const additionalOwners = document.getElementById('additional-owners');
+          const showMoreBtn = document.getElementById('show-more-owners');
+
+          // Pendant une recherche, on révèle la liste étendue (sinon les
+          // propriétaires classés au-delà du top 10 resteraient introuvables).
+          if (additionalOwners) {
+            if (filter) {
+              additionalOwners.classList.remove('hidden');
+            } else {
+              additionalOwners.classList.add('hidden');
+              if (showMoreBtn) { showMoreBtn.textContent = 'SHOW MORE'; showMoreBtn.setAttribute('aria-expanded', 'false'); }
+            }
+          }
+          if (showMoreBtn) showMoreBtn.style.display = filter ? 'none' : '';
+
+          const listItems = document.querySelectorAll('#global-owners li, #additional-owners li');
+          let found = false;
+
+          listItems.forEach(item => {
+            const text = item.textContent.toLowerCase();
+            const match = text.includes(filter);
+            item.style.display = match ? '' : 'none';
+            if (match) found = true;
+          });
+
+          const noResults = document.getElementById('no-results');
+          if (!found) {
+            if (!noResults) {
+              const msg = document.createElement('li');
+              msg.id = 'no-results';
+              msg.textContent = 'No results found';
+              msg.style.color = '#fff';
+              document.getElementById('global-owners').appendChild(msg);
+            }
+          } else if (noResults) {
+            noResults.remove();
+          }
+        }, 300));
+      }
+    }
+
     // Charge le classement (collections + leaderboard global) depuis data.json,
     // produit par la GitHub Action — l'index ne contient plus aucune donnée en dur.
     async function loadLeaderboard() {
@@ -3737,6 +3807,10 @@ body::after {
 
       const artistSection = document.getElementById('artist');
       main.insertBefore(renderGlobalOwners(globalOwnersData), artistSection);
+
+      // Le leaderboard vient d'être inséré → on câble maintenant ses contrôles
+      // (barre de recherche + SHOW MORE), une fois #searchInput présent dans le DOM.
+      wireLeaderboardControls();
 
       // Bandeau de statistiques (compteurs animés)
       buildStatsBand();
@@ -3873,62 +3947,9 @@ body::after {
           });
         });
 
-        const showMoreButton = document.getElementById('show-more-owners');
-        if (showMoreButton) {
-          showMoreButton.addEventListener('click', () => {
-            const additionalOwners = document.getElementById('additional-owners');
-            if (additionalOwners) {
-              const isHidden = additionalOwners.classList.contains('hidden');
-              additionalOwners.classList.toggle('hidden', !isHidden);
-              showMoreButton.textContent = isHidden ? 'SHOW LESS' : 'SHOW MORE';
-              showMoreButton.setAttribute('aria-expanded', isHidden);
-            }
-          });
-        }
-
-        const searchInput = document.getElementById('searchInput');
-        if (searchInput) {
-          searchInput.addEventListener('input', debounce(() => {
-            const filter = searchInput.value.toLowerCase().trim();
-            const additionalOwners = document.getElementById('additional-owners');
-            const showMoreBtn = document.getElementById('show-more-owners');
-
-            // Pendant une recherche, on révèle la liste étendue (sinon les
-            // propriétaires classés au-delà du top 10 resteraient introuvables).
-            if (additionalOwners) {
-              if (filter) {
-                additionalOwners.classList.remove('hidden');
-              } else {
-                additionalOwners.classList.add('hidden');
-                if (showMoreBtn) { showMoreBtn.textContent = 'SHOW MORE'; showMoreBtn.setAttribute('aria-expanded', 'false'); }
-              }
-            }
-            if (showMoreBtn) showMoreBtn.style.display = filter ? 'none' : '';
-
-            const listItems = document.querySelectorAll('#global-owners li, #additional-owners li');
-            let found = false;
-
-            listItems.forEach(item => {
-              const text = item.textContent.toLowerCase();
-              const match = text.includes(filter);
-              item.style.display = match ? '' : 'none';
-              if (match) found = true;
-            });
-
-            const noResults = document.getElementById('no-results');
-            if (!found) {
-              if (!noResults) {
-                const msg = document.createElement('li');
-                msg.id = 'no-results';
-                msg.textContent = 'No results found';
-                msg.style.color = '#fff';
-                document.getElementById('global-owners').appendChild(msg);
-              }
-            } else if (noResults) {
-              noResults.remove();
-            }
-          }, 300));
-        }
+        // NB : les contrôles du leaderboard (recherche + SHOW MORE) sont câblés
+        // dans wireLeaderboardControls(), appelé par loadLeaderboard() APRÈS
+        // l'insertion asynchrone de la section (#searchInput n'existe pas encore ici).
 
         // Intro d'ouverture : se retire au clic ou à la fin de son fondu
         const intro = document.getElementById('intro');
