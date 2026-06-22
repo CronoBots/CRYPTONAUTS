@@ -25,12 +25,13 @@ jobs:
     runs-on: self-hosted   # PC de l'auteur (IP résidentielle, non bloquée par crypto.com)
     timeout-minutes: 60
     # Toutes les étapes `run:` tournent sous cmd, PAS sous Windows PowerShell.
-    # Raison : le service runner tourne en LocalSystem ; sous ce compte, npm écrit
-    # sa notice « New major version available » sur stderr, et PowerShell (avec le
-    # $ErrorActionPreference='Stop' injecté par GitHub) transforme TOUTE sortie
-    # stderr d'un programme natif en erreur fatale → l'étape échoue alors même que
-    # `npm ci` a réussi. Idem pour les console.warn de Test.js. cmd ne regarde que
-    # le code de sortie, donc ces messages stderr (bénins) ne font plus échouer.
+    # Raison (vérifiée sur les logs) : l'Execution Policy PowerShell de la machine
+    # est sur "Restricted", donc powershell.exe REFUSE d'exécuter le .ps1 que GitHub
+    # génère pour chaque étape `run:` (PSSecurityException / UnauthorizedAccess :
+    # « l'exécution de scripts est désactivée sur ce système ») → l'étape échoue
+    # en ~0,4 s avant même de lancer la commande. cmd génère un .cmd lancé par
+    # cmd.exe, qui n'a pas d'Execution Policy → contournement propre et stable.
+    # (Alternative côté machine : Set-ExecutionPolicy RemoteSigned -Scope LocalMachine.)
     defaults:
       run:
         shell: cmd
