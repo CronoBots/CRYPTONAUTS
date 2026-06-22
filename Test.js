@@ -1,5 +1,13 @@
-// Puppeteer n'est plus nécessaire : on utilise désormais l'API GraphQL directement
-// (même approche que le panel Snapshot dans index.html) — beaucoup plus rapide et fiable.
+// Récupération des propriétaires alignée EXACTEMENT sur le panel « Snapshot » v3.9.8
+// d'index.html. Owner resolution via :
+//   Phase B  — assets(collectionId) paginé (pages en parallèle)
+//   Phase C  — eventHistory(naturesIn:['transferred']) : owner courant par ÉDITION
+//   Phase C-fallback — editions(assetId:) BATCHÉES en aliasing (1 HTTP = N requêtes)
+//                      → ~10× moins de requêtes = plus de 429
+//   Secondary — editionEvents(editionId) pour les NFT retirés (withdrawn)
+//   Phase E  — agrégation : 1 count / édition, holder keyé par uuid||username
+// Plus de limiteur de débit global : on s'appuie sur la concurrence bornée +
+// retry/backoff, comme le fait le snapshot dans le navigateur (IP résidentielle).
 const axios = require('axios');
 const fs = require('fs');
 
@@ -18,9 +26,12 @@ const collections = [
   { id: 'c942e9924b01fae996d8f817060611eb', name: 'Cryptonauts', process: true, usePagination: true, image: 'https://media.nft.crypto.com/5057c430-e7f5-4462-a6d2-7bb2bfb68700/original.jpg?d=lg-logo' },
 ];
 
-// Générer les URLs des collections à traiter (uniquement celles avec process: true)
+// Générer les URLs des collections à traiter (uniquement celles avec process: true).
+// SNAP_ONLY=<id> (ou nom partiel) permet de ne traiter qu'une collection (debug/test).
+const _only = (process.env.SNAP_ONLY || '').trim().toLowerCase();
 const collectionUrls = collections
   .filter(collection => collection.process)
+  .filter(collection => !_only || collection.id.toLowerCase().includes(_only) || collection.name.toLowerCase().includes(_only))
   .map(collection => ({
     url: `https://crypto.com/nft/collection/${collection.id}`,
     usePagination: collection.usePagination
@@ -84,20 +95,34 @@ function saveOwnersJson(ownersData) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// GraphQL — endpoint + queries (alignées sur le panel Snapshot de index.html)
+// GraphQL — endpoint + config (alignés sur le panel Snapshot v3.9.8 d'index.html)
 // ─────────────────────────────────────────────────────────────────────────────
 const GQL_ENDPOINT = 'https://crypto.com/nft-api/graphql';
 
-// En-têtes communs à tous les appels (évite de recréer l'objet à chaque requête)
 const HTTP_HEADERS = {
   'Content-Type': 'application/json',
   'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
 };
 
-// Nombre de tâches par-asset menées EN PARALLÈLE (étapes 2.5, 3 et Twitter).
-// Ne contrôle PAS le débit (c'est le rôle de rateGate) mais le nombre de
-// requêtes en vol simultanément, ce qui masque la latence réseau.
-const CONCURRENCY = 6;
+// Tunables — calqués sur SNAP_CONF (v3.9.8). Le modèle de coût de l'API plafonne
+// à 250/requête, ~17 par alias → 10 alias × first=1 ≈ 170 (sûr), 5 × first=100 ≈ 135.
+const SNAP_CONF = {
+  ASSET_PAGE_SIZE:                 100,  // assets() page size (max API)
+  ASSET_PAGE_CONCURRENCY:            3,  // pages assets() en parallèle
+  HISTORY_PAGE_SIZE:               100,  // eventHistory page size (séquentiel)
+  HISTORY_MAX_CONSECUTIVE_FAILS:     5,  // abandon après N échecs d'affilée
+  RETRY_BASE_MS:                   500,  // backoff exponentiel de base
+  RETRY_MAX_ATTEMPTS:                7,  // 0.5,1,2,4,8,16,30s (anti-429 résilient)
+  RETRY_MAX_MS:                  30000,  // plafond du backoff
+  PHASE_B_EMPTY_WAVE_LIMIT:          3,  // stop pagination spéculative après N vagues vides
+  FALLBACK_BATCH_SIZE_SINGLE:       10,  // alias/HTTP pour single-edition (first=1)
+  FALLBACK_BATCH_SIZE_MULTI:         5,  // alias/HTTP pour multi-edition  (first=100)
+  FALLBACK_BATCH_CONCURRENCY:        2,  // batches de fallback en parallèle
+  FALLBACK_INTER_BATCH_DELAY_MS:    50,  // petit délai entre batches
+  SECONDARY_FALLBACK_CAP:           50,  // max assets retentés via editionEvents
+};
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 // Exécute `worker` sur chaque item avec au plus `limit` tâches simultanées.
 // Conserve l'ordre des résultats (results[i] correspond à items[i]).
@@ -115,99 +140,57 @@ async function mapPool(items, limit, worker) {
   return results;
 }
 
-// ── LIMITEUR DE DÉBIT GLOBAL ─────────────────────────────────────────────────
-// crypto.com renvoie des 429 (Too Many Requests) dès que le DÉBIT global est
-// trop élevé — peu importe le nombre de workers. La concurrence (CONCURRENCY)
-// sert juste à masquer la latence ; c'est CE limiteur qui plafonne le débit
-// réel à ~1 requête / MIN_REQUEST_INTERVAL_MS, ce qui reproduit l'enveloppe de
-// l'ancienne version séquentielle (jamais bloquée) tout en évitant d'attendre
-// la réponse avant de lancer la suivante.
-const MIN_REQUEST_INTERVAL_MS = 300; // ≈ 3,3 req/s : marge anti-429 (crypto.com a resserré ses limites)
-let _nextRequestSlot = 0;
-async function rateGate() {
-  const now = Date.now();
-  const slot = Math.max(now, _nextRequestSlot);
-  _nextRequestSlot = slot + MIN_REQUEST_INTERVAL_MS; // réservation atomique (pas d'await avant)
-  const wait = slot - now;
-  if (wait > 0) await delay(wait);
+// Découpe un tableau en morceaux de n
+function chunk(arr, n) {
+  const out = [];
+  for (let i = 0; i < arr.length; i += n) out.push(arr.slice(i, i + n));
+  return out;
 }
 
-// Helper générique pour les appels GraphQL, avec retry sur erreurs HTTP
-// transitoires (réseau / 429 / 5xx). Les erreurs GraphQL *logiques* ne sont PAS
-// retentées (inutile) — elles remontent immédiatement à l'appelant.
-async function gql(operationName, variables, query, retries = 9) {
-  let attempt = 0;
-  while (true) {
-    try {
-      await rateGate(); // espacement global anti-429
-      const res = await axios.post(GQL_ENDPOINT, { operationName, variables, query }, {
-        timeout: 20000,
-        headers: HTTP_HEADERS
-      });
-      if (res.data?.errors) {
-        const e = new Error(`GraphQL Error: ${res.data.errors.map(e => e.message).join(', ')}`);
-        e.graphqlLogic = true; // erreur métier → non-retryable
-        throw e;
-      }
-      return res.data?.data;
-    } catch (err) {
-      const status = err.response?.status;
-      // 429 (Too Many Requests) / 403 / 5xx / erreurs réseau → retry avec backoff
-      // exponentiel + jitter. Le backoff long (jusqu'à ~12 s) laisse le temps à
-      // un ban temporaire de se lever ; le jitter évite que tous les workers du
-      // pool ne retentent au même instant (effet « thundering herd »).
-      const retryable = !err.graphqlLogic &&
-        (!err.response || status === 429 || status === 403 || (status >= 500 && status < 600));
-      if (attempt < retries && retryable) {
-        // Backoff long (jusqu'à 60 s) : sur un 429, la fenêtre de débit de
-        // crypto.com peut mettre ~1 min à se vider — il faut attendre, pas abandonner.
-        const base = Math.min(60000, 1500 * Math.pow(2, attempt)); // 1.5,3,6,12,24,48,60,60,60s
-        await delay(base + Math.floor(Math.random() * 600));
-        attempt++;
-        continue;
-      }
-      throw err;
-    }
-  }
-}
-
-// Infos collection (nom + métriques officielles : items / owners / editionsCount)
-const Q_COLLECTION_INFO = `query SnapCollectionInfo($collectionId:ID!){
-  public{collection(id:$collectionId){
-    id name
-    metrics{ items owners editionsCount }
+// ── Queries (copiées du module Snapshot v3.9.8) ──────────────────────────────
+const Q_COLLECTION_INFO = `query GetCollection($collectionId:ID!,$cacheId:ID){
+  public(cacheId:$cacheId){collection(id:$collectionId){
+    id name verified
+    metrics{ items }
   }}}`;
 
-// Étape 1 : historique des transferts → propriétaire actuel de chaque asset transféré
-const Q_HISTORY = `query SnapHistory($collectionId:ID!,$first:Int!,$after:String,$naturesIn:[String!]){
-  public{collection(id:$collectionId){id eventHistory(first:$first,after:$after,naturesIn:$naturesIn){
-    edges{node{id asset{id name copies}
-    user{username uuid}
-    toUser{username uuid}
-    nature}}
-    pageInfo{endCursor hasNextPage}}}}}`;
+const Q_COLLECTION_METRIC = `query GetCollectionMetric($collectionId:ID!,$cacheId:ID){
+  public(cacheId:$cacheId){collectionMetric(id:$collectionId){
+    totalSupply totalSalesCount owners
+  }}}`;
 
-// Étape 2 : tous les assets de la collection (avec copies + copiesInCirculation + edition IDs)
-const Q_ALL_ASSETS = `query SnapAllAssets($collectionId:ID,$first:Int!,$skip:Int!){
-  public{assets(collectionId:$collectionId,first:$first,skip:$skip){
+const Q_ALL_ASSETS = `query GetCollectionAssets($collectionId:ID,$first:Int!,$skip:Int!,$cacheId:ID){
+  public(cacheId:$cacheId){assets(collectionId:$collectionId,first:$first,skip:$skip){
     id name copies copiesInCirculation
     offerableEditionId
     defaultListingV2{ editionId }
     latestPurchasedEdition{ id }
   }}}`;
 
-// Étape 2.5 : pour les NFTs multi-éditions → toutes les éditions et leurs propriétaires
-const Q_EDITIONS_BY_ASSET = `query SnapEditionsByAsset($assetId:ID!,$first:Int,$skip:Int,$isDropLast:Boolean){
-  public{editions(assetId:$assetId,first:$first,skip:$skip,isDropLast:$isDropLast){
-    totalCount
-    editions{ id index owner{ uuid username } }
+const Q_HISTORY = `query getCollectionEventHistory($collectionId:ID!,$first:Int!,$after:String,$naturesIn:[String!],$cacheId:ID){
+  public(cacheId:$cacheId){collection(id:$collectionId){id eventHistory(first:$first,after:$after,naturesIn:$naturesIn){
+    edges{node{nature createdAt
+      asset{id}
+      edition{index}
+      toUser{uuid username displayName verified isCreator}
+      user{uuid username displayName verified isCreator}
+    }}
+    pageInfo{endCursor hasNextPage}
+  }}}}`;
+
+const Q_EDITION_EVENTS = `query EditionEvents($editionId:ID!,$cacheId:ID){
+  public(cacheId:$cacheId){editionEvents(editionId:$editionId){
+    nature createdAt
+    toUser{uuid username displayName verified isCreator}
+    user{uuid username displayName verified isCreator}
   }}}`;
 
-// Étape 3 : pour les single-éditions sans historique de transfert → owner via edition(id)
-const Q_EDITION_OWNER = `query SnapEdition($id:ID!){
-  public{edition(id:$id){id owner{ uuid username } }}}`;
+// Seul 'transferred' est accepté comme filtre naturesIn par l'API (vérifié
+// empiriquement). Chaque acquisition produit un event 'transferred' → couvre
+// tous les changements de propriétaire. Les mints jamais transférés sont
+// récupérés par le fallback editions(assetId:).
+const TRANSFER_NATURES = ['transferred'];
 
-// GraphQL query for fetching Twitter username
 const profileQuery = `
     query User($id: ID!, $cacheId: ID) {
         public(cacheId: $cacheId) {
@@ -219,48 +202,173 @@ const profileQuery = `
     }
 `;
 
-// Fonction pour récupérer le twitterUsername via une requête GraphQL directe
-async function getTwitterUsername(username) {
-  const graphqlEndpoint = GQL_ENDPOINT;
-  let twitterUsername = null;
-  let retries = 3;
-  let delayMs = 1000;
+// ── Couche réseau ────────────────────────────────────────────────────────────
+const _silentErrorsSeen = new Set();
 
-  while (retries > 0 && !twitterUsername) {
+// POST GraphQL unique avec retry sur erreurs transitoires (réseau / 429 / 403 /
+// 5xx). Les erreurs GraphQL *logiques* (errors && !data) ne sont pas retentées.
+// Les erreurs partielles (errors && data) sont loggées une fois puis on renvoie data.
+async function gql(operationName, variables, query) {
+  let lastErr;
+  for (let attempt = 0; attempt < SNAP_CONF.RETRY_MAX_ATTEMPTS; attempt++) {
     try {
-      await rateGate(); // espacement global anti-429
-      const response = await axios.post(graphqlEndpoint, {
-        query: profileQuery,
-        variables: {
-          id: username,
-          cacheId: `getUserQuery-Profile-${username}`
-        }
-      }, {
-        timeout: 10000,
-        headers: HTTP_HEADERS
-      });
-
-      const result = response.data;
-      if (result.errors) {
-        throw new Error(`GraphQL Error: ${result.errors.map(e => e.message).join(', ')}`);
+      const res = await axios.post(GQL_ENDPOINT,
+        { operationName, variables: variables || {}, query },
+        { timeout: 20000, headers: HTTP_HEADERS });
+      const json = res.data;
+      if (json.errors && !json.data) {
+        const e = new Error(json.errors[0]?.message || 'GraphQL error (no data)');
+        e.graphqlLogic = true;
+        throw e;
       }
-
-      const userData = result.data?.public?.user;
-      if (userData?.twitterUsername) {
-        twitterUsername = userData.twitterUsername.replace(/^@/, '');
+      if (json.errors && json.data && !_silentErrorsSeen.has(operationName)) {
+        _silentErrorsSeen.add(operationName);
+        console.warn(`[gql] ${operationName} partial errors:`, json.errors.slice(0, 3).map(e => e.message).join(' | '));
       }
-
-      retries = 0;
-    } catch (error) {
-      retries--;
-      if (retries > 0) {
-        await delay(delayMs);
-        delayMs *= 2;
+      return json.data;
+    } catch (e) {
+      lastErr = e;
+      if (e.graphqlLogic) throw e; // non-retryable
+      if (attempt < SNAP_CONF.RETRY_MAX_ATTEMPTS - 1) {
+        const backoff = Math.min(SNAP_CONF.RETRY_MAX_MS, SNAP_CONF.RETRY_BASE_MS * Math.pow(2, attempt));
+        await sleep(backoff + Math.floor(Math.random() * 400));
       }
     }
   }
+  throw lastErr;
+}
 
+// editions(assetId:) BATCHÉES via fragments aliasés : 1 HTTP = N requêtes.
+// Amortit le surcoût de coût (~17/alias) → ~10× moins de round-trips = anti-429.
+// Les assetId sont validés en hex avant interpolation (anti-injection).
+const HEX_RE = /^[0-9a-fA-F]+$/;
+async function gqlBatchEditions(assetIds, opts = {}) {
+  const first = opts.first || 1;
+  const skip = Number.isInteger(opts.skip) ? opts.skip : 0;
+  assetIds.forEach(id => {
+    if (typeof id !== 'string' || id.length > 64 || !HEX_RE.test(id)) {
+      throw new Error(`Bad assetId in batch: ${id}`);
+    }
+  });
+  const fragments = assetIds.map((id, i) =>
+`a${i}: public {
+  editions(assetId: "${id}", first: ${first}, skip: ${skip}, isDropLast: false) {
+    totalCount
+    editions {
+      id index
+      owner { uuid username displayName verified isCreator }
+      ownership { primary }
+    }
+  }
+}`).join('\n');
+  const query = `query SnapBatchEditions {\n${fragments}\n}`;
+
+  let lastErr;
+  for (let attempt = 0; attempt < SNAP_CONF.RETRY_MAX_ATTEMPTS; attempt++) {
+    try {
+      const res = await axios.post(GQL_ENDPOINT, { operationName: 'SnapBatchEditions', query },
+        { timeout: 20000, headers: HTTP_HEADERS });
+      const json = res.data;
+      if (json.errors && !json.data) throw new Error('GraphQL: ' + (json.errors[0]?.message || 'no data'));
+      if (json.errors && json.errors.length && !_silentErrorsSeen.has('SnapBatchEditions')) {
+        _silentErrorsSeen.add('SnapBatchEditions');
+        console.warn('[gqlBatchEditions] partial errors:', json.errors.slice(0, 3).map(e => e.message).join(' | '));
+      }
+      const out = {};
+      assetIds.forEach((id, i) => { out[id] = json.data?.[`a${i}`]?.editions || null; });
+      return out;
+    } catch (e) {
+      lastErr = e;
+      if (attempt < SNAP_CONF.RETRY_MAX_ATTEMPTS - 1) {
+        const backoff = Math.min(SNAP_CONF.RETRY_MAX_MS, SNAP_CONF.RETRY_BASE_MS * Math.pow(2, attempt));
+        await sleep(backoff + Math.floor(Math.random() * 400));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+// Fonction pour récupérer le twitterUsername via une requête GraphQL directe
+async function getTwitterUsername(username) {
+  let twitterUsername = null;
+  let retries = 3;
+  let delayMs = 1000;
+  while (retries > 0 && !twitterUsername) {
+    try {
+      const response = await axios.post(GQL_ENDPOINT, {
+        query: profileQuery,
+        variables: { id: username, cacheId: `getUserQuery-Profile-${username}` }
+      }, { timeout: 10000, headers: HTTP_HEADERS });
+      const result = response.data;
+      if (result.errors) throw new Error(`GraphQL Error: ${result.errors.map(e => e.message).join(', ')}`);
+      const userData = result.data?.public?.user;
+      if (userData?.twitterUsername) twitterUsername = userData.twitterUsername.replace(/^@/, '');
+      retries = 0;
+    } catch (error) {
+      retries--;
+      if (retries > 0) { await sleep(delayMs); delayMs *= 2; }
+    }
+  }
   return twitterUsername ? `https://x.com/${twitterUsername}` : '';
+}
+
+// ── Phase C — parcours eventHistory (séquentiel, cursor) ─────────────────────
+// Dérive l'owner courant par ÉDITION (asset.id × edition.index). Events en
+// newest-first → le 1er event vu pour une édition = état courant.
+async function walkOwnersAndDates(collectionId) {
+  const currentOwnerKey = {};      // "assetId|index" → déjà vu ?
+  const realEditionsPerAsset = {}; // assetId → [{ id, index, owner, ownership }]
+  let cursor = null, hasMore = true;
+  let eventCount = 0, pages = 0, pageFailures = 0, consecutiveFailures = 0;
+  const pageErrorMsgs = [];
+
+  while (hasMore) {
+    pages++;
+    let data;
+    try {
+      data = await gql('getCollectionEventHistory',
+        { collectionId, first: SNAP_CONF.HISTORY_PAGE_SIZE, after: cursor || null, naturesIn: TRANSFER_NATURES, cacheId: 'snap-hist-' + collectionId + '-' + (cursor || 'head') },
+        Q_HISTORY);
+      consecutiveFailures = 0;
+    } catch (e) {
+      pageFailures++;
+      consecutiveFailures++;
+      if (pageErrorMsgs.length < 3) pageErrorMsgs.push(e.message);
+      if (consecutiveFailures >= SNAP_CONF.HISTORY_MAX_CONSECUTIVE_FAILS) {
+        throw new Error(`Event history walk aborted: ${consecutiveFailures} consecutive page failures. Last error: ${pageErrorMsgs[0] || 'unknown'}`);
+      }
+      await sleep(500);
+      continue;
+    }
+
+    const hist = data?.public?.collection?.eventHistory;
+    if (!hist) break;
+
+    hist.edges.forEach(({ node }) => {
+      if (!node) return;
+      const aid = node.asset?.id;
+      if (!aid) return;
+      const idx = node.edition?.index ?? 1;
+      const key = `${aid}|${idx}`;
+      const nature = node.nature || 'unknown';
+
+      let owner = null;
+      if (node.toUser?.username) owner = node.toUser;
+      else if (nature === 'withdrawn' && node.user?.username) owner = node.user;
+
+      if (!currentOwnerKey[key] && owner) {
+        currentOwnerKey[key] = true;
+        if (!realEditionsPerAsset[aid]) realEditionsPerAsset[aid] = [];
+        realEditionsPerAsset[aid].push({ id: null, index: idx, owner, ownership: { primary: false } });
+      }
+      eventCount++;
+    });
+
+    cursor = hist.pageInfo.endCursor;
+    hasMore = hist.pageInfo.hasNextPage;
+  }
+
+  return { realEditionsPerAsset, eventCount, pages, pageFailures };
 }
 
 // Construit le classement (collections + leaderboard global) et l'écrit dans data.json.
@@ -314,248 +422,249 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// processCollection — version GraphQL alignée sur le panel Snapshot d'index.html
-//
-// Récupère les propriétaires d'une collection en 3 étapes via l'API GraphQL :
-//   • Étape 1 : eventHistory (nature: transferred) → propriétaire actuel de
-//               chaque asset transféré au moins une fois
-//   • Étape 2 : assets(collectionId) → liste de tous les assets avec
-//               copies / copiesInCirculation / edition IDs
-//   • Étape 2.5 : editions(assetId) → pour chaque NFT multi-édition,
-//               toutes les éditions et leurs propriétaires actuels
-//   • Étape 3 : edition(id) → pour les single-éditions sans transfert,
-//               propriétaire actuel via offerableEditionId
-//
-// Avantages vs l'ancien scraping Puppeteer :
-//   - Beaucoup plus rapide (pas de navigation, scroll, parsing DOM)
-//   - Plus correct (multi-éditions correctement comptées via editions(assetId))
-//   - Pas de dépendance navigateur
+// processCollection — port fidèle du runSnapshot(collectionId) v3.9.8
 // ─────────────────────────────────────────────────────────────────────────────
 async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, collectionsData, ownersData) {
   const collectionId = collectionUrl.split('/').pop();
   let collectionName = '';
 
   try {
-    // ── Infos de collection (nom + métriques officielles pour le log/discrepancy) ──
+    // ── PHASE A — Infos collection (nom + métriques officielles) ──────────────
     let officialItems = 0;
     let officialOwners = 0;
     try {
-      const info = await gql('SnapCollectionInfo', { collectionId }, Q_COLLECTION_INFO);
+      const [info, metric] = await Promise.all([
+        gql('GetCollection', { collectionId, cacheId: 'snap-col-' + collectionId }, Q_COLLECTION_INFO),
+        gql('GetCollectionMetric', { collectionId, cacheId: 'snap-metric-' + collectionId }, Q_COLLECTION_METRIC).catch(() => null)
+      ]);
       const c = info?.public?.collection;
-      if (c) {
-        collectionName = c.name || '';
-        // "items" et "editionsCount" — on prend le max comme dans index.html (= "Total Supply" affiché par crypto.com)
-        const items = Number(c.metrics?.items) || 0;
-        const editionsCount = Number(c.metrics?.editionsCount) || 0;
-        officialItems = Math.max(items, editionsCount);
-        officialOwners = Number(c.metrics?.owners) || 0;
-      }
+      if (c) collectionName = c.name || '';
+      const items = Number(c?.metrics?.items) || 0;
+      const totalSupply = Number(metric?.public?.collectionMetric?.totalSupply) || 0;
+      officialItems = Math.max(items, totalSupply);
+      officialOwners = Number(metric?.public?.collectionMetric?.owners) || 0;
     } catch (e) {
       console.warn(`Could not fetch collection info: ${e.message}`);
     }
-
-    if (!collectionName) {
-      throw new Error(`Failed to retrieve collection name for ${collectionId}`);
-    }
+    if (!collectionName) throw new Error(`Failed to retrieve collection name for ${collectionId}`);
 
     console.log('\nCOLLECTION:');
     console.log(`- ${collectionName}`);
     console.log(`- Total Supply (official): ${officialItems}`);
     console.log(`- Owners (official): ${officialOwners}\n`);
 
-    // ── ÉTAPE 1 — Historique des transferts (paginé) ────────────────────────
-    // Pour chaque asset, on récupère le DERNIER propriétaire connu via le
-    // premier event "transferred" rencontré (l'historique est en DESC).
-    const lastOwner = {}; // assetId → { username, uuid, copies }
-    {
-      let cursor = null, hasMore = true, pageNum = 0, count = 0;
-      console.log('Step 1/3 — Fetching transfer history (paginated)…');
-      while (hasMore) {
-        pageNum++;
-        const data = await gql('SnapHistory',
-          { collectionId, first: 100, after: cursor || null, naturesIn: ['transferred'] },
-          Q_HISTORY);
-        const hist = data?.public?.collection?.eventHistory;
-        if (!hist) {
-          console.warn('  No event history returned — collection may be invalid or empty.');
-          break;
-        }
-        hist.edges.forEach(({ node }) => {
-          if (!node?.asset?.id) return;
-          const owner = node.toUser || node.user;
-          if (!owner?.username) return;
-          if (!lastOwner[node.asset.id]) {
-            lastOwner[node.asset.id] = {
-              username: owner.username,
-              uuid: owner.uuid || owner.username,
-              copies: node.asset.copies || 1
-            };
-          }
-          count++;
-        });
-        cursor = hist.pageInfo.endCursor;
-        hasMore = hist.pageInfo.hasNextPage;
-      }
-      console.log(`  ✓ Step 1: ${pageNum} pages, ${count} events, ${Object.keys(lastOwner).length} assets with at least one transfer.`);
-    }
-
-    // ── ÉTAPE 2 — Tous les assets de la collection (paginé) ─────────────────
+    // ── PHASE B — Tous les assets (pages en parallèle) ────────────────────────
     const allAssets = [];
     {
-      let skip = 0, more = true, pageNum = 0;
-      console.log('Step 2/3 — Fetching all collection assets (paginated)…');
-      while (more) {
-        pageNum++;
-        const d = await gql('SnapAllAssets', { collectionId, first: 100, skip }, Q_ALL_ASSETS);
-        const batch = d?.public?.assets || [];
-        batch.forEach(a => allAssets.push(a));
-        skip += 100;
-        more = batch.length === 100;
-      }
-      const totalMinted = allAssets.reduce((s, a) => s + (a.copiesInCirculation != null ? a.copiesInCirculation : (a.copies || 1)), 0);
-      console.log(`  ✓ Step 2: ${allAssets.length} unique assets · ${totalMinted} editions minted.`);
-    }
-
-    // ── ÉTAPE 2.5 — Vraies éditions des NFTs multi-éditions ─────────────────
-    // editions(assetId) renvoie toutes les éditions avec leur propriétaire
-    // actuel, page par page. C'est la source autoritative pour les multi-éditions.
-    const realEditionsPerAsset = {}; // assetId → [{ id, owner:{uuid,username} }]
-    const multiEditionAssets = allAssets.filter(a => (a.copies || 1) > 1);
-    if (multiEditionAssets.length > 0) {
-      console.log(`Step 2.5/3 — Resolving editions for ${multiEditionAssets.length} multi-edition NFTs (concurrency ${CONCURRENCY})…`);
-      let mErrors = 0, mTotalEditions = 0, partialAssets = 0;
-      await mapPool(multiEditionAssets, CONCURRENCY, async (a) => {
-        const minted = a.copiesInCirculation != null ? a.copiesInCirculation : (a.copies || 1);
-        const allEds = [];
-        let apiTotalCount = 0;
-        try {
-          // Pagination interne (PAGE_SIZE = 100) jusqu'à totalCount
-          let edSkip = 0;
-          let safety = 0;
-          const PAGE_SIZE = 100;
-          while (safety < 20) {
-            safety++;
-            const d = await gql('SnapEditionsByAsset',
-              { assetId: a.id, first: PAGE_SIZE, skip: edSkip, isDropLast: false },
-              Q_EDITIONS_BY_ASSET);
-            const result = d?.public?.editions;
-            if (!result) break;
-            apiTotalCount = result.totalCount || apiTotalCount;
-            const eds = result.editions || [];
-            if (eds.length === 0) break;
-            allEds.push(...eds);
-            edSkip += eds.length;
-            if (eds.length < PAGE_SIZE) break;
-            if (apiTotalCount > 0 && allEds.length >= apiTotalCount) break;
-          }
-          realEditionsPerAsset[a.id] = allEds;
-          mTotalEditions += allEds.length;
-          if (allEds.length < minted) {
-            partialAssets++;
-            console.warn(`  ⚠ "${a.name || a.id}": API returned ${allEds.length}/${minted} editions (totalCount=${apiTotalCount}).`);
-          }
-        } catch (e) {
-          mErrors++;
-          console.warn(`  ⚠ Error on asset "${a.name || a.id}": ${e.message}`);
+      console.log('Phase B — Fetching all collection assets…');
+      const hint = officialItems;
+      if (hint > 0) {
+        const pageCount = Math.ceil(hint / SNAP_CONF.ASSET_PAGE_SIZE);
+        const pages = Array.from({ length: pageCount }, (_, i) => i);
+        await mapPool(pages, SNAP_CONF.ASSET_PAGE_CONCURRENCY, async (i) => {
+          const d = await gql('GetCollectionAssets',
+            { collectionId, first: SNAP_CONF.ASSET_PAGE_SIZE, skip: i * SNAP_CONF.ASSET_PAGE_SIZE, cacheId: 'snap-assets-' + collectionId + '-' + i },
+            Q_ALL_ASSETS);
+          (d?.public?.assets || []).forEach(a => allAssets.push(a));
+        });
+        // Sonde de sécurité : s'il manque des assets, on pagine au-delà.
+        let skip = allAssets.length;
+        let safety = 0;
+        while (allAssets.length < hint && safety < 50) {
+          safety++;
+          const d = await gql('GetCollectionAssets',
+            { collectionId, first: SNAP_CONF.ASSET_PAGE_SIZE, skip, cacheId: 'snap-assets-' + collectionId + '-probe' + safety },
+            Q_ALL_ASSETS);
+          const batch = d?.public?.assets || [];
+          if (batch.length === 0) break;
+          batch.forEach(a => allAssets.push(a));
+          skip += batch.length;
+          if (batch.length < SNAP_CONF.ASSET_PAGE_SIZE) break;
         }
-      });
-      console.log(`  ✓ Step 2.5: ${mTotalEditions} editions resolved${partialAssets ? ` (${partialAssets} partial)` : ''}${mErrors ? ` (${mErrors} errors)` : ''}.`);
-    } else {
-      console.log('Step 2.5/3 skipped — no multi-edition NFTs in this collection.');
-    }
-
-    // ── ÉTAPE 3 — Owners manquants (single-éditions sans historique) ────────
-    const missingAssets = allAssets.filter(a => !lastOwner[a.id] && (a.copies || 1) === 1);
-    if (missingAssets.length > 0) {
-      console.log(`Step 3/3 — Resolving ${missingAssets.length} owner${missingAssets.length === 1 ? '' : 's'} via edition(id) API (concurrency ${CONCURRENCY})…`);
-      let resolved = 0, noEditionId = 0, apiErrors = 0;
-      await mapPool(missingAssets, CONCURRENCY, async (a) => {
-        const editionId = a.offerableEditionId || a.latestPurchasedEdition?.id || a.defaultListingV2?.editionId;
-        if (!editionId) { noEditionId++; return; }
-        try {
-          const ed = await gql('SnapEdition', { id: editionId }, Q_EDITION_OWNER);
-          const owner = ed?.public?.edition?.owner;
-          if (owner?.username) {
-            lastOwner[a.id] = {
-              username: owner.username,
-              uuid: owner.uuid || owner.username,
-              copies: a.copies || 1
-            };
-            resolved++;
-          }
-        } catch (e) { apiErrors++; }
-      });
-      console.log(`  ✓ Step 3: ${resolved} owners resolved · ${noEditionId} without edition ID · ${apiErrors} API errors.`);
-    } else {
-      console.log('Step 3/3 skipped — all single-edition NFTs already have an owner from transfer history.');
-    }
-
-    // ── AGRÉGATION — Construire ownerNFTs (compatible avec writeCryptonautsData) ──
-    // Règle (identique à index.html) :
-    //   • Multi-edition → on attribue 1 count par édition dont on connaît l'owner
-    //   • Single-edition → on attribue 1 count à l'owner (depuis lastOwner)
-    //   • Les éditions multi non résolues n'inflatent PAS un holder aléatoire
-    const ownerNFTs = {};       // username → count (pour la collection)
-    const ownersByUuid = {};    // uuid → username (pour dédupliquer si même user a plusieurs handles)
-    let scrapedSupply = 0;
-
-    const addOwner = (username, uuid) => {
-      if (!username) return;
-      // Dédup : on garde le premier username vu pour un uuid donné, mais on incrémente toujours
-      const key = uuid || username;
-      if (!ownersByUuid[key]) ownersByUuid[key] = username;
-      const canonicalName = ownersByUuid[key];
-      ownerNFTs[canonicalName] = (ownerNFTs[canonicalName] || 0) + 1;
-      globalOwnerNFTs[canonicalName] = (globalOwnerNFTs[canonicalName] || 0) + 1;
-      scrapedSupply++;
-    };
-
-    allAssets.forEach(a => {
-      const copies = a.copies || 1;
-      const minted = a.copiesInCirculation != null ? a.copiesInCirculation : copies;
-      if (copies > 1) {
-        const realEds = realEditionsPerAsset[a.id];
-        if (realEds && realEds.length > 0) {
-          realEds.forEach(ed => {
-            if (ed?.owner?.username) addOwner(ed.owner.username, ed.owner.uuid);
+      } else {
+        // Pas de hint : pagination spéculative par vagues jusqu'à vagues vides.
+        let skip = 0, emptyWaves = 0, ended = false;
+        while (!ended && emptyWaves < SNAP_CONF.PHASE_B_EMPTY_WAVE_LIMIT) {
+          const wave = Array.from({ length: SNAP_CONF.ASSET_PAGE_CONCURRENCY }, (_, k) => skip + k * SNAP_CONF.ASSET_PAGE_SIZE);
+          const before = allAssets.length;
+          await mapPool(wave, SNAP_CONF.ASSET_PAGE_CONCURRENCY, async (s) => {
+            const d = await gql('GetCollectionAssets',
+              { collectionId, first: SNAP_CONF.ASSET_PAGE_SIZE, skip: s, cacheId: 'snap-assets-' + collectionId + '-' + s },
+              Q_ALL_ASSETS);
+            const batch = d?.public?.assets || [];
+            batch.forEach(a => allAssets.push(a));
+            if (batch.length < SNAP_CONF.ASSET_PAGE_SIZE) ended = true;
           });
+          if (allAssets.length === before) emptyWaves++; else emptyWaves = 0;
+          skip += SNAP_CONF.ASSET_PAGE_CONCURRENCY * SNAP_CONF.ASSET_PAGE_SIZE;
         }
-      } else if (minted > 0) {
-        const own = lastOwner[a.id];
-        if (own?.username) addOwner(own.username, own.uuid);
       }
+      // Dédup (les pages parallèles peuvent se recouvrir sur la sonde)
+      const seen = new Set();
+      for (let i = allAssets.length - 1; i >= 0; i--) {
+        if (seen.has(allAssets[i].id)) allAssets.splice(i, 1);
+        else seen.add(allAssets[i].id);
+      }
+      const minted = allAssets.reduce((s, a) => s + (a.copiesInCirculation != null ? a.copiesInCirculation : (a.copies || 1)), 0);
+      console.log(`  ✓ Phase B: ${allAssets.length} assets · ${minted} éditions mintées.`);
+    }
+
+    // ── PHASE C — Owner courant par édition via eventHistory ──────────────────
+    console.log('Phase C — Walking event history…');
+    const phaseC = await walkOwnersAndDates(collectionId);
+    const realEditionsPerAsset = phaseC.realEditionsPerAsset;
+    console.log(`  ✓ Phase C: ${phaseC.eventCount} events · ${phaseC.pages} pages · ${Object.keys(realEditionsPerAsset).length} assets résolus${phaseC.pageFailures ? ` · ${phaseC.pageFailures} échecs page` : ''}.`);
+
+    // ── PHASE C-fallback — editions(assetId:) batchées pour les manquants ─────
+    const phantomAssetIds = new Set();
+    {
+      const assetsZero = [], assetsPartial = [];
+      allAssets.forEach(a => {
+        const got = realEditionsPerAsset[a.id]?.length || 0;
+        const minted = a.copiesInCirculation != null ? a.copiesInCirculation : (a.copies || 1);
+        if (minted === 0) return;
+        if (got >= minted) return;
+        if (got > 0) assetsPartial.push(a); else assetsZero.push(a);
+      });
+      const needFallback = [...assetsZero, ...assetsPartial];
+
+      // Fusion par index d'édition (les résultats frais écrasent ceux de Phase C)
+      const mergeEditions = (assetId, fresh) => {
+        const byIndex = new Map();
+        (realEditionsPerAsset[assetId] || []).forEach(ed => { if (ed.index != null) byIndex.set(ed.index, ed); });
+        fresh.forEach(ed => { if (ed.index != null) byIndex.set(ed.index, ed); });
+        realEditionsPerAsset[assetId] = Array.from(byIndex.values());
+      };
+      const totalCountPerAsset = {};
+
+      if (needFallback.length > 0) {
+        console.log(`Phase C-fallback — ${needFallback.length} assets (${assetsZero.length} zéro · ${assetsPartial.length} partiels). Batched aliased…`);
+        const single = needFallback.filter(a => (a.copies || 1) === 1);
+        const multi = needFallback.filter(a => (a.copies || 1) > 1);
+
+        const runTier = async (assets, batchSize, first) => {
+          const batches = chunk(assets.map(a => a.id), batchSize);
+          await mapPool(batches, SNAP_CONF.FALLBACK_BATCH_CONCURRENCY, async (ids) => {
+            const result = await gqlBatchEditions(ids, { first });
+            ids.forEach(id => {
+              const r = result[id];
+              if (!r) return;
+              totalCountPerAsset[id] = r.totalCount || 0;
+              const eds = r.editions || [];
+              if ((r.totalCount || 0) > 0 && eds.length === 0) { phantomAssetIds.add(id); return; }
+              if (eds.length > 0) {
+                mergeEditions(id, eds.map(ed => ({ id: ed.id, index: ed.index, owner: ed.owner, ownership: ed.ownership || { primary: false } })));
+              }
+            });
+            if (SNAP_CONF.FALLBACK_INTER_BATCH_DELAY_MS > 0) await sleep(SNAP_CONF.FALLBACK_INTER_BATCH_DELAY_MS);
+          });
+        };
+
+        await runTier(single, SNAP_CONF.FALLBACK_BATCH_SIZE_SINGLE, 1);
+        await runTier(multi, SNAP_CONF.FALLBACK_BATCH_SIZE_MULTI, 100);
+
+        // Débordement pour les multi-éditions à >100 éditions
+        for (const a of multi) {
+          const tc = totalCountPerAsset[a.id] || 0;
+          if (tc > 100) {
+            let skip = 100;
+            while (skip < tc && skip < 5000) {
+              const r = await gqlBatchEditions([a.id], { first: 100, skip });
+              const eds = r[a.id]?.editions || [];
+              if (eds.length === 0) break;
+              mergeEditions(a.id, eds.map(ed => ({ id: ed.id, index: ed.index, owner: ed.owner, ownership: ed.ownership || { primary: false } })));
+              skip += 100;
+              await sleep(SNAP_CONF.FALLBACK_INTER_BATCH_DELAY_MS);
+            }
+          }
+        }
+
+        // ── Secondary — editionEvents pour les assets toujours vides (withdrawn) ──
+        const stillMissing = needFallback.filter(a => !realEditionsPerAsset[a.id]?.length && !phantomAssetIds.has(a.id));
+        if (stillMissing.length > 0 && stillMissing.length <= SNAP_CONF.SECONDARY_FALLBACK_CAP) {
+          console.log(`Phase C-fallback (secondary) — ${stillMissing.length} assets via editionEvents…`);
+          for (const a of stillMissing) {
+            const edId = a.latestPurchasedEdition?.id || a.offerableEditionId || a.defaultListingV2?.editionId;
+            if (!edId) continue;
+            try {
+              const d = await gql('EditionEvents', { editionId: edId, cacheId: 'snap-ee-' + edId }, Q_EDITION_EVENTS);
+              const events = d?.public?.editionEvents || [];
+              let owner = null;
+              for (const ev of events) {
+                if (ev.toUser?.username) { owner = ev.toUser; break; }
+                else if (ev.nature === 'withdrawn' && ev.user?.username) { owner = ev.user; break; }
+              }
+              if (owner) realEditionsPerAsset[a.id] = [{ id: edId, index: 1, owner, ownership: { primary: false } }];
+              await sleep(80);
+            } catch (e) { /* on continue */ }
+          }
+        }
+      }
+    }
+
+    // ── Filtre fantômes (totalCount>0 mais editions:[]) ───────────────────────
+    if (phantomAssetIds.size > 0) {
+      const before = allAssets.length;
+      for (let i = allAssets.length - 1; i >= 0; i--) {
+        if (phantomAssetIds.has(allAssets[i].id)) allAssets.splice(i, 1);
+      }
+      console.log(`  ✓ Filtre fantômes : ${phantomAssetIds.size} assets buggés exclus (${before} → ${allAssets.length}).`);
+    }
+
+    // ── PHASE E — Agrégation : 1 count / édition, holder keyé par uuid||username ──
+    const holderMap = {};
+    let totalAttributed = 0;
+    const upsertHolder = (own) => {
+      if (!own?.username) return;
+      const k = own.uuid || own.username;
+      if (!holderMap[k]) {
+        holderMap[k] = { username: own.username, uuid: k, count: 0 };
+      }
+      holderMap[k].count += 1;
+    };
+    allAssets.forEach(a => {
+      const eds = realEditionsPerAsset[a.id] || [];
+      eds.forEach(ed => {
+        if (ed?.owner?.username) { upsertHolder(ed.owner); totalAttributed++; }
+      });
+    });
+
+    // ── Conversion vers ownerNFTs (username→count) + contribution au global ──
+    const ownerNFTs = {};
+    Object.values(holderMap).forEach(h => {
+      ownerNFTs[h.username] = (ownerNFTs[h.username] || 0) + h.count;
+      globalOwnerNFTs[h.username] = (globalOwnerNFTs[h.username] || 0) + h.count;
     });
 
     // ── Récupérer les liens Twitter/X pour les nouveaux propriétaires ──
     const newOwners = Object.keys(ownerNFTs).filter(o => !(o in ownersData));
     if (newOwners.length > 0) {
-      console.log(`Fetching Twitter usernames for ${newOwners.length} new owner${newOwners.length === 1 ? '' : 's'} (concurrency ${CONCURRENCY})…`);
-      await mapPool(newOwners, CONCURRENCY, async (owner) => {
+      console.log(`Fetching Twitter usernames for ${newOwners.length} new owner${newOwners.length === 1 ? '' : 's'}…`);
+      await mapPool(newOwners, 4, async (owner) => {
         const twitterUrl = await getTwitterUsername(owner);
         ownersData[owner] = { username: owner, twitter: twitterUrl };
       });
-      saveOwnersJson(ownersData); // une seule écriture après tout le batch (vs une par owner avant)
+      saveOwnersJson(ownersData);
     }
 
-    // ── Logs de discrepancy (identiques à l'ancienne version) ──
+    // ── Logs de discrepancy ──
     const scrapedOwnersCount = Object.keys(ownerNFTs).length;
-    if (officialItems > 0 && scrapedSupply !== officialItems) {
-      console.warn(`Discrepancy detected for collection ${collectionName}: Scraped ${scrapedSupply} Cryptonauts, but expected ${officialItems}.`);
+    if (officialItems > 0 && totalAttributed !== officialItems) {
+      console.warn(`Discrepancy detected for collection ${collectionName}: Scraped ${totalAttributed} editions, but expected ${officialItems}.`);
     }
     if (officialOwners > 0 && scrapedOwnersCount !== officialOwners) {
       console.warn(`Discrepancy in owner count for collection ${collectionName}: Scraped ${scrapedOwnersCount} owners, but expected ${officialOwners}.`);
     }
 
-    // ── Push vers collectionsData (même format qu'avant) ──
     collectionsData.push({
       collectionId,
       collectionName,
-      totalSupply: officialItems > 0 ? officialItems : scrapedSupply,
+      totalSupply: officialItems > 0 ? officialItems : totalAttributed,
       owners: officialOwners > 0 ? officialOwners : scrapedOwnersCount,
       ownerNFTs
     });
 
-    console.log(`✅ ${collectionName}: ${scrapedOwnersCount} unique owners · ${scrapedSupply} editions counted.`);
+    console.log(`✅ ${collectionName}: ${scrapedOwnersCount} unique owners · ${totalAttributed} editions counted.`);
     return { collectionName, ownerNFTs, ok: true };
 
   } catch (error) {
@@ -573,24 +682,19 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
 
 async function main() {
   try {
-    // Charger Owners.json
     const ownersData = loadOwnersJson();
     const globalOwnerNFTs = {};
     const collectionsData = [];
 
-    // Plus besoin de lancer un navigateur Puppeteer : tout passe par GraphQL.
     const failedCollections = [];
     for (const { url, usePagination } of collectionUrls) {
       console.log(`\n=== Processing collection: ${url} ===`);
       const r = await processCollection(url, usePagination, globalOwnerNFTs, collectionsData, ownersData);
       if (!r.ok) failedCollections.push(url);
-      await delay(10000); // pause de 10 s entre collections : laisse la fenêtre anti-429 de crypto.com se vider après la grosse rafale d'une collection
+      await delay(3000); // courte pause entre collections (le batching réduit déjà fortement le débit)
     }
 
     // ── GARDE-FOU n°1 : échec d'au moins une collection ──
-    // Si une collection n'a pas pu être récupérée (429 / 403 / réseau), on
-    // REFUSE de réécrire data.json avec des données partielles. On sort en
-    // erreur pour que la GitHub Action annule le commit du data.json partiel.
     if (failedCollections.length > 0) {
       console.error(`\n❌ ${failedCollections.length}/${collectionUrls.length} collection(s) en échec (API bloquée / 429 ?). data.json NON modifié pour ne pas publier des données partielles :`);
       failedCollections.forEach(u => console.error(`   - ${u}`));
@@ -598,7 +702,6 @@ async function main() {
       return;
     }
 
-    // Calculer les totaux
     const totalUniqueOwners = Object.keys(globalOwnerNFTs).length;
     const totalCryptonautsAcrossAllCollections = collectionsData.reduce((sum, data) => sum + data.totalSupply, 0);
 
@@ -606,26 +709,14 @@ async function main() {
     console.log(`Total Unique Owners: ${totalUniqueOwners}`);
     console.log(`Total Cryptonauts Across All Collections: ${totalCryptonautsAcrossAllCollections}\n`);
 
-    const scrapedCryptonauts = Object.values(globalOwnerNFTs).reduce((sum, count) => sum + count, 0);
-    if (scrapedCryptonauts !== totalCryptonautsAcrossAllCollections) {
-      console.warn(`Global discrepancy detected: Scraped ${scrapedCryptonauts} Cryptonauts, but expected ${totalCryptonautsAcrossAllCollections}.`);
-    }
-
     // ── GARDE-FOU n°2 : aucune donnée du tout ──
-    // Si aucune donnée n'a été récupérée (API bloquée / 403 / réseau coupé),
-    // on REFUSE de réécrire data.json pour ne pas remplacer le classement par
-    // une page vide. On sort en erreur (exit code 1) pour que la GitHub Action
-    // annule le commit du data.json partiel.
     if (totalUniqueOwners === 0) {
       console.error('\n❌ Aucun propriétaire récupéré (API bloquée / 403 ?). data.json NON modifié pour ne pas écraser le classement.');
       process.exitCode = 1;
       return;
     }
 
-    // Sauvegarder Owners.json
     saveOwnersJson(ownersData);
-
-    // Écrire le classement dans data.json (consommé par index.html via fetch)
     writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData);
 
   } catch (error) {
