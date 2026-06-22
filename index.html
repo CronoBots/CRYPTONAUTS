@@ -3152,23 +3152,40 @@ body::after {
     // ── Images IPFS (collections externes / Crovia) : aucune passerelle n'est fiable
     // à 100 %, on les sert via weserv (qui met en cache) avec un repli en cascade
     // sur plusieurs passerelles si l'une échoue.
-    const IPFS_GW = ['nftstorage.link', 'ipfs.io', 'dweb.link'];
+    const IPFS_GW = ['w3s.link', 'nftstorage.link', 'dweb.link', 'ipfs.io'];
+    const _gwAt = i => IPFS_GW[((i % IPFS_GW.length) + IPFS_GW.length) % IPFS_GW.length];
     function ipfsThumb(cid, size, gw) {
-      return 'https://images.weserv.nl/?url=' + encodeURIComponent(IPFS_GW[gw || 0] + '/ipfs/' + cid) + '&w=' + size + '&h=' + size + '&fit=cover&q=68&output=webp';
+      return 'https://images.weserv.nl/?url=' + encodeURIComponent(_gwAt(gw || 0) + '/ipfs/' + cid) + '&w=' + size + '&h=' + size + '&fit=cover&q=68&output=webp';
     }
     // Attributs à poser sur un <img> IPFS pour activer le repli automatique.
-    function ipfsAttrs(cid, size) {
-      return 'src="' + ipfsThumb(cid, size, 0) + '" data-ipfs="' + escHtml(cid) + '" data-size="' + size + '" data-gw="0"';
+    // opts.gw   : passerelle de DÉPART (décalée par image → répartit la charge,
+    //             évite de marteler une seule passerelle avec ~12 requêtes simultanées).
+    // opts.fallback : image locale servie une fois TOUTES les passerelles épuisées
+    //             (→ on n'affiche jamais l'icône « image cassée »).
+    function ipfsAttrs(cid, size, opts) {
+      opts = opts || {};
+      const gw0 = ((opts.gw || 0) % IPFS_GW.length + IPFS_GW.length) % IPFS_GW.length;
+      return 'src="' + ipfsThumb(cid, size, gw0) + '" data-ipfs="' + escHtml(cid) + '" data-size="' + size
+        + '" data-gw="' + gw0 + '" data-tries="0"'
+        + (opts.fallback ? ' data-fallback="' + escHtml(opts.fallback) + '"' : '');
     }
-    // Bascule sur la passerelle suivante quand une image IPFS échoue (event 'error'
-    // capturé car il ne « bubble » pas).
+    // À chaque échec : on essaie la passerelle suivante (en parcourant TOUTES les
+    // passerelles à partir de gw0). Une fois toutes épuisées, on bascule sur
+    // l'image de repli locale (data-fallback) plutôt que de laisser l'icône cassée.
+    // (event 'error' capturé en phase de capture car il ne « bubble » pas.)
     document.addEventListener('error', function (e) {
       const img = e.target;
       if (!img || img.tagName !== 'IMG' || !img.dataset || !img.dataset.ipfs) return;
-      const next = parseInt(img.dataset.gw || '0', 10) + 1;
-      if (next >= IPFS_GW.length) return;
-      img.dataset.gw = String(next);
-      img.src = ipfsThumb(img.dataset.ipfs, img.dataset.size || 200, next);
+      const tries = parseInt(img.dataset.tries || '0', 10) + 1;
+      img.dataset.tries = String(tries);
+      if (tries < IPFS_GW.length) {
+        const gw0 = parseInt(img.dataset.gw || '0', 10);
+        img.src = ipfsThumb(img.dataset.ipfs, img.dataset.size || 200, gw0 + tries);
+      } else if (img.dataset.fallback) {
+        const fb = img.dataset.fallback;
+        delete img.dataset.ipfs; // stoppe la cascade
+        img.src = fb;
+      }
     }, true);
     function nftCardsHTML(assets, collectionId) {
       return (assets || []).map(a => {
@@ -3343,7 +3360,7 @@ body::after {
           const tag = isMint ? '<span class="sb-tag sb-tag-mint">Mint</span>' : '<span class="sb-tag sb-tag-sale">Sale</span>';
           const badge = (s.colImg && s.colImg !== thumb) ? '<img class="sb-col-badge" src="' + escHtml(s.colImg) + '" alt="" loading="lazy" decoding="async">' : '';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0"' : '') + ' alt="" loading="lazy" decoding="async">' + badge + '</span>'
+            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + ' alt="" loading="lazy" decoding="async">' + badge + '</span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tag + '</div>'
             + '<span class="sb-col">' + escHtml(s.col) + '</span>'
@@ -3397,9 +3414,10 @@ body::after {
           if (c.meta.external || !c.meta.id) {
             const arr = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[c.meta.contract]) || [];
             const href = c.meta.croviaUrl || 'https://crovia.app';
-            tiles = shuffle(arr).slice(0, COUNT).map(a =>
+            const extFallback = c.meta.image || 'assets/v3-logo.jpg?v=2';
+            tiles = shuffle(arr).slice(0, COUNT).map((a, i) =>
               '<a class="spot-nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
-              + '<img ' + ipfsAttrs(a.c, 168) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
+              + '<img ' + ipfsAttrs(a.c, 168, { gw: i, fallback: extFallback }) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></a>');
           } else {
             const st = COLLECTION_STATS[c.title] || {};
             const supply = st.supply || 30;
@@ -3512,9 +3530,9 @@ body::after {
       const list = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[collection.contract]) || [];
       if (!list.length) { grid.innerHTML = '<p class="cm-empty">No items available.</p>'; return; }
       const href = collection.croviaUrl || '#';
-      grid.innerHTML = list.map(a =>
+      grid.innerHTML = list.map((a, i) =>
         '<a class="nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
-        + '<span class="nft-img"><img ' + (a.c ? ipfsAttrs(a.c, 320) : ('src="' + escHtml(collection.image) + '"')) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
+        + '<span class="nft-img"><img ' + (a.c ? ipfsAttrs(a.c, 320, { gw: i, fallback: collection.image }) : ('src="' + escHtml(collection.image) + '"')) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
         + '<span class="nft-name">' + escHtml(a.n) + '</span></a>'
       ).join('');
     }
