@@ -2698,6 +2698,93 @@ body::after {
       .spot-row { gap: 10px; }
       .spot-name { font-size: 0.56rem; margin-left: 8%; }
     }
+    /* ════════ LIGNE DU TEMPS DES COLLECTIONS ════════
+       Bande horizontale scrollable : chaque collection = une vignette ronde reliée
+       par une ligne continue ; un clic fait défiler vers sa carte (data-target = idx). */
+    .col-timeline {
+      position: relative;
+      max-width: 1280px;
+      margin: 0 auto 30px;
+      padding: 6px 10px 4px;
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--hairline) transparent;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+    }
+    .col-timeline::-webkit-scrollbar { height: 6px; }
+    .col-timeline::-webkit-scrollbar-track { background: transparent; }
+    .col-timeline::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 3px; }
+    .tl-node {
+      position: relative;
+      flex: 0 0 auto;
+      min-width: 92px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 6px 4px;
+      background: none;
+      border: 0;
+      cursor: pointer;
+      font-family: var(--font-display);
+      color: var(--muted);
+      scroll-snap-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* Ligne continue passant par le centre des vignettes (top = padding 8 + rayon 29 = 37). */
+    .tl-node::before {
+      content: '';
+      position: absolute;
+      top: 37px;
+      left: 0; right: 0;
+      height: 2px;
+      background: var(--hairline);
+      z-index: 0;
+    }
+    .tl-node:first-child::before { left: 50%; }
+    .tl-node:last-child::before  { right: 50%; }
+    .tl-thumb {
+      position: relative;
+      z-index: 1;
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255,255,255,0.18);
+      background: var(--collection-bg);
+      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    }
+    .tl-node:hover .tl-thumb,
+    .tl-node:focus-visible .tl-thumb {
+      transform: scale(1.12);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px rgba(255,106,26,0.18);
+    }
+    .tl-node:focus-visible { outline: none; }
+    .tl-date {
+      position: relative;
+      z-index: 1;
+      font-size: 11px;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+      color: var(--muted);
+      transition: color .18s ease;
+    }
+    .tl-node:hover .tl-date { color: var(--text-dark); }
+    .tl-node.is-active .tl-thumb { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(255,106,26,0.18); }
+    .tl-node.is-active .tl-date  { color: var(--primary-color); }
+    @media (prefers-reduced-motion: reduce) { .tl-thumb { transition: none; } }
+    @media (max-width: 600px) {
+      .col-timeline { margin-bottom: 22px; }
+      .tl-node { min-width: 76px; gap: 7px; padding: 8px 5px 4px; }
+      .tl-thumb { width: 48px; height: 48px; }
+      .tl-node::before { top: 32px; }
+      .tl-date { font-size: 10px; }
+    }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1280px; margin: 0 auto; }
     /* Le lien ne porte plus le cadre (sur .col-item). Jamais souligné, même au hover/tap mobile. */
@@ -2906,6 +2993,7 @@ body::after {
         <div class="saga-stat"><span class="v">2,002</span><span class="l">Items minted</span></div>
         <div class="saga-stat"><span class="v">11</span><span class="l">Sold-out drops</span></div>
       </div>
+      <div id="collections-timeline" class="col-timeline" role="list" aria-label="Timeline of the collections"></div>
       <div id="collections-grid"></div>
     </section>
 
@@ -3397,6 +3485,7 @@ body::after {
       const panel = item.querySelector('.col-panel');
       if (panel && v.parentElement !== panel) panel.appendChild(v);
       v.classList.remove('hidden-view');
+      highlightTimelineNode(idx);
       // is-open au frame suivant → la transition d'accordéon (grid-template-rows) s'anime.
       requestAnimationFrame(() => {
         item.classList.add('is-open');
@@ -3406,6 +3495,62 @@ body::after {
     function closeCollectionDetail() {
       // On retire seulement is-open → le panneau se replie en douceur (grid-template-rows).
       document.querySelectorAll('.col-item.is-open').forEach(o => o.classList.remove('is-open'));
+    }
+
+    // ── Ligne du temps des collections ──
+    // Bande horizontale (oldest → newest) : une vignette par collection, reliées par une
+    // ligne continue. Un clic fait défiler vers la carte correspondante (data-target = idx).
+    const TL_MONTHS = { jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5, jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11 };
+    function tlReleaseRank(title) {
+      const rel = COLLECTION_RELEASE[title] || '';
+      const m = /([A-Za-z]{3})\s+(\d{4})/.exec(rel);
+      if (!m) return -1;
+      const mo = TL_MONTHS[m[1].toLowerCase()];
+      return parseInt(m[2], 10) * 12 + (mo == null ? 0 : mo);
+    }
+    function buildCollectionsTimeline() {
+      const tl = document.getElementById('collections-timeline');
+      if (!tl) return;
+      tl.innerHTML = '';
+      // Entrées (idx, titre, image) triées du plus ancien au plus récent.
+      const entries = collectionsData
+        .map((c, idx) => ({ idx, title: c.title, image: c.image, rank: tlReleaseRank(c.title) }))
+        .sort((a, b) => a.rank - b.rank);
+      entries.forEach(e => {
+        const rel = COLLECTION_RELEASE[e.title] || '';
+        const node = document.createElement('button');
+        node.type = 'button';
+        node.className = 'tl-node';
+        node.dataset.target = e.idx;
+        node.setAttribute('role', 'listitem');
+        node.setAttribute('aria-label', 'Go to ' + e.title + (rel ? ' (' + rel + ')' : ''));
+        node.title = e.title + (rel ? ' · ' + rel : '');
+        node.innerHTML =
+          '<img class="tl-thumb" src="' + e.image + '" alt="' + escHtml(e.title) + '" loading="lazy" decoding="async">' +
+          '<span class="tl-date">' + escHtml(rel || '—') + '</span>';
+        tl.appendChild(node);
+      });
+      // Délégation : clic → scroll vers la carte (+ surbrillance du repère).
+      tl.addEventListener('click', function (ev) {
+        const node = ev.target.closest('.tl-node');
+        if (!node) return;
+        const idx = node.dataset.target;
+        const item = document.querySelector('.col-item[data-idx="' + idx + '"]');
+        if (!item) return;
+        highlightTimelineNode(idx);
+        try { item.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+        catch (e) { item.scrollIntoView(); }
+      });
+    }
+    // Met en surbrillance le repère de la collection idx et recentre la bande dessus.
+    function highlightTimelineNode(idx) {
+      const tl = document.getElementById('collections-timeline');
+      if (!tl) return;
+      tl.querySelectorAll('.tl-node.is-active').forEach(n => n.classList.remove('is-active'));
+      const node = tl.querySelector('.tl-node[data-target="' + idx + '"]');
+      if (!node) return;
+      node.classList.add('is-active');
+      try { node.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) { }
     }
     // ── Sales Bot : flux des dernières ventes (events « transferred » avec prix) ──
     // Une vente = un transfert de propriété avec un montant > 0 (vendeur → acheteur).
@@ -3994,6 +4139,8 @@ body::after {
       collectionsData.forEach((collection, i) => {
         collectionsContainer.appendChild(renderCollection(collection, i));
       });
+
+      buildCollectionsTimeline();
 
       const artistSection = document.getElementById('artist');
       main.insertBefore(renderLeaderboard(globalOwnersData, collectionsData), artistSection);
