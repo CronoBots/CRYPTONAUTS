@@ -2429,6 +2429,36 @@ body::after {
     }
     /* ════════ PAGE DÉTAILLÉE D'UNE COLLECTION ════════ */
     /* Vues séparées : on n'affiche qu'une section à la fois (pilotée par data-view) */
+    /* ── Sélecteur de classement (pills) du Leaderboard ── */
+    .lb-pills {
+      display: flex; gap: 8px; overflow-x: auto;
+      padding: 2px 2px 16px; margin: 0 auto 4px; max-width: 760px;
+      scrollbar-width: none; -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x proximity;
+    }
+    .lb-pills::-webkit-scrollbar { display: none; }
+    .lb-pill {
+      flex: 0 0 auto; scroll-snap-align: start;
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 15px; border-radius: 999px;
+      border: 1px solid rgba(255, 106, 26, 0.22);
+      background: rgba(255, 255, 255, 0.03);
+      color: rgba(236, 228, 212, 0.72);
+      font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.02em;
+      text-transform: uppercase; white-space: nowrap; cursor: pointer;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .lb-pill:hover { color: #fff; border-color: rgba(255, 106, 26, 0.5); }
+    .lb-pill.is-active {
+      background: var(--primary-color); border-color: var(--primary-color);
+      color: #1a0f08; font-weight: 600;
+    }
+    .lb-pill-n {
+      font-size: 0.7rem; padding: 1px 7px; border-radius: 999px;
+      background: rgba(0, 0, 0, 0.18); opacity: 0.85;
+    }
+    .lb-pill.is-active .lb-pill-n { background: rgba(0, 0, 0, 0.2); }
+
     .hidden-view { display: none !important; }
     .nav-links a.is-active { color: #fff; }
     .nav-links a.is-active::after { width: 100%; }
@@ -2975,10 +3005,8 @@ body::after {
         <div class="cm-nfts" id="cvNfts"></div>
         <button class="cv-more" id="cvMore" type="button" hidden>Load more items</button>
       </div>
-      <div class="cv-block">
-        <h2 class="cv-sec-title">Holders <span class="cv-count cv-holders-count"></span></h2>
-        <ul class="cm-list" id="cvList"></ul>
-      </div>
+      <!-- Le classement des détenteurs est désormais centralisé dans l'onglet Leaderboard
+           (sélecteur par collection), plus dans la vue détail. Ici : aperçu des NFT seulement. -->
     </div>
   </section>
 
@@ -3501,8 +3529,7 @@ body::after {
       setStat('vol', fmtMoney(st.vol));
       setStat('sales', isExternal ? '—' : (st.sales || 0).toLocaleString('fr-FR'));
       view.querySelector('.cv-items-count').textContent = st.supply ? '(' + st.supply.toLocaleString('fr-FR') + ')' : '';
-      view.querySelector('.cv-holders-count').textContent = '(' + (collection.ownersCount || 0).toLocaleString('fr-FR') + ')';
-      view.querySelector('#cvList').innerHTML = buildOwnerRowsHTML(collection.owners);
+      // (Liste des détenteurs déplacée dans l'onglet Leaderboard.)
 
       const bannerImg = view.querySelector('.cv-banner-img');
       bannerImg.removeAttribute('src');
@@ -3574,25 +3601,30 @@ body::after {
       showView(VIEWS.includes(name) ? name : 'home');
     }
 
-    function renderGlobalOwners(owners) {
-      try {
-        const sortedOwners = [...owners].sort((a, b) => b.count - a.count);
-        let currentRank = 1;
-        let previousCount = null;
-        const rankedOwners = sortedOwners.map((owner, index) => {
-          if (index > 0 && owner.count < previousCount) {
-            currentRank += 1;
-          }
-          previousCount = owner.count;
-          let rankClass = '';
-          if (currentRank === 1) rankClass = 'rank-1';
-          else if (currentRank === 2) rankClass = 'rank-2';
-          else if (currentRank === 3) rankClass = 'rank-3';
-          return { ...owner, rank: currentRank, rankClass };
-        });
+    // ── Leaderboard unifié : un sélecteur (pills) Global + une pill par collection.
+    //    Tous les classements vivent ici (plus dans la vue détail collection). ──
+    let LB_BOARDS = [];      // [{ label, sub, owners }]
+    const LB_VISIBLE = 25;   // lignes affichées avant « SHOW MORE »
 
-        const topTenOwners = rankedOwners.slice(0, 10);
-        const additionalOwners = rankedOwners.slice(10);
+    // Range les détenteurs (gold/silver/bronze) et renvoie les <li> au format leaderboard.
+    // Les lignes au-delà de LB_VISIBLE reçoivent la classe lb-extra (repliées par défaut).
+    function lbRowsHTML(owners) {
+      const sorted = [...(owners || [])].sort((a, b) => b.count - a.count);
+      let rank = 1, prev = null;
+      return sorted.map((owner, i) => {
+        if (i > 0 && owner.count < prev) rank += 1;
+        prev = owner.count;
+        const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+        const extra = i >= LB_VISIBLE ? ' lb-extra' : '';
+        const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : '';
+        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
+      }).join('');
+    }
+
+    function renderLeaderboard(globalOwners, collections) {
+      try {
+        LB_BOARDS = [{ label: 'Global', sub: 'The top holders across every Cryptonauts collection, combined.', owners: globalOwners || [] }]
+          .concat((collections || []).map(c => ({ label: c.title, sub: 'Top holders of ' + c.title + '.', owners: c.owners || [] })));
 
         const section = document.createElement('section');
         section.className = 'leaderboard-section section reveal hidden-view';
@@ -3602,43 +3634,21 @@ body::after {
           <div class="section-head">
             <span class="eyebrow">Global Ranking</span>
             <h2 class="section-title">Leaderboard</h2>
-            <p class="section-sub">The top holders across every Cryptonauts collection, combined.</p>
+            <p class="section-sub" id="lbSub">${escHtml(LB_BOARDS[0].sub)}</p>
           </div>
           <div class="summary">
+            <div class="lb-pills" id="lbPills" role="tablist" aria-label="Choisir un classement">
+              ${LB_BOARDS.map((b, i) => `<button class="lb-pill${i === 0 ? ' is-active' : ''}" data-lb="${i}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}" type="button">${escHtml(b.label)}<span class="lb-pill-n">${b.owners.length}</span></button>`).join('')}
+            </div>
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
-            <ul id="global-owners">
-              ${topTenOwners.map(owner => `
-                <li class="${owner.rankClass}">
-                  <div class="left-container">
-                    <span class="rank">${owner.rank}</span>
-                    <a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>
-                    ${owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : ''}
-                  </div>
-                  <span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span>
-                </li>
-              `).join('')}
-            </ul>
-            ${additionalOwners.length ? `
-              <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
-              <ul id="additional-owners" class="hidden">
-                ${additionalOwners.map(owner => `
-                  <li class="${owner.rankClass}">
-                    <div class="left-container">
-                      <span class="rank">${owner.rank}</span>
-                      <a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>
-                      ${owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : ''}
-                    </div>
-                    <span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span>
-                  </li>
-                `).join('')}
-              </ul>
-            ` : ''}
+            <ul id="global-owners"></ul>
+            <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
           </div>
           <img src="assets/Footer.png" alt="Cryptonauts Footer Banner" class="footer-image" loading="lazy" decoding="async">
         `;
         return section;
       } catch (error) {
-        console.error('Error rendering global owners:', error);
+        console.error('Error rendering leaderboard:', error);
         return document.createElement('section');
       }
     }
@@ -3702,74 +3712,101 @@ body::after {
       }
     }
 
-    // Branche les contrôles du leaderboard (recherche + bouton SHOW MORE).
-    // À appeler APRÈS que renderGlobalOwners a inséré la section dans le DOM : le
+    // Branche les contrôles du leaderboard (pills, recherche, bouton SHOW MORE).
+    // À appeler APRÈS que renderLeaderboard a inséré la section dans le DOM : le
     // rendu est asynchrone (après le fetch de data.json), donc au DOMContentLoaded
     // #searchInput / #show-more-owners n'existent pas encore — les y câbler ne
     // faisait rien (barre de recherche inerte). C'est la régression introduite par
     // le découplage des données dans data.json.
     function wireLeaderboardControls() {
-      const showMoreButton = document.getElementById('show-more-owners');
-      if (showMoreButton) {
-        showMoreButton.setAttribute('role', 'button');
-        showMoreButton.setAttribute('tabindex', '0');
-        showMoreButton.addEventListener('keydown', (e) => {
-          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showMoreButton.click(); }
+      const listEl = document.getElementById('global-owners');
+      const subEl = document.getElementById('lbSub');
+      const pills = document.getElementById('lbPills');
+      const showMoreBtn = document.getElementById('show-more-owners');
+      const searchInput = document.getElementById('searchInput');
+      if (!listEl || !LB_BOARDS.length) return;
+
+      let expanded = false; // état « SHOW MORE » du classement courant
+
+      // Affiche/masque les lignes au-delà de LB_VISIBLE et l'état du bouton.
+      const applyCollapse = () => {
+        const extras = listEl.querySelectorAll('li.lb-extra');
+        extras.forEach(li => { li.style.display = expanded ? '' : 'none'; });
+        if (showMoreBtn) {
+          showMoreBtn.style.display = extras.length ? '' : 'none';
+          showMoreBtn.textContent = expanded ? 'SHOW LESS' : 'SHOW MORE';
+          showMoreBtn.setAttribute('aria-expanded', String(expanded));
+        }
+      };
+
+      // Bascule sur un classement (pill) : reconstruit la liste + reset recherche/collapse.
+      const selectBoard = (idx) => {
+        const board = LB_BOARDS[idx];
+        if (!board) return;
+        listEl.innerHTML = lbRowsHTML(board.owners);
+        if (subEl) subEl.textContent = board.sub;
+        if (searchInput) searchInput.value = '';
+        expanded = false;
+        applyCollapse();
+        pills.querySelectorAll('.lb-pill').forEach(p => {
+          const on = p.dataset.lb === String(idx);
+          p.classList.toggle('is-active', on);
+          p.setAttribute('aria-selected', on ? 'true' : 'false');
         });
-        showMoreButton.addEventListener('click', () => {
-          const additionalOwners = document.getElementById('additional-owners');
-          if (additionalOwners) {
-            const isHidden = additionalOwners.classList.contains('hidden');
-            additionalOwners.classList.toggle('hidden', !isHidden);
-            showMoreButton.textContent = isHidden ? 'SHOW LESS' : 'SHOW MORE';
-            showMoreButton.setAttribute('aria-expanded', isHidden);
-          }
+      };
+
+      if (pills) {
+        pills.addEventListener('click', (e) => {
+          const btn = e.target.closest('.lb-pill');
+          if (!btn) return;
+          selectBoard(parseInt(btn.dataset.lb, 10));
+          btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
         });
       }
 
-      const searchInput = document.getElementById('searchInput');
+      if (showMoreBtn) {
+        showMoreBtn.setAttribute('role', 'button');
+        showMoreBtn.setAttribute('tabindex', '0');
+        const toggle = () => { expanded = !expanded; applyCollapse(); };
+        showMoreBtn.addEventListener('click', toggle);
+        showMoreBtn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+      }
+
       if (searchInput) {
         searchInput.addEventListener('input', debounce(() => {
           const filter = searchInput.value.toLowerCase().trim();
-          const additionalOwners = document.getElementById('additional-owners');
-          const showMoreBtn = document.getElementById('show-more-owners');
-
-          // Pendant une recherche, on révèle la liste étendue (sinon les
-          // propriétaires classés au-delà du top 10 resteraient introuvables).
-          if (additionalOwners) {
-            if (filter) {
-              additionalOwners.classList.remove('hidden');
-            } else {
-              additionalOwners.classList.add('hidden');
-              if (showMoreBtn) { showMoreBtn.textContent = 'SHOW MORE'; showMoreBtn.setAttribute('aria-expanded', 'false'); }
-            }
+          const existing = document.getElementById('no-results');
+          if (!filter) {
+            if (existing) existing.remove();
+            listEl.querySelectorAll('li').forEach(li => { li.style.display = ''; });
+            expanded = false;
+            applyCollapse(); // re-replie
+            return;
           }
-          if (showMoreBtn) showMoreBtn.style.display = filter ? 'none' : '';
-
-          const listItems = document.querySelectorAll('#global-owners li, #additional-owners li');
+          // Recherche : on révèle tout puis on filtre par texte.
+          expanded = true;
           let found = false;
-
-          listItems.forEach(item => {
-            const text = item.textContent.toLowerCase();
-            const match = text.includes(filter);
-            item.style.display = match ? '' : 'none';
+          listEl.querySelectorAll('li:not(#no-results)').forEach(li => {
+            const match = li.textContent.toLowerCase().includes(filter);
+            li.style.display = match ? '' : 'none';
             if (match) found = true;
           });
-
-          const noResults = document.getElementById('no-results');
+          if (showMoreBtn) showMoreBtn.style.display = 'none';
           if (!found) {
-            if (!noResults) {
+            if (!existing) {
               const msg = document.createElement('li');
               msg.id = 'no-results';
               msg.textContent = 'No results found';
               msg.style.color = '#fff';
-              document.getElementById('global-owners').appendChild(msg);
+              listEl.appendChild(msg);
             }
-          } else if (noResults) {
-            noResults.remove();
+          } else if (existing) {
+            existing.remove();
           }
-        }, 300));
+        }, 250));
       }
+
+      selectBoard(0); // état initial : Global
     }
 
     // Charge le classement (collections + leaderboard global) depuis data.json,
@@ -3811,7 +3848,7 @@ body::after {
       });
 
       const artistSection = document.getElementById('artist');
-      main.insertBefore(renderGlobalOwners(globalOwnersData), artistSection);
+      main.insertBefore(renderLeaderboard(globalOwnersData, collectionsData), artistSection);
 
       // Le leaderboard vient d'être inséré → on câble maintenant ses contrôles
       // (barre de recherche + SHOW MORE), une fois #searchInput présent dans le DOM.
