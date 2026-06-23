@@ -3,7 +3,7 @@
 Ce document explique comment garder une **copie locale du dépôt sur votre PC**
 synchronisée avec le travail effectué dans **Claude Code on the web** (le
 conteneur cloud où Claude travaille). C'est le même principe que pour vos
-projets « pronostic » et « sport api ».
+autres projets synchronisés via Git.
 
 ## Le principe en une phrase
 
