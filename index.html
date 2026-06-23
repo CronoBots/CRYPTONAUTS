@@ -2512,17 +2512,18 @@ body::after {
     .col-item {
       position: relative; display: block;
       border-radius: 18px; overflow: hidden;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 106, 26, 0.45);   /* contour orange sur TOUTES les cartes */
       background: linear-gradient(135deg, #100c09, #15110d);
       box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
       opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .col-item:hover, .col-item:focus-within {
-      border-color: rgba(255, 106, 26, 0.5);
+      border-color: rgba(255, 106, 26, 0.65);
       box-shadow: 0 16px 38px rgba(255, 106, 26, 0.2);
     }
-    .col-item.is-open { border-color: rgba(255, 106, 26, 0.4); }
+    /* Carte active (dépliée) : halo orange. */
+    .col-item.is-open { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(255, 106, 26, 0.22), 0 16px 38px rgba(255, 106, 26, 0.28); }
     /* Panneau dépliable animé via grid-template-rows 0fr→1fr (transition fluide). */
     .col-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.38s ease; }
     .col-panel > * { min-height: 0; overflow: hidden; }
@@ -2752,9 +2753,9 @@ body::after {
       position: relative;
       z-index: 1;
       width: 58px; height: 58px;
-      border-radius: 50%;
+      border-radius: 12px;                          /* même forme (carré arrondi) que .col-logo */
       object-fit: cover;
-      border: 2px solid rgba(255,255,255,0.18);
+      border: 1px solid rgba(255, 106, 26, 0.5);    /* contour orange fin sur TOUTES les vignettes */
       background: var(--collection-bg);
       transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
     }
@@ -2781,7 +2782,7 @@ body::after {
     @media (max-width: 600px) {
       .col-timeline { margin-bottom: 22px; }
       .tl-node { min-width: 76px; gap: 7px; padding: 8px 5px 4px; }
-      .tl-thumb { width: 48px; height: 48px; }
+      .tl-thumb { width: 48px; height: 48px; border-radius: 10px; }
       .tl-node::before { top: 32px; }
       .tl-date { font-size: 10px; }
     }
@@ -2820,7 +2821,7 @@ body::after {
     .col-logo {
       position: absolute; z-index: 3; left: clamp(16px, 3vw, 28px); top: 0; transform: translateY(-50%);
       width: 92px; height: 92px; border-radius: 18px; object-fit: cover;
-      border: 2px solid rgba(255, 106, 26, 0.4); background: #100c09;
+      border: 1px solid rgba(255, 106, 26, 0.4); background: #100c09;
       box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
       transition: box-shadow 0.25s ease, border-color 0.25s ease;
     }
