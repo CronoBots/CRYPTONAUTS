@@ -326,6 +326,13 @@ body::after {
       transform: scale(1.02);
     }
 
+    /* PC : lignes du leaderboard plus compactes (mobile garde sa hauteur tactile). */
+    @media (min-width: 601px) {
+      #global-owners li, #additional-owners li {
+        padding: 9px 18px; margin-bottom: 7px; font-size: 1.05rem;
+      }
+    }
+
     #global-owners li.rank-1,
     #additional-owners li.rank-1,
     .collection ul li.collection-rank-1,
@@ -2458,6 +2465,45 @@ body::after {
     }
     .lb-pill.is-active .lb-pill-n { background: rgba(0, 0, 0, 0.2); }
 
+    /* ── Podium (top 3) du Leaderboard ── */
+    .lb-podium { display: flex; justify-content: center; align-items: flex-end; gap: 14px; margin: 6px auto 26px; max-width: 720px; }
+    .lb-pod {
+      position: relative; flex: 1 1 0; min-width: 0;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      padding: 16px 12px 0; border-radius: 16px 16px 0 0;
+      background: linear-gradient(180deg, rgba(255, 106, 26, 0.10), rgba(20, 22, 38, 0.45));
+      border: 1px solid var(--hairline); border-bottom: none;
+    }
+    .lb-pod-medal { font-size: 1.7rem; line-height: 1; margin-bottom: 6px; }
+    .lb-pod-name { display: block; max-width: 100%; font-family: var(--font-display); font-size: 0.95rem; color: #f7f1e6; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .lb-pod-tw { display: block; font-size: 0.68rem; color: var(--primary-color); margin-top: 2px; white-space: nowrap; overflow: hidden; max-width: 100%; text-overflow: ellipsis; }
+    .lb-pod-count { font-family: var(--font-display); font-size: 1.35rem; color: var(--primary-color); margin: 8px 0 12px; text-shadow: 0 0 16px rgba(255, 106, 26, 0.35); }
+    .lb-pod-count small { display: block; font-size: 0.5rem; letter-spacing: 0.12em; color: var(--muted); margin-top: 3px; }
+    .lb-pod-base { display: flex; align-items: flex-start; justify-content: center; padding-top: 9px; width: 100%; font-family: var(--font-display); font-size: 1.5rem; color: rgba(255, 255, 255, 0.9); border-radius: 8px 8px 0 0; }
+    .lb-pod-1 { border-color: rgba(232, 192, 105, 0.5); background: linear-gradient(180deg, rgba(232, 192, 105, 0.14), rgba(20, 22, 38, 0.45)); }
+    .lb-pod-1 .lb-pod-medal { font-size: 2.1rem; }
+    .lb-pod-1 .lb-pod-base { height: 74px; background: linear-gradient(180deg, rgba(232, 192, 105, 0.30), rgba(232, 192, 105, 0.05)); }
+    .lb-pod-2 { border-color: rgba(206, 208, 214, 0.32); }
+    .lb-pod-2 .lb-pod-base { height: 54px; background: linear-gradient(180deg, rgba(206, 208, 214, 0.26), rgba(206, 208, 214, 0.04)); }
+    .lb-pod-3 { border-color: rgba(205, 127, 50, 0.36); }
+    .lb-pod-3 .lb-pod-base { height: 40px; background: linear-gradient(180deg, rgba(205, 127, 50, 0.26), rgba(205, 127, 50, 0.04)); }
+    /* Spécificité > #global-owners li { display:flex } pour bien masquer le top 3 dans la liste. */
+    #global-owners li.lb-top3 { display: none; }   /* présents dans le podium (révélés en recherche via display:flex inline) */
+    @media (max-width: 600px) {
+      .lb-podium { gap: 7px; margin: 4px auto 20px; }
+      .lb-pod { padding: 11px 6px 0; border-radius: 12px 12px 0 0; }
+      .lb-pod-medal { font-size: 1.3rem; }
+      .lb-pod-1 .lb-pod-medal { font-size: 1.6rem; }
+      .lb-pod-name { font-size: 0.72rem; }
+      .lb-pod-tw { font-size: 0.6rem; }
+      .lb-pod-count { font-size: 1rem; margin: 5px 0 8px; }
+      .lb-pod-count small { font-size: 0.42rem; }
+      .lb-pod-base { font-size: 1.1rem; padding-top: 6px; }
+      .lb-pod-1 .lb-pod-base { height: 52px; }
+      .lb-pod-2 .lb-pod-base { height: 38px; }
+      .lb-pod-3 .lb-pod-base { height: 28px; }
+    }
+
     .hidden-view { display: none !important; }
     .nav-links a.is-active { color: #fff; }
     .nav-links a.is-active::after { width: 100%; }
@@ -2716,14 +2762,15 @@ body::after {
     .sb-thumb-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
     .sb-thumb { width: 60px; height: 60px; border-radius: 13px; object-fit: cover; background: rgba(255, 255, 255, 0.04); }
     .sb-col-badge { position: absolute; bottom: -5px; right: -5px; width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 2px solid #100c09; background: #100c09; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
-    .sb-main { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-    .sb-line1 { display: flex; align-items: center; gap: 8px; min-width: 0; }
+    /* PC : infos l'une à côté de l'autre (nom · collection · vendeur→acheteur). */
+    .sb-main { min-width: 0; display: flex; flex-direction: row; align-items: center; gap: 20px; }
+    .sb-line1 { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
     .sb-name { font-family: var(--font-display); font-size: 0.98rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-tag { flex: none; font-family: var(--font-body); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
     .sb-tag-sale { background: rgba(255, 106, 26, 0.14); color: #ff8a4c; border: 1px solid rgba(255, 106, 26, 0.36); }
     .sb-tag-mint { background: rgba(232, 192, 105, 0.14); color: var(--gold); border: 1px solid rgba(232, 192, 105, 0.36); }
-    .sb-col { display: block; font-size: 0.76rem; color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sb-parties { display: block; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-col { display: block; flex: 0 0 auto; font-size: 0.76rem; color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .sb-parties { display: block; flex: 0 0 auto; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sb-arrow { color: rgba(255, 106, 26, 0.8); margin: 0 1px; }
     .sb-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
     .sb-price { font-family: var(--font-display); font-size: 1.02rem; color: #ff6a1a; text-shadow: 0 0 14px rgba(255, 106, 26, 0.3); white-space: nowrap; }
@@ -2738,6 +2785,10 @@ body::after {
       .sb-name { font-size: 0.9rem; }
       .sb-col, .sb-parties { font-size: 0.72rem; }
       .sb-price { font-size: 0.94rem; }
+      /* Mobile : on revient aux infos empilées (nom au-dessus de la collection, etc.). */
+      .sb-main { flex-direction: column; align-items: flex-start; gap: 3px; }
+      .sb-line1 { width: 100%; flex: none; }
+      .sb-col, .sb-parties { flex: none; max-width: 100%; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
@@ -3264,6 +3315,7 @@ body::after {
     const VIEWS = ['home', 'collections', 'leaderboard', 'artist', 'salesbot'];
     let spotlightLoaded = false;
     let collectionsAnimated = false;
+    let _salesTimer = null;   // intervalle d'auto-refresh du Sales Bot (actif uniquement sur l'onglet)
     function syncNav(name) {
       document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
         const on = a.dataset.nav === name;
@@ -3291,7 +3343,17 @@ body::after {
         collectionsAnimated = true;
         loadGalleryBanners();
       }
-      if (name === 'salesbot' && !salesLoaded) { salesLoaded = true; loadSales(); }
+      // Sales Bot : (re)charge à chaque ouverture, puis auto-refresh SILENCIEUX
+      // toutes les 60 s tant que la vue est affichée. L'intervalle est coupé dès
+      // qu'on quitte l'onglet (avant, le flux ne se chargeait qu'une fois par session).
+      if (name === 'salesbot') {
+        loadSales();
+        if (_salesTimer) clearInterval(_salesTimer);
+        _salesTimer = setInterval(() => loadSales(true), 60000);
+      } else if (_salesTimer) {
+        clearInterval(_salesTimer);
+        _salesTimer = null;
+      }
     }
 
     // ── Sales Bot : flux des dernières ventes (events « transferred » avec prix) ──
@@ -3349,12 +3411,16 @@ body::after {
       });
     }
 
-    async function loadSales() {
+    async function loadSales(silent) {
       const feed = document.getElementById('salesFeed');
       const countEl = document.getElementById('sbCount');
       if (!feed) return;
-      feed.innerHTML = '<div class="sb-row sb-skel"></div>'.repeat(8);
-      if (countEl) countEl.textContent = 'Loading…';
+      // En mode silencieux (auto-refresh), on ne vide pas le flux : on remplace juste
+      // le contenu une fois les nouvelles ventes prêtes (pas de clignotement de skeletons).
+      if (!silent) {
+        feed.innerHTML = '<div class="sb-row sb-skel"></div>'.repeat(8);
+        if (countEl) countEl.textContent = 'Loading…';
+      }
       // Liste des collections depuis COLLECTION_META (statique) — indépendante du
       // chargement async de collectionsData (data.json). Sinon, à la 1re ouverture,
       // cols pouvait être vide → seuls les mints V3 apparaissaient (~12 ventes).
@@ -3622,14 +3688,35 @@ body::after {
     // Les lignes au-delà de LB_VISIBLE reçoivent la classe lb-extra (repliées par défaut).
     function lbRowsHTML(owners) {
       const sorted = [...(owners || [])].sort((a, b) => b.count - a.count);
+      const hasPodium = sorted.length >= 3;
       let rank = 1, prev = null;
       return sorted.map((owner, i) => {
         if (i > 0 && owner.count < prev) rank += 1;
         prev = owner.count;
         const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
+        const top3 = (hasPodium && i < 3) ? ' lb-top3' : ''; // présents dans le podium → masqués dans la liste (sauf recherche)
         const extra = i >= LB_VISIBLE ? ' lb-extra' : '';
         const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : '';
-        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
+        return `<li class="${rankClass}${top3}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
+      }).join('');
+    }
+
+    // Podium des 3 premiers (mise en avant). Ordre d'affichage : 2e · 1er · 3e.
+    // Renvoie '' si moins de 3 détenteurs (alors la liste affiche tout normalement).
+    function lbPodiumHTML(owners) {
+      const top = [...(owners || [])].sort((a, b) => b.count - a.count).slice(0, 3);
+      if (top.length < 3) return '';
+      const medal = ['🥇', '🥈', '🥉'];
+      return [1, 0, 2].map(rk => {
+        const o = top[rk];
+        const tw = o.twitter ? `<a class="lb-pod-tw" href="${validateTwitterUrl(o.twitter)}" target="_blank" rel="noopener noreferrer">${getTwitterHandle(o.twitter)}</a>` : '';
+        return `<div class="lb-pod lb-pod-${rk + 1}">
+          <span class="lb-pod-medal">${medal[rk]}</span>
+          <a class="lb-pod-name" href="${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">${escHtml(o.name)}</a>
+          ${tw}
+          <span class="lb-pod-count">${o.count}<small>CRYPTONAUTS</small></span>
+          <span class="lb-pod-base">${rk + 1}</span>
+        </div>`;
       }).join('');
     }
 
@@ -3652,6 +3739,7 @@ body::after {
             <div class="lb-pills" id="lbPills" role="tablist" aria-label="Choisir un classement">
               ${LB_BOARDS.map((b, i) => `<button class="lb-pill${i === 0 ? ' is-active' : ''}" data-lb="${i}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}" type="button">${escHtml(b.label)}<span class="lb-pill-n">${b.owners.length}</span></button>`).join('')}
             </div>
+            <div class="lb-podium" id="lbPodium"></div>
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
             <ul id="global-owners"></ul>
             <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
@@ -3732,6 +3820,7 @@ body::after {
     // le découplage des données dans data.json.
     function wireLeaderboardControls() {
       const listEl = document.getElementById('global-owners');
+      const podiumEl = document.getElementById('lbPodium');
       const subEl = document.getElementById('lbSub');
       const pills = document.getElementById('lbPills');
       const showMoreBtn = document.getElementById('show-more-owners');
@@ -3755,6 +3844,7 @@ body::after {
       const selectBoard = (idx) => {
         const board = LB_BOARDS[idx];
         if (!board) return;
+        if (podiumEl) { podiumEl.innerHTML = lbPodiumHTML(board.owners); podiumEl.style.display = ''; }
         listEl.innerHTML = lbRowsHTML(board.owners);
         if (subEl) subEl.textContent = board.sub;
         if (searchInput) searchInput.value = '';
@@ -3790,17 +3880,21 @@ body::after {
           const existing = document.getElementById('no-results');
           if (!filter) {
             if (existing) existing.remove();
-            listEl.querySelectorAll('li').forEach(li => { li.style.display = ''; });
+            if (podiumEl) podiumEl.style.display = '';                 // on ré-affiche le podium
+            listEl.querySelectorAll('li').forEach(li => { li.style.display = ''; }); // top3 redeviennent masqués (CSS)
             expanded = false;
             applyCollapse(); // re-replie
             return;
           }
-          // Recherche : on révèle tout puis on filtre par texte.
+          // Recherche : on masque le podium et on révèle TOUTES les lignes (top 3 inclus)
+          // puis on filtre par texte. display:flex (et non '') pour surcharger le masquage
+          // CSS des lignes .lb-top3.
+          if (podiumEl) podiumEl.style.display = 'none';
           expanded = true;
           let found = false;
           listEl.querySelectorAll('li:not(#no-results)').forEach(li => {
             const match = li.textContent.toLowerCase().includes(filter);
-            li.style.display = match ? '' : 'none';
+            li.style.display = match ? 'flex' : 'none';
             if (match) found = true;
           });
           if (showMoreBtn) showMoreBtn.style.display = 'none';
@@ -3890,7 +3984,7 @@ body::after {
         const cvMoreBtn = document.getElementById('cvMore');
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
         const sbRefreshBtn = document.getElementById('sbRefresh');
-        if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', loadSales);
+        if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', () => loadSales());
         // Vidéo de fond du hero retirée pour l'instant (sera retravaillée plus tard) :
         // seul le poster statique (assets/nebula-poster.jpg) reste affiché.
         window.addEventListener('hashchange', handleRoute);
