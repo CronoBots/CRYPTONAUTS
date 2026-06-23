@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CronoBots | Cryptonauts Leaderboards</title>
   <link rel="preload" href="fonts/Geomanist-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="assets/icon.png">
@@ -50,6 +50,10 @@
       font-style: normal;
       font-display: swap;
     }
+
+/* Reset global + garde-fou anti-scroll horizontal (clip pour ne pas casser position:sticky). */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { overflow-x: clip; }
 
 body {
   font-family: var(--font-body);
@@ -1554,10 +1558,7 @@ body::after {
     /* Icônes de nav : masquées sur desktop (libellés texte), affichées sur mobile. */
     .nav-ico { width: 23px; height: 23px; display: none; flex-shrink: 0; }
     .nav-social {
-      position: absolute;
-      right: clamp(18px, 4vw, 72px);
-      top: 50%;
-      transform: translateY(-50%);
+      flex: 0 0 auto;          /* dans le flux flex : aligné au bord du contenu 1280, pas au bord viewport */
       display: flex;
       align-items: center;
       gap: 15px;
@@ -2482,30 +2483,35 @@ body::after {
     .lb-pill.is-active .lb-pill-n { background: rgba(0, 0, 0, 0.2); }
 
     .hidden-view { display: none !important; }
-    /* Détail d'une collection OUVERT EN LIGNE : inséré juste sous la carte cliquée,
-       en pleine largeur de la grille (effet accordéon). */
-    #collectionView.cv-inline {
-      grid-column: 1 / -1;
-      border: 1px solid rgba(255, 106, 26, 0.22); border-radius: 18px; overflow: hidden;
-      margin: 6px 0 12px; background: rgba(8, 8, 14, 0.55);
-      animation: cvExpand 0.35s ease;
-    }
-    @keyframes cvExpand { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+
+    /* ── Carte collection dépliable : la MÊME carte s'agrandit (accordéon) ── */
+    .col-item { position: relative; }
+    /* Panneau dépliable animé via grid-template-rows 0fr→1fr (transition fluide). */
+    .col-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.38s ease; }
+    .col-panel > * { min-height: 0; overflow: hidden; }
+    .col-item.is-open .col-panel { grid-template-rows: 1fr; margin-top: 8px; }
+    /* #collectionView = panneau intégré (plus d'overlay ni de cadre séparé). */
+    #collectionView { background: rgba(8, 8, 14, 0.5); border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; }
+    /* Dans le panneau on masque ce qui est DÉJÀ dans l'en-tête de la carte (logo, titre, stats, date). */
+    .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-stats, .col-panel .cv-release { display: none; }
+    .col-panel .cv-meta { padding: 18px 0 0; }
+    /* Lien vers la collection : centré, en bas du cadre. */
+    .cv-link-wrap { display: flex; justify-content: center; padding: 22px 0 6px; }
+    .cv-link-wrap .cv-link { margin: 0; }
+
     .nav-links a.is-active { color: #fff; }
     .nav-links a.is-active::after { width: 100%; }
 
-    /* overflow:visible -> le logo à cheval n'est pas rogné (l'image reste à la taille
-       de la bannière, donc elle ne déborde pas). */
+    /* Bannière du détail : ratio contrôlé + plafond de hauteur, remplie sans déformation. */
     .cv-banner {
       position: relative;
       width: 100%;
-      min-height: 150px;        /* place pour le titre/bouton avant chargement de l'image */
-      overflow: visible;
+      aspect-ratio: 16 / 5;
+      max-height: 240px;
+      overflow: hidden;
       background: linear-gradient(135deg, #100c09, #15110d);
     }
-    /* Bannière ENTIÈREMENT visible (PC + mobile) : largeur 100 %, hauteur auto =
-       aucun rognage (au lieu de object-fit:cover sur une hauteur fixe). */
-    .cv-banner-img { width: 100%; height: auto; display: block; opacity: 0; transition: opacity 0.5s ease; }
+    .cv-banner-img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; opacity: 0; transition: opacity 0.5s ease; }
     #collectionView.has-banner .cv-banner-img { opacity: 1; }
     .cv-banner-grad {
       position: absolute; inset: 0; pointer-events: none;
@@ -2645,7 +2651,7 @@ body::after {
       .spot-name { font-size: 0.56rem; margin-left: 8%; }
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
-    #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: none; margin: 0 auto; }
+    #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1280px; margin: 0 auto; }
     .col-row {
       position: relative; display: block; height: 268px;
       border-radius: 18px; overflow: hidden; text-decoration: none;
@@ -2791,9 +2797,9 @@ body::after {
   <nav class="navbar" id="navbar">
     <div class="nav-links">
       <a href="#home" data-nav="home"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18" stroke-linecap="round"/><path d="M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18" stroke-linecap="round"/></svg><span class="nav-txt">World</span></a>
-      <a href="#artist" data-nav="artist"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0" stroke-linecap="round"/></svg><span class="nav-txt">Artist</span></a>
       <a href="#collections" data-nav="collections"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg><span class="nav-txt">Collections</span></a>
       <a href="#leaderboard" data-nav="leaderboard"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M6 20V11M12 20V4M18 20v-6"/></svg><span class="nav-txt">Leaderboard</span></a>
+      <a href="#artist" data-nav="artist"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="8" r="3.4"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0" stroke-linecap="round"/></svg><span class="nav-txt">Artist</span></a>
       <a href="#salesbot" data-nav="salesbot"><svg class="nav-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="4.5" y="8" width="15" height="11" rx="2.5"/><path d="M12 5.5V8" stroke-linecap="round"/><circle cx="12" cy="4.3" r="1.3"/><circle cx="9.2" cy="13" r="1.15" fill="currentColor" stroke="none"/><circle cx="14.8" cy="13" r="1.15" fill="currentColor" stroke="none"/><path d="M9.5 16.3h5" stroke-linecap="round"/></svg><span class="nav-txt">Sales Bot</span></a>
     </div>
     <div class="nav-social">
@@ -2887,11 +2893,6 @@ body::after {
             <p class="iv-lede iv-reveal">Selected excerpts from Fran’s “Creator Community” interview — read the full piece on Medium.</p>
 
             <div class="iv-qa iv-reveal">
-              <h4 class="iv-q">Where are you from, and what was your upbringing like?</h4>
-              <p class="iv-a">I was born in a small industrial town in northern Spain, then I went to live in Madrid for 10 years. Now, I live in Barcelona. I grew up in a very normal, working-class family, but there were always books and music — and I was brought up in a very patient and sensitive way. I guess that influenced me to dedicate myself to something related to art.</p>
-            </div>
-
-            <div class="iv-qa iv-reveal">
               <h4 class="iv-q">Are you self-taught, or did you receive any training?</h4>
               <p class="iv-a">I studied graphic design in college and then I did several online and classroom courses. But I must say that almost everything I know, I know thanks to spending hours and hours of sleepless nights — for several years — reading in forums, watching tutorials and asking people who knew more than me. I strongly believe in self-learning. On the internet, we have access to all human knowledge for free. It’s just a matter of getting started.</p>
             </div>
@@ -2921,16 +2922,6 @@ body::after {
             </div>
 
             <blockquote class="iv-pull iv-reveal">For me, art has to be honest. Really honest. I like art that creates, somehow, a parallel universe.</blockquote>
-
-            <div class="iv-qa iv-reveal">
-              <h4 class="iv-q">What do you try to say with your art?</h4>
-              <p class="iv-a">I try to transmit curiosity, amazement and fascination for nature — for the cosmos. That’s all that matters to me. I want people who see my work to feel a part of the magic I feel when I contemplate a sky or a mountain.</p>
-            </div>
-
-            <div class="iv-qa iv-reveal">
-              <h4 class="iv-q">What inspires you, in general?</h4>
-              <p class="iv-a">Nature. The universe. Everything that is not me inspires me — how the cosmos affects my mind, how it transforms it. I love the outdoors. Hiking. Music is a huge source of inspiration for me. I listen to music all the time, about eight or nine hours a day — in my studio, walking, cooking…</p>
-            </div>
 
             <a class="iv-cta iv-reveal" href="https://medium.com/cryptocomnft/creator-community-fran-rodri%CC%81guez-f7f1734a3bd0" target="_blank" rel="noopener">
               <span class="iv-cta-ic"><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h12l4 4v10H4z"/><path d="M8 10h8M8 14h6"/></svg></span>
@@ -3045,17 +3036,18 @@ body::after {
           <div class="cv-stat"><span class="v cv-sales">0</span><span class="l">Sales</span></div>
         </div>
         <p class="cv-desc"></p>
-        <a class="cv-link btn btn-primary" target="_blank" rel="noopener"><span class="cv-link-label">View on crypto.com</span>
-          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </a>
       </div>
       <div class="cv-block">
         <h2 class="cv-sec-title">Items <span class="cv-count cv-items-count"></span></h2>
         <div class="cm-nfts" id="cvNfts"></div>
         <button class="cv-more" id="cvMore" type="button" hidden>Load more items</button>
       </div>
-      <!-- Le classement des détenteurs est désormais centralisé dans l'onglet Leaderboard
-           (sélecteur par collection), plus dans la vue détail. Ici : aperçu des NFT seulement. -->
+      <!-- Lien vers la collection : EN BAS du cadre, centré. -->
+      <div class="cv-link-wrap">
+        <a class="cv-link btn btn-primary" target="_blank" rel="noopener"><span class="cv-link-label">View on crypto.com</span>
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      </div>
     </div>
   </section>
 
@@ -3173,11 +3165,14 @@ body::after {
         const total = collection.owners.reduce((sum, o) => sum + (o.count || 0), 0);
         const items = st.supply || total;
         const rel = COLLECTION_RELEASE[collection.title] || '';
+        const item = document.createElement('div');
+        item.className = 'col-item';
+        item.dataset.idx = index;
+        item.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
         const a = document.createElement('a');
         a.className = 'col-row';
         a.href = '#c/' + index;
         a.setAttribute('aria-label', 'View ' + collection.title);
-        a.style.animationDelay = (Math.min(index || 0, 14) * 0.05) + 's';
         a.innerHTML = `
           <div class="col-bg" data-cid="${meta.id || ''}"${collection.external ? ` style="background-image:url('${collection.banner || collection.image}')"` : ''}></div>
           <div class="col-grad"></div>
@@ -3195,27 +3190,17 @@ body::after {
           </div>
           <svg class="col-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         `;
-        return a;
+        const panel = document.createElement('div');
+        panel.className = 'col-panel';   // reçoit le détail (#collectionView) quand la carte est dépliée
+        item.appendChild(a);
+        item.appendChild(panel);
+        return item;
       } catch (error) {
         console.error(`Error rendering collection ${collection.title}:`, error);
-        return document.createElement('a');
+        return document.createElement('div');
       }
     }
 
-    // Construit les lignes de propriétaires classées (réutilisé par la modale).
-    function buildOwnerRowsHTML(owners) {
-      const sorted = [...owners].sort((a, b) => b.count - a.count);
-      let rank = 1, prev = null;
-      return sorted.map((o, i) => {
-        if (i > 0 && o.count < prev) rank += 1;
-        prev = o.count;
-        const rc = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
-        const tw = o.twitter ? `<a href="${validateTwitterUrl(o.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(o.twitter)}</a>` : '';
-        return `<li class="${rc}"><div class="lb-left"><span class="rank">${rank}</span><a class="lb-name" href="${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">${escHtml(o.name)}</a>${tw}</div><span class="lb-count"><span class="n">${o.count}</span><span class="t">NFT${o.count > 1 ? 's' : ''}</span></span></li>`;
-      }).join('');
-    }
-
-    // Ouvre la modale détaillée d'une collection.
     // Échappe le texte injecté en HTML.
     function escHtml(s) {
       return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -3297,11 +3282,6 @@ body::after {
       return bannerCache[id];
     }
 
-    // Vues séparées : une seule section affichée à la fois (Home / Collections / Stats / Leaderboard / Artist / collection).
-    const VIEWS = ['home', 'collections', 'leaderboard', 'artist', 'salesbot'];
-    let spotlightLoaded = false;
-    let collectionsAnimated = false;
-    let _salesTimer = null;   // intervalle d'auto-refresh du Sales Bot (actif uniquement sur l'onglet)
     function syncNav(name) {
       document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
         const on = a.dataset.nav === name;
@@ -3312,36 +3292,55 @@ body::after {
         }
       });
     }
-    // Site en UNE seule page : toutes les sections sont visibles, le menu scrolle.
-    // Cliquer une collection OUVRE son détail EN LIGNE (inséré juste sous la carte
-    // cliquée, en pleine largeur de la grille), au lieu d'un overlay plein écran.
+    // Site en UNE seule page. Cliquer une collection AGRANDIT LA MÊME carte (accordéon) :
+    // le détail (#collectionView, panneau unique réutilisé) est inséré DANS la carte
+    // (.col-panel) et la carte se déplie. Re-cliquer la carte la replie.
     function openCollectionDetail(idx) {
       const v = document.getElementById('collectionView');
-      if (!v) return;
       const grid = document.getElementById('collections-grid');
-      const card = grid && grid.querySelector('a.col-row[href="#c/' + idx + '"]');
-      if (card) card.insertAdjacentElement('afterend', v); // place le détail juste après la carte
+      const item = grid && grid.querySelector('.col-item[data-idx="' + idx + '"]');
+      if (!v || !item) return;
+      // Replie toute autre carte ouverte (une seule à la fois).
+      grid.querySelectorAll('.col-item.is-open').forEach(o => { if (o !== item) o.classList.remove('is-open'); });
+      const panel = item.querySelector('.col-panel');
+      if (panel && v.parentElement !== panel) panel.appendChild(v);
       v.classList.remove('hidden-view');
-      v.classList.add('cv-inline');
-      requestAnimationFrame(() => { try { v.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { v.scrollIntoView(); } });
+      // is-open au frame suivant → la transition d'accordéon (grid-template-rows) s'anime.
+      requestAnimationFrame(() => {
+        item.classList.add('is-open');
+        requestAnimationFrame(() => { try { item.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { } });
+      });
     }
     function closeCollectionDetail() {
-      const v = document.getElementById('collectionView');
-      if (v) { v.classList.add('hidden-view'); v.classList.remove('cv-inline'); }
+      // On retire seulement is-open → le panneau se replie en douceur (grid-template-rows).
+      document.querySelectorAll('.col-item.is-open').forEach(o => o.classList.remove('is-open'));
     }
-    // Scroll-spy : surligne le bouton du menu de la section actuellement à l'écran.
+    // Scroll-spy : surligne le bouton du menu de la section la plus centrée à l'écran.
+    // 'spotlight' est mappé sur 'home' (sinon zone morte au milieu du mur d'œuvres).
     function setupScrollSpy() {
       if (!('IntersectionObserver' in window)) return;
-      const ids = ['home', 'collections', 'leaderboard', 'artist', 'salesbot'];
+      const ids = ['home', 'spotlight', 'collections', 'leaderboard', 'artist', 'salesbot'];
+      const navOf = id => (id === 'spotlight' ? 'home' : id);
+      const visible = new Set();
+      const pick = () => {
+        const mid = window.innerHeight / 2;
+        let best = null, bestDist = Infinity;
+        visible.forEach(el => {
+          const r = el.getBoundingClientRect();
+          const dist = Math.abs((r.top + r.bottom) / 2 - mid);
+          if (dist < bestDist) { bestDist = dist; best = el; }
+        });
+        if (best) syncNav(navOf(best.id));
+      };
       const spy = new IntersectionObserver((entries) => {
-        entries.forEach(e => { if (e.isIntersecting) syncNav(e.target.id); });
-      }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+        entries.forEach(e => { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
+        pick();
+      }, { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
       ids.forEach(id => { const el = document.getElementById(id); if (el) spy.observe(el); });
     }
 
     // ── Sales Bot : flux des dernières ventes (events « transferred » avec prix) ──
     // Une vente = un transfert de propriété avec un montant > 0 (vendeur → acheteur).
-    let salesLoaded = false;
     const SALES_GQL_Q = 'query($collectionId:ID!,$first:Int!,$naturesIn:[String!]){public{collection(id:$collectionId){eventHistory(first:$first,naturesIn:$naturesIn){edges{node{id asset{id name cover{url}} user{username displayName} toUser{username displayName} listing{currency salePriceDecimalUSD} nature amountDecimal createdAt}}}}}}';
 
     function sbTimeAgo(iso) {
@@ -3558,7 +3557,7 @@ body::after {
     function showCollectionView(idx) {
       const view = document.getElementById('collectionView');
       const collection = (typeof collectionsData !== 'undefined') ? collectionsData[idx] : null;
-      if (!view || !collection) { showHome(); return; }
+      if (!view || !collection) { closeCollectionDetail(); return; }
       cv.idx = idx;
       const title = collection.title;
       const meta = COLLECTION_META[title] || {};
@@ -3950,7 +3949,29 @@ body::after {
 
         // Routage : page détaillée d'une collection (#c/<i>) ↔ accueil
         const cvBack = document.querySelector('#collectionView .cv-back');
-        if (cvBack) cvBack.addEventListener('click', () => { location.hash = '#collections'; });
+        if (cvBack) cvBack.addEventListener('click', () => { closeCollectionDetail(); history.replaceState(null, '', location.pathname + location.search); });
+
+        // Clic sur une carte collection : toggle accordéon (ouvre / referme la MÊME carte).
+        // On intercepte le clic (preventDefault) au lieu de se reposer sur le hash, sinon
+        // recliquer la carte déjà ouverte ne déclenche pas hashchange → rien ne se replie.
+        const colGrid = document.getElementById('collections-grid');
+        if (colGrid) {
+          colGrid.addEventListener('click', (e) => {
+            const row = e.target.closest('.col-row');
+            if (!row) return;                 // clic dans le panneau (NFT, lien…) → comportement normal
+            e.preventDefault();
+            const item = row.closest('.col-item');
+            if (!item) return;
+            if (item.classList.contains('is-open')) {
+              closeCollectionDetail();
+              history.replaceState(null, '', location.pathname + location.search);
+            } else {
+              const idx = parseInt(item.dataset.idx, 10);
+              showCollectionView(idx);
+              history.replaceState(null, '', '#c/' + idx);
+            }
+          });
+        }
         const cvMoreBtn = document.getElementById('cvMore');
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
         const sbRefreshBtn = document.getElementById('sbRefresh');
@@ -4080,6 +4101,12 @@ body::after {
         // Bouton "retour en haut" + parallaxe léger du champ d'étoiles au défilement
         const scrollTopBtn = document.getElementById('scrollTopBtn');
         const navbar = document.getElementById('navbar');
+        // Cale le décalage d'ancre (#section) sur la HAUTEUR RÉELLE de la navbar sticky.
+        // Avant, scroll-padding-top était figé à 84px (≠ navbar mobile ~56px) → on
+        // n'atterrissait pas au bon endroit sur mobile. Recalculé au load + resize.
+        const syncScrollPad = () => { if (navbar) document.documentElement.style.scrollPaddingTop = (navbar.offsetHeight + 10) + 'px'; };
+        syncScrollPad();
+        window.addEventListener('resize', syncScrollPad);
         const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let starTicking = false;
         const onScroll = () => {
