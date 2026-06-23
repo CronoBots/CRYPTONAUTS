@@ -2680,14 +2680,17 @@ body::after {
     /* Bannière = strip en haut, peu foncée (image bien visible, assombrie seulement en bas). */
     .col-banner { position: relative; width: 100%; aspect-ratio: 16 / 4.2; max-height: 200px; overflow: hidden; background: #0d0a08; }
     /* Remplissage flou SOUS l'image nette : colore les bords quand la bannière ne remplit pas tout le strip. */
-    .col-bg-blur { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; filter: blur(26px) brightness(0.5); transform: scale(1.18); }
-    /* Bannière NETTE et ENTIÈRE : 'contain' -> toute la largeur (et la hauteur) de la bannière reste visible, jamais rognée. */
-    .col-bg { position: absolute; inset: 0; z-index: 1; background-size: contain; background-repeat: no-repeat; background-position: center; transition: transform 0.5s ease; }
+    .col-bg-blur { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: top center; filter: blur(26px) brightness(0.5); transform: scale(1.18); }
+    /* Bannière NETTE et ENTIÈRE : 'contain' -> toute la largeur de la bannière reste visible (jamais rognée),
+       ancrée EN HAUT pour ne laisser aucun vide au-dessus (l'éventuel reste passe en bas, sous le dégradé/logo). */
+    .col-bg { position: absolute; inset: 0; z-index: 1; background-size: contain; background-repeat: no-repeat; background-position: top center; transition: transform 0.5s ease; }
     .col-row:hover .col-bg { transform: scale(1.04); }
     .col-grad { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.78) 0%, rgba(8, 6, 10, 0.22) 38%, transparent 70%); }
     /* Badge de statut en haut À DROITE de la bannière (sold out / drop en cours). */
     .col-badge { position: absolute; z-index: 4; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(3, 4, 10, 0.62); border: 1px solid rgba(255, 255, 255, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
     .col-badge.is-live { background: rgba(255, 106, 26, 0.92); border-color: rgba(255, 106, 26, 0.95); box-shadow: 0 4px 16px rgba(255, 106, 26, 0.4); }
+    /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
+    .col-badge.col-date-badge { left: 10px; right: auto; }
     .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
     @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     /* Avancement du drop (collection en cours de mint sur Crovia). */
@@ -3210,9 +3213,10 @@ body::after {
         const badge = minting
           ? '<span class="col-badge is-live"><span class="dot"></span>Minting on Crovia</span>'
           : (meta.soldOut ? '<span class="col-badge">Sold out</span>' : '');
+        const dateBadge = rel ? `<span class="col-badge col-date-badge">${escHtml(rel)}</span>` : '';
         const mint = (minting && meta.mintTotal) ? `
             <div class="col-mint">
-              <div class="col-mint-row"><span class="lbl">Drop en cours sur Crovia</span><span class="num"><b>${(meta.minted || 0).toLocaleString('fr-FR')}</b> / ${meta.mintTotal.toLocaleString('fr-FR')} mintés</span></div>
+              <div class="col-mint-row"><span class="lbl">Mint progress</span><span class="num"><b>${(meta.minted || 0).toLocaleString('fr-FR')}</b> / ${meta.mintTotal.toLocaleString('fr-FR')}</span></div>
               <div class="col-mint-bar"><div class="col-mint-fill" style="width:${Math.min(100, Math.round((meta.minted || 0) / meta.mintTotal * 100))}%"></div></div>
             </div>` : '';
         a.innerHTML = `
@@ -3220,6 +3224,7 @@ body::after {
             <div class="col-bg-blur"${bgStyle}></div>
             <div class="col-bg" data-cid="${meta.id || ''}"${bgStyle}></div>
             <div class="col-grad"></div>
+            ${dateBadge}
             ${badge}
             <svg class="col-arrow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
@@ -3227,7 +3232,6 @@ body::after {
             <img class="col-logo" src="${collection.image}" alt="${escHtml(collection.alt)}" loading="lazy" decoding="async">
             <div class="col-title-wrap">
               <h3 class="col-title">${escHtml(collection.title)}</h3>
-              ${rel ? `<span class="col-date">${rel}</span>` : ''}
             </div>
             <div class="col-stats">
               <div class="col-stat"><span class="cv">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
