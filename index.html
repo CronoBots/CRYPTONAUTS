@@ -2568,6 +2568,8 @@ body::after {
       letter-spacing: 0.16em; text-transform: uppercase; color: #fff; margin-bottom: 8px;
     }
     .cv-sold[hidden] { display: none; }
+    .cv-sold.is-live { display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 106, 26, 0.16); border-color: rgba(255, 106, 26, 0.6); color: #ffcfa6; letter-spacing: 0.08em; }
+    .cv-sold.is-live .dot { width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; box-shadow: 0 0 8px rgba(255, 106, 26, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
     .cv-desc { color: var(--muted); line-height: 1.68; max-width: 680px; margin: 12px 0 20px; font-size: 0.95rem; }
     .cv-link[hidden] { display: none; }
 
@@ -2676,10 +2678,26 @@ body::after {
       outline: none;
     }
     /* Bannière = strip en haut, peu foncée (image bien visible, assombrie seulement en bas). */
-    .col-banner { position: relative; width: 100%; aspect-ratio: 16 / 4.2; max-height: 200px; overflow: hidden; }
-    .col-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #15110d; opacity: 0.95; transition: transform 0.5s ease; }
-    .col-row:hover .col-bg { transform: scale(1.05); }
-    .col-grad { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.82) 0%, rgba(8, 6, 10, 0.25) 40%, transparent 72%); }
+    .col-banner { position: relative; width: 100%; aspect-ratio: 16 / 4.2; max-height: 200px; overflow: hidden; background: #0d0a08; }
+    /* Remplissage flou SOUS l'image nette : colore les bords quand la bannière ne remplit pas tout le strip. */
+    .col-bg-blur { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: center; filter: blur(26px) brightness(0.5); transform: scale(1.18); }
+    /* Bannière NETTE et ENTIÈRE : 'contain' -> toute la largeur (et la hauteur) de la bannière reste visible, jamais rognée. */
+    .col-bg { position: absolute; inset: 0; z-index: 1; background-size: contain; background-repeat: no-repeat; background-position: center; transition: transform 0.5s ease; }
+    .col-row:hover .col-bg { transform: scale(1.04); }
+    .col-grad { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.78) 0%, rgba(8, 6, 10, 0.22) 38%, transparent 70%); }
+    /* Badge de statut en haut À DROITE de la bannière (sold out / drop en cours). */
+    .col-badge { position: absolute; z-index: 4; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(3, 4, 10, 0.62); border: 1px solid rgba(255, 255, 255, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .col-badge.is-live { background: rgba(255, 106, 26, 0.92); border-color: rgba(255, 106, 26, 0.95); box-shadow: 0 4px 16px rgba(255, 106, 26, 0.4); }
+    .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
+    @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    /* Avancement du drop (collection en cours de mint sur Crovia). */
+    .col-mint { margin-top: 16px; }
+    .col-mint-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 7px; }
+    .col-mint-row .lbl { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .col-mint-row .num { font-family: var(--font-display); font-size: 0.95rem; color: #ecdfc7; white-space: nowrap; }
+    .col-mint-row .num b { color: var(--primary-color); }
+    .col-mint-bar { height: 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+    .col-mint-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ff6a1a, #ffb066); box-shadow: 0 0 12px rgba(255, 106, 26, 0.5); }
     /* Logo À CHEVAL : ancré au bord HAUT du corps (= bas de la bannière), il déborde
        vers le haut sur la bannière. Dans .col-body (sans overflow) pour ne pas être rogné. */
     .col-logo {
@@ -2690,7 +2708,7 @@ body::after {
       transition: box-shadow 0.25s ease, border-color 0.25s ease;
     }
     .col-row:hover .col-logo { border-color: rgba(255, 106, 26, 0.65); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6), 0 0 22px rgba(255, 106, 26, 0.3); }
-    .col-arrow { position: absolute; z-index: 3; right: 14px; top: 12px; color: rgba(236, 228, 212, 0.85); background: rgba(3, 4, 10, 0.5); border-radius: 50%; padding: 3px; transition: transform 0.3s ease, color 0.25s ease; }
+    .col-arrow { position: absolute; z-index: 3; right: 12px; bottom: 10px; color: rgba(236, 228, 212, 0.85); background: rgba(3, 4, 10, 0.5); border-radius: 50%; padding: 3px; transition: transform 0.3s ease, color 0.25s ease; }
     .col-item.is-open .col-arrow { transform: rotate(180deg); color: var(--primary-color); }
     /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
     .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 18px; }
@@ -2713,6 +2731,10 @@ body::after {
       .col-stats { margin-top: 12px; }
       .col-stat .cv { font-size: 1.02rem; }
       .col-stat .cl { font-size: 0.5rem; }
+      .col-badge { top: 8px; right: 8px; font-size: 0.5rem; padding: 4px 8px; gap: 5px; }
+      .col-badge .dot { width: 6px; height: 6px; }
+      .col-mint { margin-top: 12px; }
+      .col-mint-row .num { font-size: 0.82rem; }
     }
     /* ── Ethos : ligne narrative monumentale (accueil) ── */
     .ethos { max-width: 900px; margin: 0 auto; padding: 60px 24px 34px; text-align: center; }
@@ -3104,7 +3126,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
-      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
+      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", launchUrl: "https://crovia.app/launch/quantum-cryptonauts-v3", status: "minting", minted: 231, mintTotal: 299, items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
       "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
@@ -3182,10 +3204,23 @@ body::after {
         a.className = 'col-row';
         a.href = '#c/' + index;
         a.setAttribute('aria-label', 'View ' + collection.title);
+        const bgUrl = collection.external ? (collection.banner || collection.image) : '';
+        const bgStyle = bgUrl ? ` style="background-image:url('${bgUrl}')"` : '';
+        const minting = meta.status === 'minting';
+        const badge = minting
+          ? '<span class="col-badge is-live"><span class="dot"></span>Minting on Crovia</span>'
+          : (meta.soldOut ? '<span class="col-badge">Sold out</span>' : '');
+        const mint = (minting && meta.mintTotal) ? `
+            <div class="col-mint">
+              <div class="col-mint-row"><span class="lbl">Drop en cours sur Crovia</span><span class="num"><b>${(meta.minted || 0).toLocaleString('fr-FR')}</b> / ${meta.mintTotal.toLocaleString('fr-FR')} mintés</span></div>
+              <div class="col-mint-bar"><div class="col-mint-fill" style="width:${Math.min(100, Math.round((meta.minted || 0) / meta.mintTotal * 100))}%"></div></div>
+            </div>` : '';
         a.innerHTML = `
           <div class="col-banner">
-            <div class="col-bg" data-cid="${meta.id || ''}"${collection.external ? ` style="background-image:url('${collection.banner || collection.image}')"` : ''}></div>
+            <div class="col-bg-blur"${bgStyle}></div>
+            <div class="col-bg" data-cid="${meta.id || ''}"${bgStyle}></div>
             <div class="col-grad"></div>
+            ${badge}
             <svg class="col-arrow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="col-body">
@@ -3200,7 +3235,7 @@ body::after {
               <div class="col-stat"><span class="cv">${fmtMoney(st.floor)}</span><span class="cl">Floor</span></div>
               <div class="col-stat"><span class="cv">${fmtMoney(st.vol)}</span><span class="cl">Volume</span></div>
               <div class="col-stat"><span class="cv">${st.sales != null ? st.sales.toLocaleString('fr-FR') : '—'}</span><span class="cl">Sales</span></div>
-            </div>
+            </div>${mint}
           </div>
         `;
         const panel = document.createElement('div');
@@ -3497,7 +3532,12 @@ body::after {
       document.querySelectorAll('.col-bg[data-cid]').forEach(el => {
         const cid = el.dataset.cid;
         if (!cid) return;
-        fetchBanner(cid).then(b => { if (b.banner) el.style.backgroundImage = 'url("' + b.banner + '")'; });
+        fetchBanner(cid).then(b => {
+          if (!b.banner) return;
+          el.style.backgroundImage = 'url("' + b.banner + '")';
+          const blur = el.parentElement && el.parentElement.querySelector('.col-bg-blur');
+          if (blur) blur.style.backgroundImage = 'url("' + b.banner + '")';
+        });
       });
     }
 
@@ -3599,12 +3639,23 @@ body::after {
         link.href = 'https://crypto.com/nft/collection/' + meta.id;
         if (linkLabel) linkLabel.textContent = 'View on crypto.com';
         link.hidden = false;
-      } else if (collection.croviaUrl) {
-        link.href = collection.croviaUrl;
-        if (linkLabel) linkLabel.textContent = 'Trade on Crovia';
+      } else if (meta.launchUrl || collection.croviaUrl || meta.croviaUrl) {
+        link.href = meta.launchUrl || collection.croviaUrl || meta.croviaUrl;
+        if (linkLabel) linkLabel.textContent = meta.status === 'minting' ? 'Mint on Crovia' : 'Trade on Crovia';
         link.hidden = false;
       } else { link.hidden = true; }
-      const sold = view.querySelector('.cv-sold'); if (sold) sold.hidden = !meta.soldOut;
+      const sold = view.querySelector('.cv-sold');
+      if (sold) {
+        if (meta.status === 'minting' && meta.mintTotal) {
+          sold.classList.add('is-live');
+          sold.innerHTML = '<span class="dot"></span>Minting now on Crovia · ' + (meta.minted || 0) + ' / ' + meta.mintTotal;
+          sold.hidden = false;
+        } else {
+          sold.classList.remove('is-live');
+          sold.textContent = 'Sold out';
+          sold.hidden = !meta.soldOut;
+        }
+      }
       const setStat = (k, v) => { const e = view.querySelector('.cv-' + k); if (e) e.textContent = v; };
       setStat('holders', (collection.ownersCount || 0).toLocaleString('fr-FR'));
       setStat('items', (st.supply || 0).toLocaleString('fr-FR'));
