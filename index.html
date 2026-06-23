@@ -2484,19 +2484,29 @@ body::after {
 
     .hidden-view { display: none !important; }
 
-    /* ── Carte collection dépliable : la MÊME carte s'agrandit (accordéon) ── */
+    /* ── Carte collection dépliable : la MÊME carte s'ALLONGE (accordéon) ── */
     .col-item { position: relative; }
     /* Panneau dépliable animé via grid-template-rows 0fr→1fr (transition fluide). */
     .col-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.38s ease; }
     .col-panel > * { min-height: 0; overflow: hidden; }
-    .col-item.is-open .col-panel { grid-template-rows: 1fr; margin-top: 8px; }
-    /* #collectionView = panneau intégré (plus d'overlay ni de cadre séparé). */
-    #collectionView { background: rgba(8, 8, 14, 0.5); border: 1px solid var(--hairline); border-radius: 16px; overflow: hidden; }
-    /* Dans le panneau on masque ce qui est DÉJÀ dans l'en-tête de la carte (logo, titre, stats, date). */
-    .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-stats, .col-panel .cv-release { display: none; }
-    .col-panel .cv-meta { padding: 18px 0 0; }
+    .col-item.is-open .col-panel { grid-template-rows: 1fr; }
+    /* La carte cliquée perd ses coins/bordure du bas → le panneau PROLONGE le même cadre. */
+    .col-item.is-open .col-row { border-radius: 18px 18px 0 0; border-bottom-color: transparent; border-color: rgba(255, 106, 26, 0.4); }
+    /* En-tête ouvert : on retire les petites stats + la flèche (repris en grand dans le panneau). */
+    .col-item.is-open .col-stats, .col-item.is-open .col-arrow { opacity: 0; }
+    /* Détail = continuation du cadre (pas une boîte séparée) : même bordure, coins bas arrondis. */
+    #collectionView {
+      background: linear-gradient(180deg, rgba(18, 14, 11, 0.97), rgba(11, 10, 16, 0.97));
+      border: 1px solid rgba(255, 106, 26, 0.4); border-top: none; border-radius: 0 0 18px 18px;
+    }
+    /* Dans le panneau : on masque bannière + logo + titre + date (déjà dans l'en-tête de la carte).
+       On AFFICHE stats → description → NFT (à la suite). */
+    .col-panel .cv-banner, .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-release { display: none; }
+    .col-panel .cv-inner { padding: 0 clamp(16px, 3vw, 34px) 8px; }
+    .col-panel .cv-meta { padding: 22px 0 0; }
+    .col-panel .cv-desc { margin-top: 14px; }
     /* Lien vers la collection : centré, en bas du cadre. */
-    .cv-link-wrap { display: flex; justify-content: center; padding: 22px 0 6px; }
+    .cv-link-wrap { display: flex; justify-content: center; padding: 20px 0 22px; }
     .cv-link-wrap .cv-link { margin: 0; }
 
     .nav-links a.is-active { color: #fff; }
