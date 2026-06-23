@@ -2485,21 +2485,35 @@ body::after {
     .hidden-view { display: none !important; }
 
     /* ── Carte collection dépliable : la MÊME carte s'ALLONGE (accordéon) ── */
-    .col-item { position: relative; }
+    /* Le CADRE (bordure, coins, fond, ombre) est porté par .col-item : il englobe la carte
+       ET le panneau déplié → UN seul cadre continu, et AUCUNE ligne résiduelle au repli
+       (rien de bordé ne se réduit à 0 de hauteur). */
+    .col-item {
+      position: relative; display: block;
+      border-radius: 18px; overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(135deg, #100c09, #15110d);
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+      transition: border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+    .col-item:hover, .col-item:focus-within {
+      border-color: rgba(255, 106, 26, 0.5);
+      box-shadow: 0 16px 38px rgba(255, 106, 26, 0.2);
+    }
+    .col-item.is-open { border-color: rgba(255, 106, 26, 0.4); }
     /* Panneau dépliable animé via grid-template-rows 0fr→1fr (transition fluide). */
     .col-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.38s ease; }
     .col-panel > * { min-height: 0; overflow: hidden; }
     .col-item.is-open .col-panel { grid-template-rows: 1fr; }
-    /* La carte cliquée perd ses coins/bordure du bas → le panneau PROLONGE le même cadre. */
-    .col-item.is-open .col-row { border-radius: 18px 18px 0 0; border-bottom-color: transparent; border-color: rgba(255, 106, 26, 0.4); }
-    /* Détail = continuation du cadre (pas une boîte séparée) : même bordure, coins bas arrondis. */
-    #collectionView {
-      background: linear-gradient(180deg, rgba(18, 14, 11, 0.97), rgba(11, 10, 16, 0.97));
-      border: 1px solid rgba(255, 106, 26, 0.4); border-top: none; border-radius: 0 0 18px 18px;
-    }
-    /* Dans le panneau : on masque bannière/logo/titre/date ET les stats (toutes déjà dans
-       l'en-tête de la carte qui RESTE affiché). On n'ajoute que description → NFT → lien. */
+    /* Détail dans le panneau = prolongement TRANSPARENT : le fond continu et le cadre viennent
+       de .col-item, donc aucune boîte ni couture, et pas de bordure propre (= pas de ligne au repli). */
+    .col-panel #collectionView { background: transparent; border: none; border-radius: 0; }
+    /* Dans le panneau : on masque bannière/logo/titre/date, le badge mint/sold (DÉJÀ en haut à
+       droite de la carte → pas de répétition) ET les stats (toutes dans l'en-tête qui RESTE affiché).
+       On n'ajoute que description → NFT → lien. */
     .col-panel .cv-banner, .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-release, .col-panel .cv-stats { display: none; }
+    .col-item.is-open .cv-sold, .col-item.is-open .cv-sold.is-live { display: none; }
     .col-panel .cv-inner { padding: 0 clamp(16px, 3vw, 34px) 8px; }
     .col-panel .cv-meta { padding: 0; }
     .col-panel .cv-desc { margin-top: 18px; }
@@ -2662,32 +2676,21 @@ body::after {
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1280px; margin: 0 auto; }
+    /* Le lien ne porte plus le cadre (sur .col-item). Jamais souligné, même au hover/tap mobile. */
     .col-row {
       position: relative; display: block; height: auto;
-      border-radius: 18px; overflow: hidden; text-decoration: none;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-      background: linear-gradient(135deg, #100c09, #15110d);
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
-      opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
-      transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+      text-decoration: none; color: inherit; outline: none;
     }
-    .col-row:hover, .col-row:focus-visible {
-      border-color: rgba(255, 106, 26, 0.5);
-      box-shadow: 0 16px 38px rgba(255, 106, 26, 0.2);
-      transform: translateY(-2px);
-      outline: none;
-    }
+    .col-row:hover, .col-row:focus, .col-row:focus-visible, .col-row:active { text-decoration: none; }
     /* Bannière = strip en haut, peu foncée (image bien visible, assombrie seulement en bas). */
     .col-banner { position: relative; width: 100%; aspect-ratio: 16 / 4.2; max-height: 200px; overflow: hidden; background: #0d0a08; }
-    /* Remplissage flou SOUS l'image nette : colore les bords quand la bannière ne remplit pas tout le strip. */
-    .col-bg-blur { position: absolute; inset: 0; z-index: 0; background-size: cover; background-position: top center; filter: blur(26px) brightness(0.5); transform: scale(1.18); }
-    /* Bannière NETTE et ENTIÈRE : 'contain' -> toute la largeur de la bannière reste visible (jamais rognée),
-       ancrée EN HAUT pour ne laisser aucun vide au-dessus (l'éventuel reste passe en bas, sous le dégradé/logo). */
-    .col-bg { position: absolute; inset: 0; z-index: 1; background-size: contain; background-repeat: no-repeat; background-position: top center; transition: transform 0.5s ease; }
-    .col-row:hover .col-bg { transform: scale(1.04); }
+    /* Bannière : 'cover' -> remplit TOUT le strip de façon identique quelle que soit la taille native
+       de l'image. Compromis : léger rognage centré (au lieu de bandes floues variables), mais toutes
+       les bannières semblent alors exactement de même largeur/hauteur. */
+    .col-bg { position: absolute; inset: 0; z-index: 1; background-size: cover; background-repeat: no-repeat; background-position: center; }
     .col-grad { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.78) 0%, rgba(8, 6, 10, 0.22) 38%, transparent 70%); }
     /* Badge de statut en haut À DROITE de la bannière (sold out / drop en cours). */
-    .col-badge { position: absolute; z-index: 4; top: 10px; right: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #fff; background: rgba(3, 4, 10, 0.62); border: 1px solid rgba(255, 255, 255, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .col-badge { position: absolute; z-index: 4; top: 10px; right: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; line-height: 1; letter-spacing: 0.12em; text-indent: 0.12em; text-transform: uppercase; color: #fff; background: rgba(3, 4, 10, 0.62); border: 1px solid rgba(255, 255, 255, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
     .col-badge.is-live { background: rgba(255, 106, 26, 0.92); border-color: rgba(255, 106, 26, 0.95); box-shadow: 0 4px 16px rgba(255, 106, 26, 0.4); }
     /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
     .col-badge.col-date-badge { left: 10px; right: auto; }
@@ -2723,7 +2726,7 @@ body::after {
     .col-stat + .col-stat { border-left: 1px solid var(--hairline); }
     .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(255, 106, 26, 0.35); }
     .col-stat .cl { display: block; margin-top: 7px; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    @media (prefers-reduced-motion: reduce) { .col-row { animation: none; opacity: 1; translate: none; } }
+    @media (prefers-reduced-motion: reduce) { .col-item { animation: none; opacity: 1; translate: none; } }
     @media screen and (max-width: 600px) {
       .col-banner { aspect-ratio: 16 / 6; max-height: 140px; }
       .col-logo { width: 60px; height: 60px; left: 13px; border-radius: 13px; }
@@ -3221,7 +3224,6 @@ body::after {
             </div>` : '';
         a.innerHTML = `
           <div class="col-banner">
-            <div class="col-bg-blur"${bgStyle}></div>
             <div class="col-bg" data-cid="${meta.id || ''}"${bgStyle}></div>
             <div class="col-grad"></div>
             ${dateBadge}
@@ -3539,8 +3541,6 @@ body::after {
         fetchBanner(cid).then(b => {
           if (!b.banner) return;
           el.style.backgroundImage = 'url("' + b.banner + '")';
-          const blur = el.parentElement && el.parentElement.querySelector('.col-bg-blur');
-          if (blur) blur.style.backgroundImage = 'url("' + b.banner + '")';
         });
       });
     }
