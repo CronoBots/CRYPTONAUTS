@@ -2492,19 +2492,17 @@ body::after {
     .col-item.is-open .col-panel { grid-template-rows: 1fr; }
     /* La carte cliquée perd ses coins/bordure du bas → le panneau PROLONGE le même cadre. */
     .col-item.is-open .col-row { border-radius: 18px 18px 0 0; border-bottom-color: transparent; border-color: rgba(255, 106, 26, 0.4); }
-    /* En-tête ouvert : on retire les petites stats + la flèche (repris en grand dans le panneau). */
-    .col-item.is-open .col-stats, .col-item.is-open .col-arrow { opacity: 0; }
     /* Détail = continuation du cadre (pas une boîte séparée) : même bordure, coins bas arrondis. */
     #collectionView {
       background: linear-gradient(180deg, rgba(18, 14, 11, 0.97), rgba(11, 10, 16, 0.97));
       border: 1px solid rgba(255, 106, 26, 0.4); border-top: none; border-radius: 0 0 18px 18px;
     }
-    /* Dans le panneau : on masque bannière + logo + titre + date (déjà dans l'en-tête de la carte).
-       On AFFICHE stats → description → NFT (à la suite). */
-    .col-panel .cv-banner, .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-release { display: none; }
+    /* Dans le panneau : on masque bannière/logo/titre/date ET les stats (toutes déjà dans
+       l'en-tête de la carte qui RESTE affiché). On n'ajoute que description → NFT → lien. */
+    .col-panel .cv-banner, .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-release, .col-panel .cv-stats { display: none; }
     .col-panel .cv-inner { padding: 0 clamp(16px, 3vw, 34px) 8px; }
-    .col-panel .cv-meta { padding: 22px 0 0; }
-    .col-panel .cv-desc { margin-top: 14px; }
+    .col-panel .cv-meta { padding: 0; }
+    .col-panel .cv-desc { margin-top: 18px; }
     /* Lien vers la collection : centré, en bas du cadre. */
     .cv-link-wrap { display: flex; justify-content: center; padding: 20px 0 22px; }
     .cv-link-wrap .cv-link { margin: 0; }
@@ -2663,7 +2661,7 @@ body::after {
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 14px; max-width: 1280px; margin: 0 auto; }
     .col-row {
-      position: relative; display: block; height: 268px;
+      position: relative; display: block; height: auto;
       border-radius: 18px; overflow: hidden; text-decoration: none;
       border: 1px solid rgba(255, 255, 255, 0.08);
       background: linear-gradient(135deg, #100c09, #15110d);
@@ -2677,43 +2675,44 @@ body::after {
       transform: translateY(-2px);
       outline: none;
     }
-    .col-bg { position: absolute; inset: 0; background-size: cover; background-position: center; opacity: 0.58; transition: transform 0.5s ease, opacity 0.3s ease; }
-    .col-row:hover .col-bg { transform: scale(1.06); opacity: 0.72; }
-    .col-grad { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(3, 4, 10, 0.94) 0%, rgba(3, 4, 10, 0.62) 26%, rgba(3, 4, 10, 0.58) 74%, rgba(3, 4, 10, 0.94) 100%); }
+    /* Bannière = strip en haut, peu foncée (image bien visible, assombrie seulement en bas). */
+    .col-banner { position: relative; width: 100%; aspect-ratio: 16 / 4.2; max-height: 200px; overflow: hidden; }
+    .col-bg { position: absolute; inset: 0; background-size: cover; background-position: center; background-color: #15110d; opacity: 0.95; transition: transform 0.5s ease; }
+    .col-row:hover .col-bg { transform: scale(1.05); }
+    .col-grad { position: absolute; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.82) 0%, rgba(8, 6, 10, 0.25) 40%, transparent 72%); }
+    /* Logo À CHEVAL : ancré au bord HAUT du corps (= bas de la bannière), il déborde
+       vers le haut sur la bannière. Dans .col-body (sans overflow) pour ne pas être rogné. */
     .col-logo {
-      position: absolute; z-index: 2; left: 30px; top: 50%; transform: translateY(-50%);
-      width: 184px; height: 184px; border-radius: 24px; object-fit: cover;
-      border: 1px solid rgba(255, 106, 26, 0.32);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 0 4px rgba(18, 13, 9, 0.5);
+      position: absolute; z-index: 3; left: clamp(16px, 3vw, 28px); top: 0; transform: translateY(-50%);
+      width: 92px; height: 92px; border-radius: 18px; object-fit: cover;
+      border: 2px solid rgba(255, 106, 26, 0.4); background: #100c09;
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6);
       transition: box-shadow 0.25s ease, border-color 0.25s ease;
     }
-    .col-row:hover .col-logo { border-color: rgba(255, 106, 26, 0.6); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.55), 0 0 22px rgba(255, 106, 26, 0.3); }
-    .col-title-wrap {
-      position: absolute; z-index: 2; inset: 0; padding: 0 488px 0 248px;
-      display: flex; flex-direction: column; align-items: flex-start; justify-content: center; text-align: left; gap: 10px;
-    }
-    .col-title { margin: 0; font-size: clamp(1.5rem, 2.6vw, 2.2rem); line-height: 1.12; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9); }
-    .col-date { font-size: 0.82rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(236, 228, 212, 0.72); }
-    .col-stats { position: absolute; z-index: 2; right: 56px; top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 18px; }
-    .col-stat { text-align: center; min-width: 58px; }
-    .col-stat + .col-stat { border-left: 1px solid var(--hairline); padding-left: 18px; }
-    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.6rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(255, 106, 26, 0.35); }
-    .col-stat .cl { display: block; margin-top: 7px; font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-    .col-arrow { position: absolute; z-index: 2; right: 18px; top: 50%; transform: translateY(-50%); color: rgba(236, 228, 212, 0.5); transition: color 0.25s ease, transform 0.25s ease; }
-    .col-row:hover .col-arrow { color: var(--primary-color); transform: translateY(-50%) translateX(3px); }
+    .col-row:hover .col-logo { border-color: rgba(255, 106, 26, 0.65); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6), 0 0 22px rgba(255, 106, 26, 0.3); }
+    .col-arrow { position: absolute; z-index: 3; right: 14px; top: 12px; color: rgba(236, 228, 212, 0.85); background: rgba(3, 4, 10, 0.5); border-radius: 50%; padding: 3px; transition: transform 0.3s ease, color 0.25s ease; }
+    .col-item.is-open .col-arrow { transform: rotate(180deg); color: var(--primary-color); }
+    /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
+    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 18px; }
+    .col-title-wrap { padding-left: 116px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+    .col-title { margin: 0; font-size: clamp(1.25rem, 2.2vw, 1.9rem); line-height: 1.12; color: #fff; }
+    .col-date { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236, 228, 212, 0.6); }
+    .col-stats { display: flex; align-items: stretch; gap: 0; margin-top: 16px; }
+    .col-stat { flex: 1; text-align: center; }
+    .col-stat + .col-stat { border-left: 1px solid var(--hairline); }
+    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(255, 106, 26, 0.35); }
+    .col-stat .cl { display: block; margin-top: 7px; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) { .col-row { animation: none; opacity: 1; translate: none; } }
     @media screen and (max-width: 600px) {
-      .col-row { height: 132px; }
-      .col-logo { width: 54px; height: 54px; left: 14px; top: 16px; transform: none; border-radius: 12px; box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(18, 13, 9, 0.5); }
-      .col-title-wrap { inset: auto; left: 80px; right: 14px; top: 15px; bottom: auto; padding: 0; align-items: flex-start; justify-content: flex-start; text-align: left; gap: 3px; }
-      .col-title { font-size: 1rem; }
-      .col-date { font-size: 0.54rem; letter-spacing: 0.12em; }
-      .col-stats { position: absolute; left: 14px; right: 14px; bottom: 14px; top: auto; transform: none; gap: 0; display: grid; grid-template-columns: repeat(5, 1fr); }
-      .col-stat { min-width: 0; }
-      .col-stat + .col-stat { padding-left: 0; }
-      .col-stat .cv { font-size: 0.9rem; }
-      .col-stat .cl { font-size: 0.44rem; }
-      .col-arrow { display: none; }
+      .col-banner { aspect-ratio: 16 / 6; max-height: 140px; }
+      .col-logo { width: 60px; height: 60px; left: 13px; border-radius: 13px; }
+      .col-body { padding: 10px 13px 14px; }
+      .col-title-wrap { padding-left: 74px; min-height: 36px; gap: 2px; }
+      .col-title { font-size: 1.04rem; }
+      .col-date { font-size: 0.56rem; letter-spacing: 0.12em; }
+      .col-stats { margin-top: 12px; }
+      .col-stat .cv { font-size: 1.02rem; }
+      .col-stat .cl { font-size: 0.5rem; }
     }
     /* ── Ethos : ligne narrative monumentale (accueil) ── */
     .ethos { max-width: 900px; margin: 0 auto; padding: 60px 24px 34px; text-align: center; }
@@ -3184,21 +3183,25 @@ body::after {
         a.href = '#c/' + index;
         a.setAttribute('aria-label', 'View ' + collection.title);
         a.innerHTML = `
-          <div class="col-bg" data-cid="${meta.id || ''}"${collection.external ? ` style="background-image:url('${collection.banner || collection.image}')"` : ''}></div>
-          <div class="col-grad"></div>
-          <img class="col-logo" src="${collection.image}" alt="${escHtml(collection.alt)}" loading="lazy" decoding="async">
-          <div class="col-title-wrap">
-            <h3 class="col-title">${escHtml(collection.title)}</h3>
-            ${rel ? `<span class="col-date">${rel}</span>` : ''}
+          <div class="col-banner">
+            <div class="col-bg" data-cid="${meta.id || ''}"${collection.external ? ` style="background-image:url('${collection.banner || collection.image}')"` : ''}></div>
+            <div class="col-grad"></div>
+            <svg class="col-arrow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
-          <div class="col-stats">
-            <div class="col-stat"><span class="cv">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
-            <div class="col-stat"><span class="cv">${(items || 0).toLocaleString('fr-FR')}</span><span class="cl">Items</span></div>
-            <div class="col-stat"><span class="cv">${fmtMoney(st.floor)}</span><span class="cl">Floor</span></div>
-            <div class="col-stat"><span class="cv">${fmtMoney(st.vol)}</span><span class="cl">Volume</span></div>
-            <div class="col-stat"><span class="cv">${st.sales != null ? st.sales.toLocaleString('fr-FR') : '—'}</span><span class="cl">Sales</span></div>
+          <div class="col-body">
+            <img class="col-logo" src="${collection.image}" alt="${escHtml(collection.alt)}" loading="lazy" decoding="async">
+            <div class="col-title-wrap">
+              <h3 class="col-title">${escHtml(collection.title)}</h3>
+              ${rel ? `<span class="col-date">${rel}</span>` : ''}
+            </div>
+            <div class="col-stats">
+              <div class="col-stat"><span class="cv">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
+              <div class="col-stat"><span class="cv">${(items || 0).toLocaleString('fr-FR')}</span><span class="cl">Items</span></div>
+              <div class="col-stat"><span class="cv">${fmtMoney(st.floor)}</span><span class="cl">Floor</span></div>
+              <div class="col-stat"><span class="cv">${fmtMoney(st.vol)}</span><span class="cl">Volume</span></div>
+              <div class="col-stat"><span class="cv">${st.sales != null ? st.sales.toLocaleString('fr-FR') : '—'}</span><span class="cl">Sales</span></div>
+            </div>
           </div>
-          <svg class="col-arrow" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         `;
         const panel = document.createElement('div');
         panel.className = 'col-panel';   // reçoit le détail (#collectionView) quand la carte est dépliée
