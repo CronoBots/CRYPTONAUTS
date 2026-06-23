@@ -10,7 +10,7 @@
  * Le nom du cache est versionné : incrémentez CACHE_VERSION à chaque
  * changement de la liste précachée pour forcer la mise à jour.
  */
-const CACHE_VERSION = 'v15';
+const CACHE_VERSION = 'v16';
 const CACHE = 'cryptonauts-' + CACHE_VERSION;
 
 const PRECACHE = [

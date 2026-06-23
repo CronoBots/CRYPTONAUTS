@@ -51,9 +51,9 @@
       font-display: swap;
     }
 
-/* Reset global + garde-fou anti-scroll horizontal (clip pour ne pas casser position:sticky). */
+/* Reset global box-sizing (sûr). PAS d'overflow-x:clip/hidden sur html/body :
+   ça bloque le scroll vertical sur iOS Safari. Les largeurs sont déjà plafonnées par section. */
 *, *::before, *::after { box-sizing: border-box; }
-html, body { overflow-x: clip; }
 
 body {
   font-family: var(--font-body);
