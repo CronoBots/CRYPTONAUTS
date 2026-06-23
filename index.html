@@ -62,6 +62,18 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Sélection de texte désactivée sur tout le site (sauf champs de saisie ci-dessous). */
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 /* Police d'affichage réservée aux titres et aux données (contraste éditorial) */
@@ -1506,9 +1518,10 @@ body::after {
       z-index: 800;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: space-between;
       gap: 16px;
-      padding: 16px clamp(18px, 4vw, 72px);
+      /* Fond pleine largeur, mais CONTENU plafonné à 1280px (largeur Leaderboard) et centré. */
+      padding: 16px max(clamp(18px, 4vw, 72px), calc((100% - 1280px) / 2));
       border-bottom: 1px solid rgba(255, 106, 26, 0.10);
       background: rgba(3, 4, 10, 0.35);
       -webkit-backdrop-filter: blur(10px);
@@ -1517,12 +1530,15 @@ body::after {
     }
     .navbar.scrolled {
       background: rgba(3, 4, 10, 0.85);
-      padding: 12px clamp(18px, 4vw, 72px);
+      padding: 12px max(clamp(18px, 4vw, 72px), calc((100% - 1280px) / 2));
     }
+    /* Les boutons du menu se répartissent sur toute la largeur (1280px). */
     .nav-links {
       display: flex;
       align-items: center;
-      gap: clamp(22px, 3.2vw, 46px);
+      flex: 1;
+      justify-content: space-between;
+      gap: clamp(16px, 2vw, 40px);
     }
     .nav-links a {
       font-family: var(--font-display);
@@ -2465,60 +2481,16 @@ body::after {
     }
     .lb-pill.is-active .lb-pill-n { background: rgba(0, 0, 0, 0.2); }
 
-    /* ── Podium (top 3) du Leaderboard — présentation premium ── */
-    .lb-podium { display: flex; justify-content: center; align-items: flex-end; gap: clamp(10px, 2.2vw, 22px); margin: 14px auto 32px; max-width: 720px; }
-    .lb-pod {
-      position: relative; flex: 1 1 0; min-width: 0;
-      display: flex; flex-direction: column; align-items: center; text-align: center;
-      padding: 20px 14px 18px; border-radius: 18px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.015));
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.38);
-    }
-    /* Pastille / avatar avec l'initiale + petit badge de rang. */
-    .lb-pod-avatar {
-      position: relative; width: 52px; height: 52px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
-      font-family: var(--font-display); font-size: 1.35rem; color: #1a120a;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.55);
-    }
-    .lb-pod-rank {
-      position: absolute; bottom: -4px; right: -4px; width: 20px; height: 20px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.66rem; color: #fff; background: #15110d; border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    .lb-pod-crown { position: absolute; top: -14px; font-size: 1.15rem; color: var(--gold); text-shadow: 0 0 12px rgba(232, 192, 105, 0.6); }
-    .lb-pod-name { display: block; max-width: 100%; font-family: var(--font-display); font-size: 0.98rem; color: #f7f1e6; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .lb-pod-tw { display: block; font-size: 0.68rem; color: var(--primary-color); margin-top: 3px; white-space: nowrap; overflow: hidden; max-width: 100%; text-overflow: ellipsis; }
-    .lb-pod-count { font-family: var(--font-display); font-size: 1.5rem; color: #fff; margin-top: 12px; line-height: 1; }
-    .lb-pod-count small { display: block; font-size: 0.5rem; letter-spacing: 0.16em; color: var(--muted); margin-top: 5px; }
-    /* Or / argent / bronze + élévation du 1er. */
-    .lb-pod-1 { transform: translateY(-18px) scale(1.05); z-index: 2; border-color: rgba(232, 192, 105, 0.55); box-shadow: 0 16px 44px rgba(0, 0, 0, 0.5), 0 0 38px rgba(232, 192, 105, 0.2); }
-    .lb-pod-1 .lb-pod-avatar { background: linear-gradient(145deg, #ffe9a8, #d8a83d); }
-    .lb-pod-1 .lb-pod-count { color: var(--gold); }
-    .lb-pod-2 { border-color: rgba(206, 208, 214, 0.38); }
-    .lb-pod-2 .lb-pod-avatar { background: linear-gradient(145deg, #f3f4f6, #b7bac2); }
-    .lb-pod-3 { border-color: rgba(205, 127, 50, 0.42); }
-    .lb-pod-3 .lb-pod-avatar { background: linear-gradient(145deg, #f0b787, #bd7338); }
-    /* Spécificité > #global-owners li { display:flex } pour bien masquer le top 3 dans la liste. */
-    #global-owners li.lb-top3 { display: none; }   /* présents dans le podium (révélés en recherche via display:flex inline) */
-    @media (max-width: 600px) {
-      .lb-podium { gap: 6px; margin: 10px auto 22px; }
-      .lb-pod { padding: 13px 5px 12px; border-radius: 13px; }
-      .lb-pod-1 { transform: translateY(-11px) scale(1.03); }
-      .lb-pod-avatar { width: 40px; height: 40px; font-size: 1rem; margin-bottom: 7px; }
-      .lb-pod-rank { width: 16px; height: 16px; font-size: 0.55rem; }
-      .lb-pod-name { font-size: 0.68rem; }
-      .lb-pod-tw { font-size: 0.56rem; }
-      .lb-pod-count { font-size: 1.05rem; margin-top: 7px; }
-      .lb-pod-count small { font-size: 0.4rem; letter-spacing: 0.1em; }
-    }
-
     .hidden-view { display: none !important; }
-    /* Vue détail d'une collection = overlay plein écran au-dessus de la page unique. */
-    #collectionView { position: fixed; inset: 0; z-index: 1200; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #03040a; }
-    body.cv-open { overflow: hidden; }
+    /* Détail d'une collection OUVERT EN LIGNE : inséré juste sous la carte cliquée,
+       en pleine largeur de la grille (effet accordéon). */
+    #collectionView.cv-inline {
+      grid-column: 1 / -1;
+      border: 1px solid rgba(255, 106, 26, 0.22); border-radius: 18px; overflow: hidden;
+      margin: 6px 0 12px; background: rgba(8, 8, 14, 0.55);
+      animation: cvExpand 0.35s ease;
+    }
+    @keyframes cvExpand { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
     .nav-links a.is-active { color: #fff; }
     .nav-links a.is-active::after { width: 100%; }
 
@@ -3340,18 +3312,22 @@ body::after {
         }
       });
     }
-    // Site en UNE seule page : toutes les sections sont visibles, le menu scrolle
-    // (ancres + scroll-behavior:smooth). La vue détail d'une collection (#c/<i>)
-    // s'ouvre en OVERLAY plein écran au-dessus de la page.
-    function openCollectionDetail() {
+    // Site en UNE seule page : toutes les sections sont visibles, le menu scrolle.
+    // Cliquer une collection OUVRE son détail EN LIGNE (inséré juste sous la carte
+    // cliquée, en pleine largeur de la grille), au lieu d'un overlay plein écran.
+    function openCollectionDetail(idx) {
       const v = document.getElementById('collectionView');
-      if (v) { v.classList.remove('hidden-view'); v.scrollTop = 0; }
-      document.body.classList.add('cv-open');
+      if (!v) return;
+      const grid = document.getElementById('collections-grid');
+      const card = grid && grid.querySelector('a.col-row[href="#c/' + idx + '"]');
+      if (card) card.insertAdjacentElement('afterend', v); // place le détail juste après la carte
+      v.classList.remove('hidden-view');
+      v.classList.add('cv-inline');
+      requestAnimationFrame(() => { try { v.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { v.scrollIntoView(); } });
     }
     function closeCollectionDetail() {
       const v = document.getElementById('collectionView');
-      if (v) v.classList.add('hidden-view');
-      document.body.classList.remove('cv-open');
+      if (v) { v.classList.add('hidden-view'); v.classList.remove('cv-inline'); }
     }
     // Scroll-spy : surligne le bouton du menu de la section actuellement à l'écran.
     function setupScrollSpy() {
@@ -3396,7 +3372,8 @@ body::after {
     // Mints on-chain d'une collection Crovia/Cronos (Quantum Cryptonauts V3),
     // comptés comme des ventes (primary sales). Prix natif en CRO converti en USD
     // (taux live CoinGecko), repli en CRO si le taux est indisponible.
-    const V3_SALES = [{"t":104,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":103,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":102,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":101,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":100,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":99,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":98,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":97,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781785817},{"t":96,"b":"0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed","cro":400,"ts":1781738126},{"t":95,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781735977},{"t":94,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781734045},{"t":93,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781734045},{"t":92,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781734045},{"t":91,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781734045},{"t":90,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781734045},{"t":89,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781725971},{"t":88,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781725971},{"t":87,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781725971},{"t":86,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781725971},{"t":85,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781725971},{"t":84,"b":"0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2","cro":300,"ts":1781724908},{"t":83,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781724535},{"t":82,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781724535},{"t":81,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781724535},{"t":80,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781724535},{"t":79,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781724535},{"t":78,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781721201},{"t":77,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781721201},{"t":76,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781721201},{"t":75,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781721201},{"t":74,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":73,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":72,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":71,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":70,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":69,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":68,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":67,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":66,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":65,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781720425},{"t":64,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":63,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":62,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":61,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":60,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":59,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":58,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":57,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":56,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":55,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781719537},{"t":54,"b":"0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2","cro":300,"ts":1781719477},{"t":53,"b":"0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2","cro":300,"ts":1781719412},{"t":52,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781717875},{"t":51,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":50,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":49,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":48,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":47,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":46,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":45,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":44,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":43,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":42,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781716746},{"t":41,"b":"0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed","cro":400,"ts":1781715419},{"t":40,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":300,"ts":1781715084},{"t":39,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":300,"ts":1781715084},{"t":38,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":300,"ts":1781715084},{"t":37,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":300,"ts":1781715084},{"t":36,"b":"0xedce0151656e82150a0835e9b9cbd1ec53a17eae","cro":300,"ts":1781715084},{"t":35,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781710138},{"t":34,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781710049},{"t":33,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781710049},{"t":32,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781709592},{"t":31,"b":"0xac96bdcd69f708a5f660425af5d1248aa27fc1ee","cro":300,"ts":1781709592},{"t":30,"b":"0x965a73574acb12b9b48f3ff43415eea791fd70bd","cro":300,"ts":1781703575},{"t":29,"b":"0x7886acebc8401bd6b1cf397d84b85d01416e4c06","cro":300,"ts":1781703048},{"t":28,"b":"0x7886acebc8401bd6b1cf397d84b85d01416e4c06","cro":300,"ts":1781703048},{"t":27,"b":"0x7886acebc8401bd6b1cf397d84b85d01416e4c06","cro":300,"ts":1781703048},{"t":26,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":25,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":24,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":23,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":22,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":21,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":20,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":19,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":18,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":17,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":16,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":15,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":14,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":13,"b":"0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b","cro":300,"ts":1781702074},{"t":12,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781702059},{"t":11,"b":"0x2b8b37dd17fa67833b01e30229502169d1a8ae40","cro":300,"ts":1781702059},{"t":10,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781701849},{"t":9,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781701849},{"t":8,"b":"0x740cd1001bf468e03a2cef898c4ce880f228da0d","cro":300,"ts":1781701849},{"t":7,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781701623},{"t":6,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781701623},{"t":5,"b":"0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06","cro":400,"ts":1781701443},{"t":4,"b":"0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06","cro":400,"ts":1781701443},{"t":3,"b":"0x478ffba8ea4945fb9327812231dfb1c6cafd2c49","cro":300,"ts":1781701242},{"t":2,"b":"0x478ffba8ea4945fb9327812231dfb1c6cafd2c49","cro":300,"ts":1781701242},{"t":1,"b":"0x183379144e7c8581f24b02b7eedd4e9995bb1048","cro":300,"ts":1781701211}];
+    // Ventes V3 (mints Crovia/Cronos) — alimentées depuis data.json (v3Sales), calculées on-chain par Test.js.
+    let V3_SALES = [];
 
     async function appendExternalSales(sales) {
       if (typeof V3_SALES === 'undefined' || !V3_SALES.length) return;
@@ -3623,7 +3600,7 @@ body::after {
       grid.innerHTML = '<span class="nft skeleton"></span>'.repeat(12);
       document.getElementById('cvMore').hidden = true;
 
-      openCollectionDetail();
+      openCollectionDetail(idx);
 
       if (cv.id) {
         fetchBanner(cv.id).then(b => {
@@ -3696,36 +3673,14 @@ body::after {
     // Les lignes au-delà de LB_VISIBLE reçoivent la classe lb-extra (repliées par défaut).
     function lbRowsHTML(owners) {
       const sorted = [...(owners || [])].sort((a, b) => b.count - a.count);
-      const hasPodium = sorted.length >= 3;
       let rank = 1, prev = null;
       return sorted.map((owner, i) => {
         if (i > 0 && owner.count < prev) rank += 1;
         prev = owner.count;
         const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
-        const top3 = (hasPodium && i < 3) ? ' lb-top3' : ''; // présents dans le podium → masqués dans la liste (sauf recherche)
         const extra = i >= LB_VISIBLE ? ' lb-extra' : '';
         const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : '';
-        return `<li class="${rankClass}${top3}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
-      }).join('');
-    }
-
-    // Podium des 3 premiers (mise en avant premium). Ordre d'affichage : 2e · 1er · 3e.
-    // Renvoie '' si moins de 3 détenteurs (alors la liste affiche tout normalement).
-    function lbPodiumHTML(owners) {
-      const top = [...(owners || [])].sort((a, b) => b.count - a.count).slice(0, 3);
-      if (top.length < 3) return '';
-      const initial = n => (String(n || '?').trim()[0] || '?').toUpperCase();
-      return [1, 0, 2].map(rk => {
-        const o = top[rk];
-        const crown = rk === 0 ? '<span class="lb-pod-crown" aria-hidden="true">♛</span>' : '';
-        const tw = o.twitter ? `<a class="lb-pod-tw" href="${validateTwitterUrl(o.twitter)}" target="_blank" rel="noopener noreferrer">${getTwitterHandle(o.twitter)}</a>` : '';
-        return `<div class="lb-pod lb-pod-${rk + 1}">
-          ${crown}
-          <span class="lb-pod-avatar">${escHtml(initial(o.name))}<span class="lb-pod-rank">${rk + 1}</span></span>
-          <a class="lb-pod-name" href="${validateUrl(o.url)}" target="_blank" rel="noopener noreferrer">${escHtml(o.name)}</a>
-          ${tw}
-          <span class="lb-pod-count">${o.count}<small>CRYPTONAUTS</small></span>
-        </div>`;
+        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
       }).join('');
     }
 
@@ -3748,7 +3703,6 @@ body::after {
             <div class="lb-pills" id="lbPills" role="tablist" aria-label="Choisir un classement">
               ${LB_BOARDS.map((b, i) => `<button class="lb-pill${i === 0 ? ' is-active' : ''}" data-lb="${i}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}" type="button">${escHtml(b.label)}<span class="lb-pill-n">${b.owners.length}</span></button>`).join('')}
             </div>
-            <div class="lb-podium" id="lbPodium"></div>
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
             <ul id="global-owners"></ul>
             <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
@@ -3829,7 +3783,6 @@ body::after {
     // le découplage des données dans data.json.
     function wireLeaderboardControls() {
       const listEl = document.getElementById('global-owners');
-      const podiumEl = document.getElementById('lbPodium');
       const subEl = document.getElementById('lbSub');
       const pills = document.getElementById('lbPills');
       const showMoreBtn = document.getElementById('show-more-owners');
@@ -3853,7 +3806,6 @@ body::after {
       const selectBoard = (idx) => {
         const board = LB_BOARDS[idx];
         if (!board) return;
-        if (podiumEl) { podiumEl.innerHTML = lbPodiumHTML(board.owners); podiumEl.style.display = ''; }
         listEl.innerHTML = lbRowsHTML(board.owners);
         if (subEl) subEl.textContent = board.sub;
         if (searchInput) searchInput.value = '';
@@ -3889,21 +3841,17 @@ body::after {
           const existing = document.getElementById('no-results');
           if (!filter) {
             if (existing) existing.remove();
-            if (podiumEl) podiumEl.style.display = '';                 // on ré-affiche le podium
-            listEl.querySelectorAll('li').forEach(li => { li.style.display = ''; }); // top3 redeviennent masqués (CSS)
+            listEl.querySelectorAll('li').forEach(li => { li.style.display = ''; });
             expanded = false;
             applyCollapse(); // re-replie
             return;
           }
-          // Recherche : on masque le podium et on révèle TOUTES les lignes (top 3 inclus)
-          // puis on filtre par texte. display:flex (et non '') pour surcharger le masquage
-          // CSS des lignes .lb-top3.
-          if (podiumEl) podiumEl.style.display = 'none';
+          // Recherche : on révèle tout puis on filtre par texte.
           expanded = true;
           let found = false;
           listEl.querySelectorAll('li:not(#no-results)').forEach(li => {
             const match = li.textContent.toLowerCase().includes(filter);
-            li.style.display = match ? 'flex' : 'none';
+            li.style.display = match ? '' : 'none';
             if (match) found = true;
           });
           if (showMoreBtn) showMoreBtn.style.display = 'none';
@@ -3939,6 +3887,7 @@ body::after {
         const data = await res.json();
         collectionsData = Array.isArray(data.collectionsData) ? data.collectionsData : [];
         globalOwnersData = Array.isArray(data.globalOwnersData) ? data.globalOwnersData : [];
+        V3_SALES = Array.isArray(data.v3Sales) ? data.v3Sales : []; // mints V3 récents (on-chain) pour le Sales Bot
       } catch (e) {
         console.error('Échec du chargement de data.json :', e);
         return;

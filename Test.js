@@ -423,18 +423,26 @@ const V3_FALLBACK = [
 
 let _v3RpcIdx = 0;
 async function cronosRpc(method, params) {
-  for (let i = 0; i < CRONOS_RPCS.length; i++) {
+  const MAX_ATTEMPTS = 8;
+  let lastErr;
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
     try {
       const res = await axios.post(CRONOS_RPCS[_v3RpcIdx], { jsonrpc: '2.0', id: 1, method, params },
         { timeout: 20000, headers: { 'Content-Type': 'application/json' } });
       if (res.data?.error) throw new Error(res.data.error.message);
       return res.data?.result;
     } catch (e) {
-      _v3RpcIdx = (_v3RpcIdx + 1) % CRONOS_RPCS.length; // bascule de RPC
-      if (i === CRONOS_RPCS.length - 1) throw e;
-      await delay(300);
+      lastErr = e;
+      _v3RpcIdx = (_v3RpcIdx + 1) % CRONOS_RPCS.length; // RPC suivant
+      // Backoff exponentiel sur 429/503 (les RPC publics limitent le débit), sinon court.
+      const status = e.response?.status;
+      const backoff = (status === 429 || status === 503 || !e.response)
+        ? Math.min(8000, 500 * Math.pow(2, Math.floor(i / CRONOS_RPCS.length)))
+        : 300;
+      await delay(backoff + Math.floor(Math.random() * 250));
     }
   }
+  throw lastErr;
 }
 
 // Lit le classement des détenteurs V3 on-chain. Renvoie [{addr,count}] trié desc, ou null si échec.
@@ -447,7 +455,7 @@ async function fetchV3Holders() {
     }
     console.log(`V3 on-chain : lecture des Transfer sur ${windows.length} fenêtres (blocs ${V3_CREATION_BLOCK}→${latest})…`);
     const logs = [];
-    await mapPool(windows, 6, async ([from, to]) => {
+    await mapPool(windows, 3, async ([from, to]) => {
       const res = await cronosRpc('eth_getLogs', [{
         address: V3_CONTRACT, topics: [V3_TRANSFER_TOPIC],
         fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16)
@@ -456,18 +464,40 @@ async function fetchV3Holders() {
     });
     // Tri chronologique strict, puis dernier `to` par tokenId = propriétaire actuel.
     logs.sort((a, b) => (parseInt(a.blockNumber, 16) - parseInt(b.blockNumber, 16)) || (parseInt(a.logIndex, 16) - parseInt(b.logIndex, 16)));
+    const ZERO = '0x0000000000000000000000000000000000000000';
     const ownerOf = {};
+    const mintsRaw = []; // mints = transferts depuis 0x0 : { t, b, bn }
     for (const l of logs) {
       if (!l.topics || l.topics.length !== 4) continue; // ERC-721 (tokenId indexé)
-      ownerOf[BigInt(l.topics[3]).toString()] = '0x' + l.topics[2].slice(26).toLowerCase();
+      const to = '0x' + l.topics[2].slice(26).toLowerCase();
+      const from = '0x' + l.topics[1].slice(26).toLowerCase();
+      const tokenId = BigInt(l.topics[3]).toString();
+      ownerOf[tokenId] = to;
+      if (from === ZERO) mintsRaw.push({ t: Number(tokenId), b: to, bn: parseInt(l.blockNumber, 16) });
     }
-    const ZERO = '0x0000000000000000000000000000000000000000';
     const counts = {};
     for (const t in ownerOf) { const o = ownerOf[t]; if (o === ZERO) continue; counts[o] = (counts[o] || 0) + 1; }
     const ranking = Object.entries(counts).map(([addr, count]) => ({ addr, count })).sort((a, b) => b.count - a.count);
     if (ranking.length === 0) throw new Error('0 holder résolu');
-    console.log(`✅ V3 on-chain : ${ranking.length} détenteurs · ${ranking.reduce((s, r) => s + r.count, 0)} NFT.`);
-    return ranking;
+
+    // Date des mints (= ventes V3 dans le Sales Bot) : timestamp du bloc de chaque mint.
+    const uniqBlocks = [...new Set(mintsRaw.map(m => m.bn))];
+    const blockTs = {};
+    await mapPool(uniqBlocks, 3, async (bn) => {
+      try {
+        const blk = await cronosRpc('eth_getBlockByNumber', ['0x' + bn.toString(16), false]);
+        if (blk && blk.timestamp) blockTs[bn] = parseInt(blk.timestamp, 16);
+      } catch (e) { /* bloc ignoré */ }
+    });
+    // Prix de mint forfaitaire (300 CRO) — non disponible dans le log Transfer.
+    const mints = mintsRaw
+      .map(m => ({ t: m.t, b: m.b, cro: 300, ts: blockTs[m.bn] || 0 }))
+      .filter(m => m.ts > 0)
+      .sort((a, b) => b.ts - a.ts)
+      .slice(0, 40);
+
+    console.log(`✅ V3 on-chain : ${ranking.length} détenteurs · ${ranking.reduce((s, r) => s + r.count, 0)} NFT · ${mints.length} mints récents.`);
+    return { ranking, mints };
   } catch (e) {
     console.warn(`⚠ Lecture on-chain V3 échouée (${e.message}) → repli sur le snapshot intégré.`);
     return null;
@@ -492,7 +522,7 @@ function buildV3Collection(ranking) {
   };
 }
 
-function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection) {
+function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Sales) {
   // Prepare collectionsData, including all collections from the collections array
   const allCollectionsData = collections.map(collection => {
     const scrapedData = collectionsData.find(data => data.collectionId === collection.id) || {
@@ -532,7 +562,8 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Co
   });
 
   // Écrit le classement dans data.json (consommé par index.html via fetch).
-  const out = { generatedAt: new Date().toISOString(), collectionsData: allCollectionsData, globalOwnersData };
+  // v3Sales = mints V3 récents (on-chain) pour le Sales Bot — remplace l'ancien tableau figé.
+  const out = { generatedAt: new Date().toISOString(), collectionsData: allCollectionsData, globalOwnersData, v3Sales: v3Sales || [] };
   try {
     fs.writeFileSync('data.json', JSON.stringify(out), 'utf8');
     console.log(`✅ data.json écrit : ${allCollectionsData.length} collections · ${globalOwnersData.length} holders globaux.`);
@@ -839,11 +870,13 @@ async function main() {
 
     saveOwnersJson(ownersData);
 
-    // Collection externe V3 (Crovia/Cronos) : détenteurs lus on-chain (repli sur snapshot si échec).
-    const v3Ranking = (await fetchV3Holders()) || V3_FALLBACK;
+    // Collection externe V3 (Crovia/Cronos) : détenteurs ET mints lus on-chain (repli sur snapshot si échec).
+    const v3 = await fetchV3Holders();
+    const v3Ranking = (v3 && v3.ranking) || V3_FALLBACK;
+    const v3Mints = (v3 && v3.mints) || [];
     const v3Collection = buildV3Collection(v3Ranking);
 
-    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection);
+    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Mints);
 
   } catch (error) {
     console.error('Main execution failed:', error.message);
