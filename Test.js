@@ -373,7 +373,126 @@ async function walkOwnersAndDates(collectionId) {
 
 // Construit le classement (collections + leaderboard global) et l'écrit dans data.json.
 // Test.js ne génère plus index.html : l'index charge data.json en direct via fetch().
-function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Collection externe V3 (Quantum Cryptonauts V3) — Crovia / Cronos on-chain.
+// Crovia bloque le scraping (Cloudflare) ; on lit donc les détenteurs DIRECTEMENT
+// on-chain via un RPC public Cronos : on parcourt tous les events Transfer du
+// contrat ERC-721 et on calcule le propriétaire actuel de chaque tokenId.
+// → comptes exacts et auto-actualisés à chaque run. Les pseudos (non on-chain)
+// proviennent de la table fixe V3_NAMES ; les autres holders s'affichent en adresse.
+// ─────────────────────────────────────────────────────────────────────────────
+const V3_CONTRACT = '0x840d5e2df597ab3dcfed4e5fc883c8d87606748d';
+const V3_CREATION_BLOCK = 77606321; // bloc de déploiement (fixe) — évite la recherche
+const V3_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+const CRONOS_RPCS = ['https://evm.cronos.org', 'https://cronos-evm-rpc.publicnode.com', 'https://1rpc.io/cro'];
+const RPC_LOG_STEP = 1999; // < limite de 2000 blocs/getLogs des RPC publics
+
+// Adresse (minuscule) → pseudo affiché. Les holders absents de cette table
+// s'affichent en adresse tronquée. À compléter quand de nouveaux pseudos sont connus.
+const V3_NAMES = {
+  '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b': 'SANDIMAN',
+  '0x2b8b37dd17fa67833b01e30229502169d1a8ae40': 'MTCH',
+  '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee': 'JERAAAMY',
+  '0x740cd1001bf468e03a2cef898c4ce880f228da0d': 'CLOUDY',
+  '0x183379144e7c8581f24b02b7eedd4e9995bb1048': 'PAULO24',
+  '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed': 'WARNEREVERCHANGE',
+  '0x7886acebc8401bd6b1cf397d84b85d01416e4c06': 'PAYSAGISTE00',
+  '0xedce0151656e82150a0835e9b9cbd1ec53a17eae': 'SNAKE APE',
+  '0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2': 'JAMUS0',
+};
+
+// Repli si la lecture on-chain échoue (snapshot du 2026-06-23) → data.json garde un V3 cohérent.
+const V3_FALLBACK = [
+  { addr: '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b', count: 61 },
+  { addr: '0x2b8b37dd17fa67833b01e30229502169d1a8ae40', count: 49 },
+  { addr: '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee', count: 43 },
+  { addr: '0x740cd1001bf468e03a2cef898c4ce880f228da0d', count: 31 },
+  { addr: '0x183379144e7c8581f24b02b7eedd4e9995bb1048', count: 11 },
+  { addr: '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed', count: 10 },
+  { addr: '0x7886acebc8401bd6b1cf397d84b85d01416e4c06', count: 6 },
+  { addr: '0xedce0151656e82150a0835e9b9cbd1ec53a17eae', count: 5 },
+  { addr: '0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2', count: 4 },
+  { addr: '0x478ffba8ea4945fb9327812231dfb1c6cafd2c49', count: 3 },
+  { addr: '0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06', count: 2 },
+  { addr: '0x1d9b981b7aba1a747883833fb8a1b5072eac5d8f', count: 2 },
+  { addr: '0x965a73574acb12b9b48f3ff43415eea791fd70bd', count: 1 },
+  { addr: '0x27ac7493fa8395ad35c260282522b3d9e314cee7', count: 1 },
+  { addr: '0x2270cbad5072b7685357ec83ddc959ffde535b27', count: 1 },
+  { addr: '0xf7e392c06c7691b44a06a0ec1e723bcc0533febf', count: 1 },
+];
+
+let _v3RpcIdx = 0;
+async function cronosRpc(method, params) {
+  for (let i = 0; i < CRONOS_RPCS.length; i++) {
+    try {
+      const res = await axios.post(CRONOS_RPCS[_v3RpcIdx], { jsonrpc: '2.0', id: 1, method, params },
+        { timeout: 20000, headers: { 'Content-Type': 'application/json' } });
+      if (res.data?.error) throw new Error(res.data.error.message);
+      return res.data?.result;
+    } catch (e) {
+      _v3RpcIdx = (_v3RpcIdx + 1) % CRONOS_RPCS.length; // bascule de RPC
+      if (i === CRONOS_RPCS.length - 1) throw e;
+      await delay(300);
+    }
+  }
+}
+
+// Lit le classement des détenteurs V3 on-chain. Renvoie [{addr,count}] trié desc, ou null si échec.
+async function fetchV3Holders() {
+  try {
+    const latest = parseInt(await cronosRpc('eth_blockNumber', []), 16);
+    const windows = [];
+    for (let from = V3_CREATION_BLOCK; from <= latest; from += RPC_LOG_STEP + 1) {
+      windows.push([from, Math.min(from + RPC_LOG_STEP, latest)]);
+    }
+    console.log(`V3 on-chain : lecture des Transfer sur ${windows.length} fenêtres (blocs ${V3_CREATION_BLOCK}→${latest})…`);
+    const logs = [];
+    await mapPool(windows, 6, async ([from, to]) => {
+      const res = await cronosRpc('eth_getLogs', [{
+        address: V3_CONTRACT, topics: [V3_TRANSFER_TOPIC],
+        fromBlock: '0x' + from.toString(16), toBlock: '0x' + to.toString(16)
+      }]);
+      (res || []).forEach(l => logs.push(l));
+    });
+    // Tri chronologique strict, puis dernier `to` par tokenId = propriétaire actuel.
+    logs.sort((a, b) => (parseInt(a.blockNumber, 16) - parseInt(b.blockNumber, 16)) || (parseInt(a.logIndex, 16) - parseInt(b.logIndex, 16)));
+    const ownerOf = {};
+    for (const l of logs) {
+      if (!l.topics || l.topics.length !== 4) continue; // ERC-721 (tokenId indexé)
+      ownerOf[BigInt(l.topics[3]).toString()] = '0x' + l.topics[2].slice(26).toLowerCase();
+    }
+    const ZERO = '0x0000000000000000000000000000000000000000';
+    const counts = {};
+    for (const t in ownerOf) { const o = ownerOf[t]; if (o === ZERO) continue; counts[o] = (counts[o] || 0) + 1; }
+    const ranking = Object.entries(counts).map(([addr, count]) => ({ addr, count })).sort((a, b) => b.count - a.count);
+    if (ranking.length === 0) throw new Error('0 holder résolu');
+    console.log(`✅ V3 on-chain : ${ranking.length} détenteurs · ${ranking.reduce((s, r) => s + r.count, 0)} NFT.`);
+    return ranking;
+  } catch (e) {
+    console.warn(`⚠ Lecture on-chain V3 échouée (${e.message}) → repli sur le snapshot intégré.`);
+    return null;
+  }
+}
+
+// Construit l'objet collection V3 (format data.json) depuis un classement [{addr,count}].
+function buildV3Collection(ranking) {
+  const trunc = a => a.slice(0, 6) + '…' + a.slice(-4);
+  const owners = ranking.map(({ addr, count }) => ({
+    name: V3_NAMES[addr.toLowerCase()] || trunc(addr),
+    count,
+    url: 'https://cronoscan.com/address/' + addr
+  }));
+  return {
+    id: 'collection-v3', title: 'Quantum Cryptonauts V3',
+    image: 'assets/v3-logo.jpg?v=2', banner: 'assets/v3-banner.jpg?v=2',
+    alt: 'Quantum Cryptonauts V3 COLLECTION ICON',
+    ownersCount: owners.length, external: 'crovia', contract: V3_CONTRACT,
+    croviaUrl: 'https://crovia.app/collections/' + V3_CONTRACT,
+    owners
+  };
+}
+
+function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection) {
   // Prepare collectionsData, including all collections from the collections array
   const allCollectionsData = collections.map(collection => {
     const scrapedData = collectionsData.find(data => data.collectionId === collection.id) || {
@@ -400,7 +519,9 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData) {
 
   // Collection externe (Crovia / Cronos) — ajoutée en tête (la plus récente). Données on-chain,
   // owners en adresses (cronoscan) ; volontairement absente de globalOwnersData (leaderboard global).
-  allCollectionsData.unshift({"id":"collection-v3","title":"Quantum Cryptonauts V3","image":"assets/v3-logo.jpg?v=2","banner":"assets/v3-banner.jpg?v=2","alt":"Quantum Cryptonauts V3 COLLECTION ICON","ownersCount":12,"external":"crovia","contract":"0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","croviaUrl":"https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d","owners":[{"name":"0x2b8b…ae40","count":32,"url":"https://cronoscan.com/address/0x2b8b37dd17fa67833b01e30229502169d1a8ae40"},{"name":"0x1355…884b","count":32,"url":"https://cronoscan.com/address/0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b"},{"name":"0x740c…da0d","count":8,"url":"https://cronoscan.com/address/0x740cd1001bf468e03a2cef898c4ce880f228da0d"},{"name":"0xac96…c1ee","count":8,"url":"https://cronoscan.com/address/0xac96bdcd69f708a5f660425af5d1248aa27fc1ee"},{"name":"0x1833…1048","count":6,"url":"https://cronoscan.com/address/0x183379144e7c8581f24b02b7eedd4e9995bb1048"},{"name":"0xedce…7eae","count":5,"url":"https://cronoscan.com/address/0xedce0151656e82150a0835e9b9cbd1ec53a17eae"},{"name":"0x7886…4c06","count":3,"url":"https://cronoscan.com/address/0x7886acebc8401bd6b1cf397d84b85d01416e4c06"},{"name":"0x64c1…b5c2","count":3,"url":"https://cronoscan.com/address/0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2"},{"name":"0x478f…2c49","count":2,"url":"https://cronoscan.com/address/0x478ffba8ea4945fb9327812231dfb1c6cafd2c49"},{"name":"0x8147…fb06","count":2,"url":"https://cronoscan.com/address/0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06"},{"name":"0xe6e7…34ed","count":2,"url":"https://cronoscan.com/address/0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed"},{"name":"0x965a…70bd","count":1,"url":"https://cronoscan.com/address/0x965a73574acb12b9b48f3ff43415eea791fd70bd"}]});
+  // Collection externe V3 (Crovia/Cronos) — en tête, détenteurs lus on-chain (voir fetchV3Holders).
+  // Volontairement absente de globalOwnersData (exclue du leaderboard global).
+  allCollectionsData.unshift(v3Collection);
 
   // Prepare globalOwnersData (sans url ni rank : reconstruits/recalculés côté client)
   const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, count }) => {
@@ -717,7 +838,12 @@ async function main() {
     }
 
     saveOwnersJson(ownersData);
-    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData);
+
+    // Collection externe V3 (Crovia/Cronos) : détenteurs lus on-chain (repli sur snapshot si échec).
+    const v3Ranking = (await fetchV3Holders()) || V3_FALLBACK;
+    const v3Collection = buildV3Collection(v3Ranking);
+
+    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection);
 
   } catch (error) {
     console.error('Main execution failed:', error.message);
