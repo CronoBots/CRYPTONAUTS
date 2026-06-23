@@ -3282,14 +3282,11 @@ body::after {
       return bannerCache[id];
     }
 
+    // NB : pas de scrollIntoView ici — appelé par le scroll-spy, ça se battait avec le
+    // scroll de l'utilisateur (saccades sur mobile). On ne fait que (dé)surligner.
     function syncNav(name) {
       document.querySelectorAll('.nav-links a[data-nav]').forEach(a => {
-        const on = a.dataset.nav === name;
-        a.classList.toggle('is-active', on);
-        // Sur mobile (nav défilante), amène l'onglet actif dans le champ de vision.
-        if (on && window.matchMedia('(max-width: 600px)').matches) {
-          try { a.scrollIntoView({ inline: 'center', block: 'nearest' }); } catch (e) { }
-        }
+        a.classList.toggle('is-active', a.dataset.nav === name);
       });
     }
     // Site en UNE seule page. Cliquer une collection AGRANDIT LA MÊME carte (accordéon) :
@@ -3315,28 +3312,40 @@ body::after {
       // On retire seulement is-open → le panneau se replie en douceur (grid-template-rows).
       document.querySelectorAll('.col-item.is-open').forEach(o => o.classList.remove('is-open'));
     }
-    // Scroll-spy : surligne le bouton du menu de la section la plus centrée à l'écran.
-    // 'spotlight' est mappé sur 'home' (sinon zone morte au milieu du mur d'œuvres).
+    // Scroll-spy DÉTERMINISTE (basé sur la position de scroll, pas d'IntersectionObserver
+    // qui papillonnait sur des sections de hauteurs très différentes). À chaque frame de
+    // scroll, l'onglet actif = la dernière section dont le haut est passé sous la navbar.
+    // 'spotlight' est mappé sur 'home'.
+    let _spyWired = false;
     function setupScrollSpy() {
-      if (!('IntersectionObserver' in window)) return;
       const ids = ['home', 'spotlight', 'collections', 'leaderboard', 'artist', 'salesbot'];
       const navOf = id => (id === 'spotlight' ? 'home' : id);
-      const visible = new Set();
-      const pick = () => {
-        const mid = window.innerHeight / 2;
-        let best = null, bestDist = Infinity;
-        visible.forEach(el => {
-          const r = el.getBoundingClientRect();
-          const dist = Math.abs((r.top + r.bottom) / 2 - mid);
-          if (dist < bestDist) { bestDist = dist; best = el; }
-        });
-        if (best) syncNav(navOf(best.id));
+      const navbar = document.getElementById('navbar');
+      let ticking = false, last = null;
+      const update = () => {
+        ticking = false;
+        const off = (navbar ? navbar.offsetHeight : 70) + 24;
+        const y = window.scrollY + off;
+        let current = navOf(ids[0]);
+        for (const id of ids) {
+          const el = document.getElementById(id);
+          if (!el) continue;
+          const top = el.getBoundingClientRect().top + window.scrollY;
+          if (top <= y) current = navOf(id);
+        }
+        // Tout en bas de page → dernière section (sinon la dernière, courte, n'est jamais atteinte).
+        if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4) {
+          current = navOf(ids[ids.length - 1]);
+        }
+        if (current !== last) { last = current; syncNav(current); }  // resync seulement au changement
       };
-      const spy = new IntersectionObserver((entries) => {
-        entries.forEach(e => { if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target); });
-        pick();
-      }, { rootMargin: '-30% 0px -30% 0px', threshold: 0 });
-      ids.forEach(id => { const el = document.getElementById(id); if (el) spy.observe(el); });
+      const onScrollSpy = () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } };
+      if (!_spyWired) {
+        _spyWired = true;
+        window.addEventListener('scroll', onScrollSpy, { passive: true });
+        window.addEventListener('resize', onScrollSpy);
+      }
+      update();
     }
 
     // ── Sales Bot : flux des dernières ventes (events « transferred » avec prix) ──
