@@ -2468,11 +2468,13 @@ body::after {
     .cv-banner {
       position: relative;
       width: 100%;
-      height: clamp(220px, 32vw, 360px);
+      min-height: 150px;        /* place pour le titre/bouton avant chargement de l'image */
       overflow: visible;
       background: linear-gradient(135deg, #100c09, #15110d);
     }
-    .cv-banner-img { width: 100%; height: 100%; object-fit: cover; display: block; opacity: 0; transition: opacity 0.5s ease; }
+    /* Bannière ENTIÈREMENT visible (PC + mobile) : largeur 100 %, hauteur auto =
+       aucun rognage (au lieu de object-fit:cover sur une hauteur fixe). */
+    .cv-banner-img { width: 100%; height: auto; display: block; opacity: 0; transition: opacity 0.5s ease; }
     #collectionView.has-banner .cv-banner-img { opacity: 1; }
     .cv-banner-grad {
       position: absolute; inset: 0; pointer-events: none;
@@ -2503,15 +2505,16 @@ body::after {
       font-size: clamp(1.4rem, 3.4vw, 2.4rem); line-height: 1.14; letter-spacing: 0.015em;
       text-shadow: 0 3px 26px rgba(0, 0, 0, 0.92);
     }
-    /* Logo à cheval : moitié dans la bannière, moitié en dessous, à droite */
+    /* Logo à cheval : moitié dans la bannière, moitié en dessous, à GAUCHE */
     .cv-logo {
-      position: absolute; z-index: 3; right: 7%; bottom: 0; transform: translateY(50%);
+      position: absolute; z-index: 3; left: clamp(18px, 4vw, 72px); bottom: 0; transform: translateY(50%);
       width: 128px; height: 128px; border-radius: 20px; object-fit: cover;
       border: 1px solid rgba(255, 106, 26, 0.3);
       box-shadow: 0 14px 40px rgba(0, 0, 0, 0.6), 0 0 40px rgba(255, 106, 26, 0.18);
       background: #100c09;
     }
-    .cv-meta { padding: 22px 184px 0 0; min-height: 66px; }
+    /* Le contenu démarre sous le logo (qui déborde de ~64px en bas de bannière). */
+    .cv-meta { padding: 80px 0 0; }
     .cv-release { display: block; margin-bottom: 8px; font-family: var(--font-body); font-size: 0.7rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
     .cv-sold {
       display: inline-block; padding: 4px 12px; border-radius: 999px;
@@ -2523,10 +2526,18 @@ body::after {
     .cv-desc { color: var(--muted); line-height: 1.68; max-width: 680px; margin: 12px 0 20px; font-size: 0.95rem; }
     .cv-link[hidden] { display: none; }
 
-    .cv-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 32px 0 48px; }
-    .cv-stat { text-align: center; padding: 16px 8px; border-radius: 14px; background: rgba(20, 22, 38, 0.5); border: 1px solid var(--hairline); }
+    /* Stats : rangée homogène. Sur PC les 5 cartes remplissent la largeur ;
+       sur mobile elles gardent leur taille et la rangée défile horizontalement. */
+    .cv-stats { display: flex; gap: 10px; margin: 18px 0 28px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: none; scroll-snap-type: x proximity; }
+    .cv-stats::-webkit-scrollbar { display: none; }
+    .cv-stat {
+      flex: 1 0 auto; min-width: 106px; scroll-snap-align: start; text-align: center;
+      padding: 16px 12px; border-radius: 16px;
+      background: linear-gradient(180deg, rgba(255, 106, 26, 0.07), rgba(20, 22, 38, 0.45));
+      border: 1px solid var(--hairline);
+    }
     .cv-stat .v { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 16px rgba(255, 106, 26, 0.35); }
-    .cv-stat .l { display: block; margin-top: 7px; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .cv-stat .l { display: block; margin-top: 8px; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 
     .cv-block { margin-bottom: 44px; }
     .cv-sec-title { font-size: 1.4rem; margin: 0 0 16px; text-transform: none; }
@@ -2546,10 +2557,12 @@ body::after {
 
     @media screen and (max-width: 600px) {
       .cv-title { padding: 30px 16px 28px; font-size: 1.25rem; letter-spacing: 0.01em; }
-      .cv-logo { width: 76px; height: 76px; right: 16px; border-radius: 14px; }
-      .cv-meta { padding: 46px 0 0; min-height: 0; }
+      .cv-logo { width: 82px; height: 82px; left: 16px; border-radius: 16px; }
+      .cv-meta { padding: 54px 0 0; min-height: 0; }
       .cv-desc { margin: 10px 0 18px; }
-      .cv-stats { grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 22px 0 38px; }
+      .cv-stats { gap: 8px; margin: 16px 0 26px; }
+      .cv-stat { min-width: 96px; padding: 13px 10px; }
+      .cv-stat .v { font-size: 1.3rem; }
       #cvNfts { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
     }
     /* ════════ SPOTLIGHT : mur d'œuvres en mouvement ════════ */
@@ -2988,17 +3001,17 @@ body::after {
       <div class="cv-meta">
         <span class="cv-release"></span>
         <span class="cv-sold" hidden>Sold out</span>
+        <div class="cv-stats">
+          <div class="cv-stat"><span class="v cv-holders">0</span><span class="l">Holders</span></div>
+          <div class="cv-stat"><span class="v cv-items">0</span><span class="l">Items</span></div>
+          <div class="cv-stat"><span class="v cv-floor">—</span><span class="l">Floor</span></div>
+          <div class="cv-stat"><span class="v cv-vol">—</span><span class="l">Volume</span></div>
+          <div class="cv-stat"><span class="v cv-sales">0</span><span class="l">Sales</span></div>
+        </div>
         <p class="cv-desc"></p>
         <a class="cv-link btn btn-primary" target="_blank" rel="noopener"><span class="cv-link-label">View on crypto.com</span>
           <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
-      </div>
-      <div class="cv-stats">
-        <div class="cv-stat"><span class="v cv-holders">0</span><span class="l">Holders</span></div>
-        <div class="cv-stat"><span class="v cv-items">0</span><span class="l">Items</span></div>
-        <div class="cv-stat"><span class="v cv-floor">—</span><span class="l">Floor</span></div>
-        <div class="cv-stat"><span class="v cv-vol">—</span><span class="l">Volume</span></div>
-        <div class="cv-stat"><span class="v cv-sales">0</span><span class="l">Sales</span></div>
       </div>
       <div class="cv-block">
         <h2 class="cv-sec-title">Items <span class="cv-count cv-items-count"></span></h2>
