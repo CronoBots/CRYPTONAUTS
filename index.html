@@ -2696,6 +2696,12 @@ body::after {
       .cv-lb-list .twitter-link { display: none; }   /* on masque le @handle sur mobile pour aérer */
       .cv-lb-list .rank { min-width: 20px; }
       .cv-lb-list .count-text { font-size: 0.5rem; }
+      /* Onglets Items/Leaderboard/Utilities : à 1.4rem les 3 débordent (Utilities coupé).
+         On réduit taille + espacement, sans retour à la ligne, avec scroll horizontal de secours. */
+      .cv-tabs { gap: 16px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+      .cv-tabs::-webkit-scrollbar { display: none; }
+      .cv-tab { font-size: 1.02rem; white-space: nowrap; flex: 0 0 auto; padding-bottom: 10px; gap: 6px; }
+      .cv-count { font-size: 0.74rem; }
     }
     #cvNfts { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 0; }
     #cvNfts .nft { font-size: 0.66rem; }
