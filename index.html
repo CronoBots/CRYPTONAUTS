@@ -2889,7 +2889,7 @@ body::after {
     .col-arrow { position: absolute; z-index: 3; right: 12px; bottom: 10px; color: rgba(236, 228, 212, 0.85); background: rgba(3, 4, 10, 0.5); border-radius: 50%; padding: 3px; transition: transform 0.3s ease, color 0.25s ease; }
     .col-item.is-open .col-arrow { transform: rotate(180deg); color: var(--primary-color); }
     /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
-    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 18px; }
+    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 38px; }   /* bas réservé pour la flèche (coin inf. droit) */
     .col-title-wrap { padding-left: 116px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
     .col-title { margin: 0; font-size: clamp(1.25rem, 2.2vw, 1.9rem); line-height: 1.12; color: #fff; }
     .col-date { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236, 228, 212, 0.6); }
@@ -2902,7 +2902,7 @@ body::after {
     @media screen and (max-width: 600px) {
       .col-banner { aspect-ratio: 16 / 6; max-height: 140px; }
       .col-logo { width: 60px; height: 60px; left: 13px; border-radius: 13px; }
-      .col-body { padding: 10px 13px 14px; }
+      .col-body { padding: 10px 13px 32px; }
       .col-title-wrap { padding-left: 74px; min-height: 36px; gap: 2px; }
       .col-title { font-size: 1.04rem; }
       .col-date { font-size: 0.56rem; letter-spacing: 0.12em; }
@@ -3302,7 +3302,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
-      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", launchUrl: "https://crovia.app/launch/quantum-cryptonauts-v3", status: "minting", minted: 231, mintTotal: 299, items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
+      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", launchUrl: "https://crovia.app/launch/quantum-cryptonauts-v3", status: "minting", minted: 231, mintTotal: 299, mintPriceCro: 400, items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
       "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
@@ -3404,10 +3404,12 @@ body::after {
           ? '<span class="col-badge is-live"><span class="dot"></span>Minting on Crovia</span>'
           : (meta.soldOut ? '<span class="col-badge">Sold out</span>' : '');
         const dateBadge = rel ? `<span class="col-badge col-date-badge">${escHtml(rel)}</span>` : '';
+        const priceRow = meta.mintPriceCro ? `<div class="col-mint-row" style="margin:9px 0 0"><span class="lbl">Mint price</span><span class="num"><b>${meta.mintPriceCro.toLocaleString('fr-FR')}</b> CRO</span></div>` : '';
         const mint = (minting && meta.mintTotal) ? `
             <div class="col-mint">
               <div class="col-mint-row"><span class="lbl">Mint progress</span><span class="num"><b>${(meta.minted || 0).toLocaleString('fr-FR')}</b> / ${meta.mintTotal.toLocaleString('fr-FR')}</span></div>
               <div class="col-mint-bar"><div class="col-mint-fill" style="width:${Math.min(100, Math.round((meta.minted || 0) / meta.mintTotal * 100))}%"></div></div>
+              ${priceRow}
             </div>` : '';
         a.innerHTML = `
           <div class="col-banner">
@@ -3910,7 +3912,7 @@ body::after {
       if (sold) {
         if (meta.status === 'minting' && meta.mintTotal) {
           sold.classList.add('is-live');
-          sold.innerHTML = '<span class="dot"></span>Minting now on Crovia · ' + (meta.minted || 0) + ' / ' + meta.mintTotal;
+          sold.innerHTML = '<span class="dot"></span>Minting now on Crovia · ' + (meta.minted || 0) + ' / ' + meta.mintTotal + (meta.mintPriceCro ? ' · ' + meta.mintPriceCro.toLocaleString('fr-FR') + ' CRO' : '');
           sold.hidden = false;
         } else {
           sold.classList.remove('is-live');
