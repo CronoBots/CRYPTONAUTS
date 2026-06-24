@@ -933,23 +933,17 @@ body::after {
       opacity: 1;
     }
 
-    /* Pastille de rang circulaire */
+    /* Rang : numéro simple (comme dans les leaderboards de collection), sans pastille. */
     #global-owners li .rank,
     #additional-owners li .rank,
     .collection ul li .rank {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 2.3rem;
-      height: 2.3rem;
-      padding: 0 0.45rem;
-      border-radius: 999px;
-      background: rgba(255, 106, 26, 0.14);
-      border: 1px solid rgba(255, 106, 26, 0.30);
-      color: #ecdfc7;
+      min-width: 1.8rem;
+      color: var(--muted);
       font-size: 1.05rem;
       line-height: 1;
-      box-shadow: inset 0 0 10px rgba(255, 106, 26, 0.10);
       flex-shrink: 0;
     }
 
@@ -961,31 +955,16 @@ body::after {
       filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.45));
     }
 
-    /* Top 3 : pastilles colorées */
+    /* Top 3 : numéro coloré (or / argent / bronze), sans badge. */
     #global-owners li.rank-1 .rank,
     #additional-owners li.rank-1 .rank,
-    .collection ul li.collection-rank-1 .rank {
-      background: linear-gradient(135deg, #ffe680, #d4a017);
-      border-color: rgba(255, 215, 0, 0.7);
-      color: #2a1d00;
-      text-shadow: none;
-    }
+    .collection ul li.collection-rank-1 .rank { color: #ffd700; }
     #global-owners li.rank-2 .rank,
     #additional-owners li.rank-2 .rank,
-    .collection ul li.collection-rank-2 .rank {
-      background: linear-gradient(135deg, #f5f5f5, #b9b9b9);
-      border-color: rgba(220, 220, 220, 0.7);
-      color: #1d1d1d;
-      text-shadow: none;
-    }
+    .collection ul li.collection-rank-2 .rank { color: #d6d6de; }
     #global-owners li.rank-3 .rank,
     #additional-owners li.rank-3 .rank,
-    .collection ul li.collection-rank-3 .rank {
-      background: linear-gradient(135deg, #f0b27a, #cd7f32);
-      border-color: rgba(205, 127, 50, 0.7);
-      color: #2a1400;
-      text-shadow: none;
-    }
+    .collection ul li.collection-rank-3 .rank { color: #cd7f32; }
 
     /* Top 3 : fonds dégradés + bord d'accent coloré */
     #global-owners li.rank-1::before,
@@ -1016,24 +995,17 @@ body::after {
     #additional-owners li.rank-3,
     .collection ul li.collection-rank-3 { border-left-color: #cd7f32; }
 
-    /* Badge compteur (pilule) */
+    /* Compteur : juste le chiffre orange (ni pilule, ni mot « Cryptonauts »). */
     #global-owners li .count-container,
     #additional-owners li .count-container,
     .collection ul li .count-container {
       gap: 6px;
-      padding: 6px 14px;
-      border-radius: 999px;
-      background: rgba(255, 106, 26, 0.12);
-      border: 1px solid rgba(255, 106, 26, 0.22);
       flex-shrink: 0;
     }
     #global-owners li .count-text,
     #additional-owners li .count-text,
     .collection ul li .count-text {
-      opacity: 0.7;
-      font-size: 0.7rem;
-      letter-spacing: 0.04em;
-      margin-left: 0;
+      display: none;
     }
 
     /* ── Cartes de collection ── */
