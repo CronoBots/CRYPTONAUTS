@@ -2659,17 +2659,34 @@ body::after {
     .cv-tab.is-active { color: #fff; }
     .cv-tab.is-active::after { transform: scaleX(1); }
     .cv-pane[hidden] { display: none; }
-    /* Liste des utilitaires : coche verte dessinée en CSS (pas d'emoji). */
-    .cv-util-list { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 15px; max-width: 760px; }
-    .cv-util-list li { position: relative; padding-left: 34px; color: #ece4d4; line-height: 1.5; font-size: 0.98rem; }
+    /* Liste des utilitaires : une puce « • » avant chaque ligne (pas d'emoji). */
+    .cv-util-list { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 13px; max-width: 760px; }
+    .cv-util-list li { position: relative; padding-left: 22px; color: #ece4d4; line-height: 1.5; font-size: 0.98rem; }
     .cv-util-list li::before {
-      content: ''; position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%;
-      background: rgba(34, 197, 94, 0.16); border: 1px solid rgba(34, 197, 94, 0.6);
+      content: '•'; position: absolute; left: 4px; top: 0; color: var(--primary-color); font-size: 1.1em; line-height: 1.45;
     }
-    .cv-util-list li::after {
-      content: ''; position: absolute; left: 7px; top: 4px; width: 5px; height: 9px;
-      border: solid #22c55e; border-width: 0 2px 2px 0; transform: rotate(45deg);
+    /* Classement des détenteurs DANS une carte de collection (onglet Leaderboard). */
+    .cv-lb-search {
+      width: 100%; max-width: 360px; margin: 0 0 16px; padding: 11px 16px; border-radius: 999px;
+      border: 1px solid var(--hairline); background: rgba(255, 255, 255, 0.04); color: #fff;
+      font-family: var(--font-body); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
     }
+    .cv-lb-search::placeholder { color: var(--muted); }
+    .cv-lb-search:focus { outline: none; border-color: rgba(255, 106, 26, 0.5); }
+    .cv-lb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+    .cv-lb-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
+    .cv-lb-list .left-container { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .cv-lb-list .rank { font-family: var(--font-display); color: var(--muted); min-width: 26px; text-align: center; flex: none; }
+    .cv-lb-list li.rank-1 .rank { color: #ffd700; }
+    .cv-lb-list li.rank-2 .rank { color: #c0c0c0; }
+    .cv-lb-list li.rank-3 .rank { color: #cd7f32; }
+    .cv-lb-list a { color: #ece4d4; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cv-lb-list a:hover { color: #fff; }
+    .cv-lb-list .twitter-link { color: var(--muted); font-size: 0.82em; margin-left: 8px; flex: none; }
+    .cv-lb-list .count-container { display: flex; align-items: baseline; gap: 6px; flex: none; }
+    .cv-lb-list .count-number { font-family: var(--font-display); color: var(--primary-color); }
+    .cv-lb-list .count-text { font-size: 0.58rem; letter-spacing: 0.08em; color: var(--muted); }
+    .cv-lb-more { margin-top: 16px; }
     #cvNfts { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 0; }
     #cvNfts .nft { font-size: 0.66rem; }
     .cv-more {
@@ -3239,11 +3256,17 @@ body::after {
       <div class="cv-block">
         <div class="cv-tabs">
           <button class="cv-tab is-active" type="button" data-cvtab="items">Items <span class="cv-count cv-items-count"></span></button>
+          <button class="cv-tab" type="button" data-cvtab="leaderboard">Leaderboard <span class="cv-count cv-lb-count"></span></button>
           <button class="cv-tab cv-tab-util" type="button" data-cvtab="utilities" hidden>Utilities</button>
         </div>
         <div class="cv-pane" data-cvpane="items">
           <div class="cm-nfts" id="cvNfts"></div>
           <button class="cv-more" id="cvMore" type="button" hidden>Load more items</button>
+        </div>
+        <div class="cv-pane" data-cvpane="leaderboard" hidden>
+          <input type="text" class="cv-lb-search" placeholder="SEARCH HOLDER" aria-label="Search holders">
+          <ul class="cv-lb-list"></ul>
+          <span class="show-more-btn cv-lb-more" role="button" tabindex="0" aria-label="Toggle additional holders">SHOW MORE</span>
         </div>
         <div class="cv-pane" data-cvpane="utilities" hidden>
           <ul class="cv-util-list"></ul>
@@ -3874,10 +3897,25 @@ body::after {
       }
     }
 
-    // Bascule l'onglet actif (Items / Utilities) de la vue détail.
+    // Bascule l'onglet actif (Items / Leaderboard / Utilities) de la vue détail.
     function setCvTab(view, name) {
       view.querySelectorAll('.cv-tab').forEach(t => t.classList.toggle('is-active', t.dataset.cvtab === name));
       view.querySelectorAll('.cv-pane').forEach(p => { p.hidden = p.dataset.cvpane !== name; });
+    }
+
+    // Classement par collection (onglet Leaderboard de la carte) : repli/déploiement (SHOW MORE).
+    let cvLbExpanded = false;
+    function cvApplyLbCollapse() {
+      const list = document.querySelector('.cv-lb-list');
+      const more = document.querySelector('.cv-lb-more');
+      if (!list) return;
+      const extras = list.querySelectorAll('li.lb-extra');
+      extras.forEach(li => { li.style.display = cvLbExpanded ? '' : 'none'; });
+      if (more) {
+        more.style.display = extras.length ? '' : 'none';
+        more.textContent = cvLbExpanded ? 'SHOW LESS' : 'SHOW MORE';
+        more.setAttribute('aria-expanded', String(cvLbExpanded));
+      }
     }
 
     function showCollectionView(idx) {
@@ -3928,6 +3966,18 @@ body::after {
       setStat('sales', isExternal ? '—' : (st.sales || 0).toLocaleString('fr-FR'));
       view.querySelector('.cv-items-count').textContent = st.supply ? '(' + st.supply.toLocaleString('fr-FR') + ')' : '';
       // (Liste des détenteurs déplacée dans l'onglet Leaderboard.)
+
+      // Onglet « Leaderboard » : classement des détenteurs de CETTE collection (déplacé ici
+      // depuis l'onglet Leaderboard global, qui ne garde que le classement général).
+      const lbList = view.querySelector('.cv-lb-list');
+      const lbCount = view.querySelector('.cv-lb-count');
+      const owners = collection.owners || [];
+      if (lbList) lbList.innerHTML = lbRowsHTML(owners);
+      if (lbCount) lbCount.textContent = owners.length ? '(' + owners.length.toLocaleString('fr-FR') + ')' : '';
+      const lbSearch = view.querySelector('.cv-lb-search');
+      if (lbSearch) lbSearch.value = '';
+      cvLbExpanded = false;
+      cvApplyLbCollapse();
 
       // Onglet « Utilities » : présent uniquement pour les collections qui en définissent (ex. V3 Crovia).
       const utils = COLLECTION_UTILITIES[title];
@@ -4038,8 +4088,9 @@ body::after {
 
     function renderLeaderboard(globalOwners, collections) {
       try {
-        LB_BOARDS = [{ label: 'Global', sub: 'The top holders across every Cryptonauts collection, combined.', owners: globalOwners || [] }]
-          .concat((collections || []).map(c => ({ label: c.title, sub: 'Top holders of ' + c.title + '.', owners: c.owners || [] })));
+        // Onglet Leaderboard : uniquement le classement GÉNÉRAL. Les classements par
+        // collection vivent désormais dans chaque carte de collection (onglet « Leaderboard »).
+        LB_BOARDS = [{ label: 'Global', sub: 'The top holders across every Cryptonauts collection, combined.', owners: globalOwners || [] }];
 
         const section = document.createElement('section');
         section.className = 'leaderboard-section section reveal hidden-view';
@@ -4052,9 +4103,6 @@ body::after {
             <p class="section-sub" id="lbSub">${escHtml(LB_BOARDS[0].sub)}</p>
           </div>
           <div class="summary">
-            <div class="lb-pills" id="lbPills" role="tablist" aria-label="Choisir un classement">
-              ${LB_BOARDS.map((b, i) => `<button class="lb-pill${i === 0 ? ' is-active' : ''}" data-lb="${i}" role="tab" aria-selected="${i === 0 ? 'true' : 'false'}" type="button">${escHtml(b.label)}<span class="lb-pill-n">${b.owners.length}</span></button>`).join('')}
-            </div>
             <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
             <ul id="global-owners"></ul>
             <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
@@ -4163,7 +4211,7 @@ body::after {
         if (searchInput) searchInput.value = '';
         expanded = false;
         applyCollapse();
-        pills.querySelectorAll('.lb-pill').forEach(p => {
+        if (pills) pills.querySelectorAll('.lb-pill').forEach(p => {
           const on = p.dataset.lb === String(idx);
           p.classList.toggle('is-active', on);
           p.setAttribute('aria-selected', on ? 'true' : 'false');
@@ -4334,18 +4382,36 @@ body::after {
             // Clic DANS une carte ouverte, en dehors d'un élément interactif (item NFT, lien,
             // bouton, onglet) → on replie la carte.
             const openItem = e.target.closest('.col-item.is-open');
-            if (openItem && !e.target.closest('a, button, input, .nft, .cv-tab')) {
+            if (openItem && !e.target.closest('a, button, input, .nft, .cv-tab, .show-more-btn')) {
               closeCollectionDetail();
               history.replaceState(null, '', location.pathname + location.search);
             }
           });
         }
-        // Onglets Items / Utilities de la vue détail (élément unique réutilisé).
+        // Onglets Items / Leaderboard / Utilities de la vue détail (élément unique réutilisé).
         const cvView = document.getElementById('collectionView');
         if (cvView) cvView.addEventListener('click', (e) => {
           const tab = e.target.closest('.cv-tab');
           if (tab) setCvTab(cvView, tab.dataset.cvtab);
         });
+        // Contrôles du classement par collection (SHOW MORE + recherche).
+        const cvLbMore = document.querySelector('.cv-lb-more');
+        if (cvLbMore) {
+          const toggle = () => { cvLbExpanded = !cvLbExpanded; cvApplyLbCollapse(); };
+          cvLbMore.addEventListener('click', toggle);
+          cvLbMore.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+        }
+        const cvLbSearch = document.querySelector('.cv-lb-search');
+        if (cvLbSearch) cvLbSearch.addEventListener('input', debounce(() => {
+          const list = document.querySelector('.cv-lb-list');
+          if (!list) return;
+          const f = cvLbSearch.value.toLowerCase().trim();
+          if (!f) { list.querySelectorAll('li').forEach(li => { li.style.display = ''; }); cvLbExpanded = false; cvApplyLbCollapse(); return; }
+          cvLbExpanded = true;
+          list.querySelectorAll('li').forEach(li => { li.style.display = li.textContent.toLowerCase().includes(f) ? '' : 'none'; });
+          const more = document.querySelector('.cv-lb-more');
+          if (more) more.style.display = 'none';
+        }, 200));
         const cvMoreBtn = document.getElementById('cvMore');
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
         const sbRefreshBtn = document.getElementById('sbRefresh');
