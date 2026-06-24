@@ -359,10 +359,8 @@ body::after {
     #global-owners li.rank-3,
     #additional-owners li.rank-3,
     .collection ul li.collection-rank-3 {
-      font-size: 1.8rem;
       opacity: 1 !important;
       color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     #global-owners li.rank-1 a:not(.twitter-link),
@@ -378,52 +376,33 @@ body::after {
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
+    /* Top-3 : tint subtil (au lieu d'une bande pleine saturée), dégradé latéral + filet de rang. */
     #global-owners li.rank-1::before,
     #additional-owners li.rank-1::before,
     .collection ul li.collection-rank-1::before {
       content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 215, 0, 0.7);
-      opacity: 0.7;
-      border-radius: 8px;
-      z-index: -1;
-      transform: translateZ(0);
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(255, 215, 0, 0.16), rgba(255, 215, 0, 0.02) 62%);
+      box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.85);
+      border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
-
     #global-owners li.rank-2::before,
     #additional-owners li.rank-2::before,
     .collection ul li.collection-rank-2::before {
       content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(192, 192, 192, 0.7);
-      opacity: 0.7;
-      border-radius: 8px;
-      z-index: -1;
-      transform: translateZ(0);
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(214, 214, 222, 0.14), rgba(214, 214, 222, 0.02) 62%);
+      box-shadow: inset 3px 0 0 rgba(214, 214, 222, 0.8);
+      border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
-
     #global-owners li.rank-3::before,
     #additional-owners li.rank-3::before,
     .collection ul li.collection-rank-3::before {
       content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(205, 127, 50, 0.7);
-      opacity: 0.7;
-      border-radius: 8px;
-      z-index: -1;
-      transform: translateZ(0);
+      position: absolute; inset: 0;
+      background: linear-gradient(90deg, rgba(205, 127, 50, 0.16), rgba(205, 127, 50, 0.02) 62%);
+      box-shadow: inset 3px 0 0 rgba(205, 127, 50, 0.85);
+      border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
 
     .twitter-link {
@@ -449,60 +428,22 @@ body::after {
     #global-owners li .rank,
     #additional-owners li .rank,
     .collection ul li .rank {
-      font-size: 1.6rem;
+      font-size: 1.05rem; color: var(--muted); min-width: 1.7em; text-align: center; flex: none;
     }
-
-    #global-owners li.rank-1 .rank,
-    #additional-owners li.rank-1 .rank,
-    #global-owners li.rank-2 .rank,
-    #additional-owners li.rank-2 .rank,
-    #global-owners li.rank-3 .rank,
-    #additional-owners li.rank-3 .rank,
-    .collection ul li.collection-rank-1 .rank,
-    .collection ul li.collection-rank-2 .rank,
-    .collection ul li.collection-rank-3 .rank {
-      font-size: 1.8rem;
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    }
+    /* Médailles : numéro de rang coloré (or / argent / bronze) — taille uniforme. */
+    #global-owners li.rank-1 .rank, #additional-owners li.rank-1 .rank { color: #ffd700; }
+    #global-owners li.rank-2 .rank, #additional-owners li.rank-2 .rank { color: #d6d6de; }
+    #global-owners li.rank-3 .rank, #additional-owners li.rank-3 .rank { color: #cd7f32; }
 
     #global-owners li .count-number,
     #additional-owners li .count-number,
     .collection ul li .count-number {
-      font-size: 1.8rem;
+      font-size: 1.4rem; color: var(--primary-color);
     }
-
-    #global-owners li.rank-1 .count-number,
-    #additional-owners li.rank-1 .count-number,
-    .collection ul li.collection-rank-1 .count-number,
-    #global-owners li.rank-2 .count-number,
-    #additional-owners li.rank-2 .count-number,
-    .collection ul li.collection-rank-2 .count-number,
-    #global-owners li.rank-3 .count-number,
-    #additional-owners li.rank-3 .count-number,
-    .collection ul li.collection-rank-3 .count-number {
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-    }
-
     #global-owners li .count-text,
     #additional-owners li .count-text,
     .collection ul li .count-text {
-      font-size: 1.1rem;
-      margin-left: 0.5rem;
-    }
-
-    #global-owners li.rank-1 .count-text,
-    #additional-owners li.rank-1 .count-text,
-    .collection ul li.collection-rank-1 .count-text,
-    #global-owners li.rank-2 .count-text,
-    #additional-owners li.rank-2 .count-text,
-    .collection ul li.collection-rank-2 .count-text,
-    #global-owners li.rank-3 .count-text,
-    #additional-owners li.rank-3 .count-text,
-    .collection ul li.collection-rank-3 .count-text {
-      color: #fff;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      font-size: 0.62rem; margin-left: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
     }
 
     #global-owners li .left-container,
@@ -510,10 +451,26 @@ body::after {
     .collection ul li .left-container {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 11px;
       position: relative;
       z-index: 2;
+      min-width: 0;
     }
+    /* Avatar monogramme (initiale + dégradé déterministe via --h). */
+    .lb-av {
+      flex: none; display: inline-flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px; border-radius: 50%;
+      font-family: var(--font-display); font-size: 0.95rem; color: #fff; line-height: 1;
+      background: linear-gradient(135deg, hsl(var(--h, 30), 58%, 47%), hsl(var(--h, 30), 60%, 28%));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+    }
+    /* Anneau médaille autour de l'avatar (top-3, leaderboard global). */
+    #global-owners li.rank-1 .lb-av { box-shadow: 0 0 0 2px #ffd700, inset 0 0 0 1px rgba(255,255,255,0.1); }
+    #global-owners li.rank-2 .lb-av { box-shadow: 0 0 0 2px #d6d6de, inset 0 0 0 1px rgba(255,255,255,0.1); }
+    #global-owners li.rank-3 .lb-av { box-shadow: 0 0 0 2px #cd7f32, inset 0 0 0 1px rgba(255,255,255,0.1); }
+    /* Le nom prend l'espace dispo et tronque proprement. */
+    #global-owners li .left-container > a:not(.twitter-link) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
     #global-owners li .count-container,
     #additional-owners li .count-container,
@@ -2686,10 +2643,15 @@ body::after {
     .cv-lb-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
     .cv-lb-list .left-container { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
     .cv-lb-list .left-container > a:not(.twitter-link) { min-width: 0; flex: 0 1 auto; }   /* le nom tronque, le compteur ne déborde pas */
-    .cv-lb-list .rank { font-family: var(--font-display); color: var(--muted); min-width: 26px; text-align: center; flex: none; }
+    .cv-lb-list .rank { font-family: var(--font-display); color: var(--muted); min-width: 22px; text-align: center; flex: none; }
     .cv-lb-list li.rank-1 .rank { color: #ffd700; }
     .cv-lb-list li.rank-2 .rank { color: #c0c0c0; }
     .cv-lb-list li.rank-3 .rank { color: #cd7f32; }
+    /* Avatar (carte) : plus compact que le global, anneau médaille sur le top-3. */
+    .cv-lb-list .lb-av { width: 30px; height: 30px; font-size: 0.78rem; }
+    .cv-lb-list li.rank-1 .lb-av { box-shadow: 0 0 0 2px #ffd700, inset 0 0 0 1px rgba(255,255,255,0.1); }
+    .cv-lb-list li.rank-2 .lb-av { box-shadow: 0 0 0 2px #c0c0c0, inset 0 0 0 1px rgba(255,255,255,0.1); }
+    .cv-lb-list li.rank-3 .lb-av { box-shadow: 0 0 0 2px #cd7f32, inset 0 0 0 1px rgba(255,255,255,0.1); }
     .cv-lb-list a { color: #ece4d4; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cv-lb-list a:hover { color: #fff; }
     .cv-lb-list .twitter-link { color: var(--muted); font-size: 0.82em; margin-left: 8px; flex: none; }
@@ -3355,7 +3317,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
-      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", launchUrl: "https://crovia.app/launch/quantum-cryptonauts-v3", status: "minting", minted: 231, mintTotal: 299, mintPriceCro: 400, items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
+      "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", launchUrl: "https://crovia.app/launch/quantum-cryptonauts-v3", status: "minting", minted: 243, mintTotal: 299, mintPriceCro: 400, items: 299, soldOut: false, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
       "Time Travel Cryptonauts II": { id: "a870c453ec57dc8e706e999b3f37a859", items: 462, soldOut: true, desc: "The Time Travel Cryptonauts are back — 453 new quantum time travelers. They journeyed into the past and shared the knowledge of astrophysics with the most primitive humans. Time has changed forever." },
@@ -4119,8 +4081,12 @@ body::after {
         prev = owner.count;
         const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
         const extra = i >= LB_VISIBLE ? ' lb-extra' : '';
+        // Avatar monogramme : initiale + dégradé déterministe (teinte dérivée du nom).
+        const nm = owner.name || '?';
+        let hh = 0; for (let k = 0; k < nm.length; k++) hh = (hh * 31 + nm.charCodeAt(k)) % 360;
+        const av = `<span class="lb-av" style="--h:${hh}">${escHtml((nm.trim().charAt(0) || '?').toUpperCase())}</span>`;
         const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link" aria-label="${escHtml(getTwitterHandle(owner.twitter))} on X" title="${escHtml(getTwitterHandle(owner.twitter))}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : '';
-        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
+        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span>${av}<a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
       }).join('');
     }
 
