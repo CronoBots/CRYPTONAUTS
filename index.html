@@ -3050,6 +3050,7 @@ body::after {
   </header>
 
   <main>
+    <section class="section reveal" id="universStats" data-view="home" aria-label="The saga in numbers"></section>
     <section class="section reveal spot-section" id="spotlight" data-view="home">
       <div class="section-head">
         <span class="eyebrow">Spotlight</span>
@@ -4388,6 +4389,17 @@ body::after {
             }
           });
         }
+        // Clic N'IMPORTE OÙ en dehors d'une carte de collection → replie la carte ouverte.
+        document.addEventListener('click', (e) => {
+          if (!document.querySelector('.col-item.is-open')) return;
+          if (e.target.closest('.col-item')) return;   // clic dans une carte → déjà géré ci-dessus
+          closeCollectionDetail();
+          history.replaceState(null, '', location.pathname + location.search);
+        });
+        // Univers : on duplique le bandeau de stats de l'onglet Collections (mêmes chiffres).
+        const sagaSrc = document.querySelector('#collections .saga-stats');
+        const universHost = document.getElementById('universStats');
+        if (sagaSrc && universHost) universHost.appendChild(sagaSrc.cloneNode(true));
         // Onglets Items / Leaderboard / Utilities de la vue détail (élément unique réutilisé).
         const cvView = document.getElementById('collectionView');
         if (cvView) cvView.addEventListener('click', (e) => {
