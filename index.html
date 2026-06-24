@@ -3695,7 +3695,12 @@ body::after {
       const node = tl.querySelector('.tl-node[data-target="' + idx + '"]');
       if (!node) return;
       node.classList.add('is-active');
-      try { node.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch (e) { }
+      // Recentre la bande HORIZONTALEMENT uniquement (scrollLeft) — surtout pas scrollIntoView,
+      // qui ferait remonter la PAGE vers la ligne du temps quand on ouvre une collection.
+      try {
+        const target = node.offsetLeft - (tl.clientWidth - node.offsetWidth) / 2;
+        tl.scrollTo({ left: Math.max(0, target), behavior: 'smooth' });
+      } catch (e) { }
     }
     // ── Sales Bot : flux des dernières ventes (events « transferred » avec prix) ──
     // Une vente = un transfert de propriété avec un montant > 0 (vendeur → acheteur).
