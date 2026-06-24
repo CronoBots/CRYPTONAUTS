@@ -451,24 +451,11 @@ body::after {
     .collection ul li .left-container {
       display: flex;
       align-items: center;
-      gap: 11px;
+      gap: 8px;
       position: relative;
       z-index: 2;
       min-width: 0;
     }
-    /* Avatar monogramme (initiale + dégradé déterministe via --h). */
-    .lb-av {
-      flex: none; display: inline-flex; align-items: center; justify-content: center;
-      width: 38px; height: 38px; border-radius: 50%;
-      font-family: var(--font-display); font-size: 0.95rem; color: #fff; line-height: 1;
-      background: linear-gradient(135deg, hsl(var(--h, 30), 58%, 47%), hsl(var(--h, 30), 60%, 28%));
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
-    }
-    /* Anneau médaille autour de l'avatar (top-3, leaderboard global). */
-    #global-owners li.rank-1 .lb-av { box-shadow: 0 0 0 2px #ffd700, inset 0 0 0 1px rgba(255,255,255,0.1); }
-    #global-owners li.rank-2 .lb-av { box-shadow: 0 0 0 2px #d6d6de, inset 0 0 0 1px rgba(255,255,255,0.1); }
-    #global-owners li.rank-3 .lb-av { box-shadow: 0 0 0 2px #cd7f32, inset 0 0 0 1px rgba(255,255,255,0.1); }
     /* Le nom prend l'espace dispo et tronque proprement. */
     #global-owners li .left-container > a:not(.twitter-link) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -2647,11 +2634,6 @@ body::after {
     .cv-lb-list li.rank-1 .rank { color: #ffd700; }
     .cv-lb-list li.rank-2 .rank { color: #c0c0c0; }
     .cv-lb-list li.rank-3 .rank { color: #cd7f32; }
-    /* Avatar (carte) : plus compact que le global, anneau médaille sur le top-3. */
-    .cv-lb-list .lb-av { width: 30px; height: 30px; font-size: 0.78rem; }
-    .cv-lb-list li.rank-1 .lb-av { box-shadow: 0 0 0 2px #ffd700, inset 0 0 0 1px rgba(255,255,255,0.1); }
-    .cv-lb-list li.rank-2 .lb-av { box-shadow: 0 0 0 2px #c0c0c0, inset 0 0 0 1px rgba(255,255,255,0.1); }
-    .cv-lb-list li.rank-3 .lb-av { box-shadow: 0 0 0 2px #cd7f32, inset 0 0 0 1px rgba(255,255,255,0.1); }
     .cv-lb-list a { color: #ece4d4; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cv-lb-list a:hover { color: #fff; }
     .cv-lb-list .twitter-link { color: var(--muted); font-size: 0.82em; margin-left: 8px; flex: none; }
@@ -4081,12 +4063,8 @@ body::after {
         prev = owner.count;
         const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
         const extra = i >= LB_VISIBLE ? ' lb-extra' : '';
-        // Avatar monogramme : initiale + dégradé déterministe (teinte dérivée du nom).
-        const nm = owner.name || '?';
-        let hh = 0; for (let k = 0; k < nm.length; k++) hh = (hh * 31 + nm.charCodeAt(k)) % 360;
-        const av = `<span class="lb-av" style="--h:${hh}">${escHtml((nm.trim().charAt(0) || '?').toUpperCase())}</span>`;
         const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link" aria-label="${escHtml(getTwitterHandle(owner.twitter))} on X" title="${escHtml(getTwitterHandle(owner.twitter))}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : '';
-        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span>${av}<a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
+        return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
       }).join('');
     }
 
