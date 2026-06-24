@@ -430,13 +430,16 @@ body::after {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      margin-left: 0.55rem;
-      color: rgba(236, 228, 212, 0.7) !important;
+      align-self: center;
+      margin-left: 0.5rem;
+      color: rgba(236, 228, 212, 0.85) !important;
       opacity: 1 !important;
       text-decoration: none;
       transition: color 0.18s ease, transform 0.18s ease;
     }
-    .twitter-link svg { display: block; width: 14px; height: 14px; }
+    .twitter-link svg { display: block; width: 17px; height: 17px; }
+    /* Leaderboard global : grande police → logo X plus grand pour rester proportionné au pseudo. */
+    #global-owners li .twitter-link svg, #additional-owners li .twitter-link svg { width: 22px; height: 22px; }
     .twitter-link:hover {
       color: #fff !important;
       transform: translateY(-1px);
