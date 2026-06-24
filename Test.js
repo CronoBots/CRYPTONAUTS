@@ -387,6 +387,12 @@ const V3_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f
 const CRONOS_RPCS = ['https://evm.cronos.org', 'https://cronos-evm-rpc.publicnode.com', 'https://1rpc.io/cro'];
 const RPC_LOG_STEP = 1999; // < limite de 2000 blocs/getLogs des RPC publics
 
+// API Explorer Cronos (Blockscout, compat Etherscan) — clé fournie via secret GitHub
+// CRONOS_EXPLORER_API_KEY. Source fiable et indexée des transferts NFT (mints V3) pour le
+// Sales Bot, en remplacement du scan RPC (plafonné à 2000 blocs). Clé : https://explorer.cronos.com/register
+const CRONOS_EXPLORER_API = 'https://explorer-api.cronos.org/mainnet/api/v1';
+const CRONOS_EXPLORER_KEY = process.env.CRONOS_EXPLORER_API_KEY || '';
+
 // Adresse (minuscule) → pseudo affiché. Les holders absents de cette table
 // s'affichent en adresse tronquée. À compléter quand de nouveaux pseudos sont connus.
 const V3_NAMES = {
@@ -500,6 +506,40 @@ async function fetchV3Holders() {
     return { ranking, mints };
   } catch (e) {
     console.warn(`⚠ Lecture on-chain V3 échouée (${e.message}) → repli sur le snapshot intégré.`);
+    return null;
+  }
+}
+
+// Mints V3 récents via l'API Explorer Cronos (clé). Renvoie [{t,b,cro,ts}] trié du + récent,
+// ou null si pas de clé / échec (→ repli sur les mints lus on-chain par fetchV3Holders).
+async function fetchV3MintsExplorer(limit = 40) {
+  if (!CRONOS_EXPLORER_KEY) { console.log('ℹ Pas de CRONOS_EXPLORER_API_KEY → mints V3 via RPC on-chain.'); return null; }
+  const ZERO = '0x0000000000000000000000000000000000000000';
+  try {
+    const url = `${CRONOS_EXPLORER_API}/account/tokennfttx`;
+    const res = await axios.get(url, {
+      params: { contractaddress: V3_CONTRACT, page: 1, offset: 200, sort: 'desc', apikey: CRONOS_EXPLORER_KEY },
+      timeout: 20000, headers: { 'accept': 'application/json' }
+    });
+    // Réponses possibles : Etherscan-compat {status,message,result:[…]} ou {items:[…]}/{data:[…]}.
+    const d = res.data || {};
+    const rows = Array.isArray(d.result) ? d.result : (Array.isArray(d.items) ? d.items : (Array.isArray(d.data) ? d.data : null));
+    if (!rows) { console.warn('⚠ Explorer API V3 : forme inattendue →', JSON.stringify(d).slice(0, 200)); return null; }
+    const mints = rows
+      .filter(r => String(r.from || r.fromAddress || '').toLowerCase() === ZERO)
+      .map(r => ({
+        t: parseInt(r.tokenID != null ? r.tokenID : (r.tokenId != null ? r.tokenId : r.token_id), 10),
+        b: String(r.to || r.toAddress || '').toLowerCase(),
+        cro: 300,
+        ts: parseInt(r.timeStamp != null ? r.timeStamp : (r.timestamp != null ? r.timestamp : r.time_stamp), 10)
+      }))
+      .filter(m => Number.isFinite(m.t) && m.ts > 0)
+      .sort((a, b) => b.ts - a.ts)
+      .slice(0, limit);
+    console.log(`✅ Explorer API V3 : ${mints.length} mints récents (sur ${rows.length} transferts).`);
+    return mints.length ? mints : null;
+  } catch (e) {
+    console.warn(`⚠ Explorer API V3 échouée (${e.message}) → repli sur les mints RPC on-chain.`);
     return null;
   }
 }
@@ -877,7 +917,9 @@ async function main() {
     // Collection externe V3 (Crovia/Cronos) : détenteurs ET mints lus on-chain (repli sur snapshot si échec).
     const v3 = await fetchV3Holders();
     const v3Ranking = (v3 && v3.ranking) || V3_FALLBACK;
-    const v3Mints = (v3 && v3.mints) || [];
+    // Mints (Sales Bot) : API Explorer en priorité (indexée, fiable), repli sur les mints RPC.
+    const explorerMints = await fetchV3MintsExplorer();
+    const v3Mints = explorerMints || (v3 && v3.mints) || [];
     const v3Collection = buildV3Collection(v3Ranking);
 
     writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Mints);

@@ -53,6 +53,10 @@ jobs:
 
       - name: Build data.json
         run: node Test.js
+        env:
+          # Clé API Explorer Cronos (mints V3 fiables pour le Sales Bot). Optionnelle :
+          # sans elle, Test.js retombe sur la lecture on-chain via RPC.
+          CRONOS_EXPLORER_API_KEY: ${{ secrets.CRONOS_EXPLORER_API_KEY }}
 
       - name: Commit data.json si le classement a changé
         run: node .github/commit-data.js
