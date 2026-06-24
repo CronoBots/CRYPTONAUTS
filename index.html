@@ -376,14 +376,14 @@ body::after {
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
-    /* Top-3 : tint subtil (au lieu d'une bande pleine saturée), dégradé latéral + filet de rang. */
+    /* Top-3 : tint subtil dégradé (au lieu d'une bande pleine saturée). Pas de filet : la bordure
+       de la ligne + le badge de rang suffisent (évite l'effet double bordure à gauche). */
     #global-owners li.rank-1::before,
     #additional-owners li.rank-1::before,
     .collection ul li.collection-rank-1::before {
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(255, 215, 0, 0.16), rgba(255, 215, 0, 0.02) 62%);
-      box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.85);
       border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
     #global-owners li.rank-2::before,
@@ -392,7 +392,6 @@ body::after {
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(214, 214, 222, 0.14), rgba(214, 214, 222, 0.02) 62%);
-      box-shadow: inset 3px 0 0 rgba(214, 214, 222, 0.8);
       border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
     #global-owners li.rank-3::before,
@@ -401,7 +400,6 @@ body::after {
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(205, 127, 50, 0.16), rgba(205, 127, 50, 0.02) 62%);
-      box-shadow: inset 3px 0 0 rgba(205, 127, 50, 0.85);
       border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
 
