@@ -830,6 +830,21 @@ body::after {
         width: 100%;
         max-width: 100%;
       }
+      /* PC : icônes sociales toujours visibles, en bas à gauche de l'écran. */
+      .footer-social {
+        position: fixed;
+        left: 22px;
+        bottom: 20px;
+        z-index: 120;
+        gap: 14px;
+        padding: 10px 15px;
+        border-radius: 999px;
+        background: rgba(3, 4, 10, 0.6);
+        border: 1px solid var(--hairline);
+        -webkit-backdrop-filter: blur(8px);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+      }
     }
     /* ── Bandeau de statistiques ── */
     .stats-band {
@@ -2149,7 +2164,7 @@ body::after {
     .cm-stats { flex-wrap: wrap; }
     .saga-stats {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);   /* PC : 4 colonnes égales, pleine largeur des cadres */
+      grid-template-columns: repeat(5, 1fr);   /* PC : 5 colonnes égales, pleine largeur des cadres */
       gap: 16px;
       max-width: 1280px;
       margin: 0 auto 30px;
@@ -2180,6 +2195,7 @@ body::after {
     @media screen and (max-width: 600px) {
       .saga-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
       .saga-stat { min-width: 0; padding: 14px 8px; }
+      .saga-stat:first-child { grid-column: 1 / -1; }   /* « Collections » en tête, pleine largeur */
       .saga-stat .v { font-size: 1.4rem; }
       .tab-bar { gap: 6px; }
       .tab-btn { padding: 9px 13px; font-size: 0.72rem; letter-spacing: 0.04em; }
@@ -2778,6 +2794,13 @@ body::after {
     .tl-node:hover .tl-date { color: var(--text-dark); }
     .tl-node.is-active .tl-thumb { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(255,106,26,0.18); }
     .tl-node.is-active .tl-date  { color: var(--primary-color); }
+    /* Wrapper de la vignette (porte la pastille live en absolu). */
+    .tl-thumb-wrap { position: relative; display: inline-flex; line-height: 0; }
+    /* Repère « minting » (Crovia) sur la ligne du temps : contour vert clignotant + pastille live. */
+    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22); animation: tlLivePulse 1.6s ease-in-out infinite; }
+    .tl-node.tl-minting .tl-date { color: #22c55e; }
+    .tl-live { position: absolute; top: -3px; right: -3px; z-index: 3; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #03040a; box-shadow: 0 0 8px rgba(34, 197, 94, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
+    @keyframes tlLivePulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22); } 50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.36); } }
     @media (prefers-reduced-motion: reduce) { .tl-thumb { transition: none; } }
     @media (max-width: 600px) {
       .col-timeline { margin-bottom: 22px; }
@@ -2803,11 +2826,13 @@ body::after {
     .col-grad { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.78) 0%, rgba(8, 6, 10, 0.22) 38%, transparent 70%); }
     /* Badge de statut en haut À DROITE de la bannière (sold out / drop en cours). */
     .col-badge { position: absolute; z-index: 4; top: 10px; right: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; line-height: 1; letter-spacing: 0.12em; text-indent: 0.12em; text-transform: uppercase; color: #fff; background: rgba(3, 4, 10, 0.62); border: 1px solid rgba(255, 255, 255, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-    .col-badge.is-live { background: rgba(255, 106, 26, 0.92); border-color: rgba(255, 106, 26, 0.95); box-shadow: 0 4px 16px rgba(255, 106, 26, 0.4); }
+    /* Badge « minting » : vert, clignotant (style live). */
+    .col-badge.is-live { background: rgba(34, 197, 94, 0.92); border-color: rgba(34, 197, 94, 0.95); animation: liveBadgePulse 1.6s ease-in-out infinite; }
     /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
     .col-badge.col-date-badge { left: 10px; right: auto; }
     .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
     @keyframes livePulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    @keyframes liveBadgePulse { 0%, 100% { box-shadow: 0 4px 16px rgba(34, 197, 94, 0.45); } 50% { box-shadow: 0 4px 24px rgba(34, 197, 94, 0.85); } }
     /* Avancement du drop (collection en cours de mint sur Crovia). */
     .col-mint { margin-top: 16px; }
     .col-mint-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 7px; }
@@ -2986,9 +3011,10 @@ body::after {
       <div class="section-head">
         <span class="eyebrow">The collections</span>
         <h2 class="section-title">Twelve worlds, one crew</h2>
-        <p class="section-sub">Twelve chapters of the Cryptonauts saga — eleven sold out on crypto.com, the twelfth minting now on Crovia. Tap any collection to explore its items and holders.</p>
+        <p class="section-sub">Twelve chapters of the Cryptonauts saga.<br>Eleven sold out on crypto.com, the twelfth minting now on Crovia.</p>
       </div>
       <div class="saga-stats">
+        <div class="saga-stat"><span class="v">12</span><span class="l">Collections</span></div>
         <div class="saga-stat"><span class="v">$194K</span><span class="l">Traded volume</span></div>
         <div class="saga-stat"><span class="v">3,914</span><span class="l">Secondary sales</span></div>
         <div class="saga-stat"><span class="v">2,002</span><span class="l">Items minted</span></div>
@@ -3519,16 +3545,20 @@ body::after {
         .sort((a, b) => a.rank - b.rank);
       entries.forEach(e => {
         const rel = COLLECTION_RELEASE[e.title] || '';
+        const minting = (COLLECTION_META[e.title] || {}).status === 'minting';
         const node = document.createElement('button');
         node.type = 'button';
-        node.className = 'tl-node';
+        node.className = 'tl-node' + (minting ? ' tl-minting' : '');
         node.dataset.target = e.idx;
         node.setAttribute('role', 'listitem');
-        node.setAttribute('aria-label', 'Go to ' + e.title + (rel ? ' (' + rel + ')' : ''));
-        node.title = e.title + (rel ? ' · ' + rel : '');
+        node.setAttribute('aria-label', 'Go to ' + e.title + (rel ? ' (' + rel + ')' : '') + (minting ? ' — minting now' : ''));
+        node.title = e.title + (rel ? ' · ' + rel : '') + (minting ? ' · Minting now' : '');
         node.innerHTML =
-          '<img class="tl-thumb" src="' + e.image + '" alt="' + escHtml(e.title) + '" loading="lazy" decoding="async">' +
-          '<span class="tl-date">' + escHtml(rel || '—') + '</span>';
+          '<span class="tl-thumb-wrap">' +
+            '<img class="tl-thumb" src="' + e.image + '" alt="' + escHtml(e.title) + '" loading="lazy" decoding="async">' +
+            (minting ? '<span class="tl-live"></span>' : '') +
+          '</span>' +
+          '<span class="tl-date">' + (minting ? 'Minting' : escHtml(rel || '—')) + '</span>';
         tl.appendChild(node);
       });
       // Délégation : clic → scroll vers la carte (+ surbrillance du repère).
