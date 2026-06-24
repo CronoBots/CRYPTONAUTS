@@ -427,16 +427,20 @@ body::after {
     }
 
     .twitter-link {
-      font-size: 1.1rem;
-      margin-left: 0.5rem;
-      color: var(--primary-color) !important;
-      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 0.55rem;
+      color: rgba(236, 228, 212, 0.7) !important;
       opacity: 1 !important;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+      text-decoration: none;
+      transition: color 0.18s ease, transform 0.18s ease;
     }
-
+    .twitter-link svg { display: block; width: 14px; height: 14px; }
     .twitter-link:hover {
-      text-decoration: underline;
+      color: #fff !important;
+      transform: translateY(-1px);
+      text-decoration: none;
     }
 
     #global-owners li .rank,
@@ -2693,7 +2697,6 @@ body::after {
     @media (max-width: 600px) {
       .cv-lb-list li { padding: 10px 12px; gap: 8px; }
       .cv-lb-list .left-container { gap: 9px; }
-      .cv-lb-list .twitter-link { display: none; }   /* on masque le @handle sur mobile pour aérer */
       .cv-lb-list .rank { min-width: 20px; }
       .cv-lb-list .count-text { font-size: 0.5rem; }
       /* Onglets Items/Leaderboard/Utilities : à 1.4rem les 3 débordent (Utilities coupé).
@@ -4113,7 +4116,7 @@ body::after {
         prev = owner.count;
         const rankClass = rank === 1 ? 'rank-1' : rank === 2 ? 'rank-2' : rank === 3 ? 'rank-3' : '';
         const extra = i >= LB_VISIBLE ? ' lb-extra' : '';
-        const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link">${getTwitterHandle(owner.twitter)}</a>` : '';
+        const tw = owner.twitter ? `<a href="${validateTwitterUrl(owner.twitter)}" target="_blank" rel="noopener noreferrer" class="twitter-link" aria-label="${escHtml(getTwitterHandle(owner.twitter))} on X" title="${escHtml(getTwitterHandle(owner.twitter))}"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>` : '';
         return `<li class="${rankClass}${extra}"><div class="left-container"><span class="rank">${rank}</span><a href="${validateUrl(owner.url)}" target="_blank" rel="noopener noreferrer">${escHtml(owner.name)}</a>${tw}</div><span class="count-container"><span class="count-number">${owner.count}</span><span class="count-text">CRYPTONAUTS</span></span></li>`;
       }).join('');
     }
