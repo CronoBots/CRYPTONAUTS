@@ -2651,6 +2651,7 @@ body::after {
       font-family: var(--font-display); font-size: 1.4rem; line-height: 1; color: var(--muted);
       display: inline-flex; align-items: baseline; gap: 8px; transition: color .2s ease;
     }
+    .cv-tab[hidden] { display: none; }   /* l'attribut hidden doit l'emporter sur display:inline-flex */
     .cv-tab::after {
       content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
       background: var(--primary-color); transform: scaleX(0); transform-origin: left; transition: transform .22s ease;
