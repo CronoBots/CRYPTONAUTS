@@ -1817,6 +1817,9 @@ body::after {
       text-transform: none;
       margin: 0;
     }
+    /* Onglet Collections : en-tête aligné sur la largeur des cadres (1280px). */
+    #collections .section-head { max-width: 1280px; }
+    #collections .section-head .section-sub { max-width: 760px; margin: 0 auto; }
 
     /* ── Révélations au défilement ── */
     .reveal {
@@ -2145,35 +2148,32 @@ body::after {
     /* Stats marché de la modale + chiffres de la saga */
     .cm-stats { flex-wrap: wrap; }
     .saga-stats {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 14px;
-      max-width: 780px;
-      margin: 0 auto 32px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);   /* PC : 4 colonnes égales, pleine largeur des cadres */
+      gap: 16px;
+      max-width: 1280px;
+      margin: 0 auto 30px;
     }
     .saga-stat {
-      flex: 1 1 auto;
-      min-width: 132px;
       text-align: center;
-      padding: 18px 14px;
-      border-radius: 14px;
-      background: rgba(20, 22, 38, 0.5);
-      border: 1px solid var(--hairline);
+      padding: 24px 18px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(20, 22, 38, 0.55), rgba(255, 106, 26, 0.05));
+      border: 1px solid rgba(255, 106, 26, 0.22);
     }
     .saga-stat .v {
       display: block;
       font-family: var(--font-display);
-      font-size: 1.85rem;
+      font-size: 2.2rem;
       line-height: 1;
       color: var(--primary-color);
       text-shadow: 0 0 18px rgba(255, 106, 26, 0.3);
     }
     .saga-stat .l {
       display: block;
-      margin-top: 8px;
-      font-size: 0.66rem;
-      letter-spacing: 0.1em;
+      margin-top: 10px;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
     }
@@ -2706,7 +2706,7 @@ body::after {
       position: relative;
       max-width: 1280px;
       margin: 0 auto 30px;
-      padding: 6px 10px 4px;
+      padding: 6px 4px 4px;
       display: flex;
       align-items: flex-start;
       gap: 0;
@@ -2722,8 +2722,8 @@ body::after {
     .col-timeline::-webkit-scrollbar-thumb { background: var(--hairline); border-radius: 3px; }
     .tl-node {
       position: relative;
-      flex: 0 0 auto;
-      min-width: 92px;
+      flex: 1 1 0;              /* PC : les nœuds grandissent pour occuper toute la largeur des cadres */
+      min-width: 92px;          /* mobile : plancher → la bande déborde et devient scrollable */
       display: flex;
       flex-direction: column;
       align-items: center;
