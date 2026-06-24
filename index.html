@@ -2644,6 +2644,32 @@ body::after {
     .cv-block { margin-bottom: 44px; }
     .cv-sec-title { font-size: 1.4rem; margin: 0 0 16px; text-transform: none; }
     .cv-count { color: var(--muted); font-size: 0.9rem; font-family: var(--font-body); }
+    /* Onglets « Items » / « Utilities » dans la vue détail. */
+    .cv-tabs { display: flex; gap: 24px; margin: 0 0 20px; border-bottom: 1px solid var(--hairline); }
+    .cv-tab {
+      position: relative; background: none; border: 0; cursor: pointer; padding: 0 0 12px;
+      font-family: var(--font-display); font-size: 1.4rem; line-height: 1; color: var(--muted);
+      display: inline-flex; align-items: baseline; gap: 8px; transition: color .2s ease;
+    }
+    .cv-tab::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px;
+      background: var(--primary-color); transform: scaleX(0); transform-origin: left; transition: transform .22s ease;
+    }
+    .cv-tab:hover { color: #fff; }
+    .cv-tab.is-active { color: #fff; }
+    .cv-tab.is-active::after { transform: scaleX(1); }
+    .cv-pane[hidden] { display: none; }
+    /* Liste des utilitaires : coche verte dessinée en CSS (pas d'emoji). */
+    .cv-util-list { list-style: none; margin: 2px 0 0; padding: 0; display: grid; gap: 15px; max-width: 760px; }
+    .cv-util-list li { position: relative; padding-left: 34px; color: #ece4d4; line-height: 1.5; font-size: 0.98rem; }
+    .cv-util-list li::before {
+      content: ''; position: absolute; left: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%;
+      background: rgba(34, 197, 94, 0.16); border: 1px solid rgba(34, 197, 94, 0.6);
+    }
+    .cv-util-list li::after {
+      content: ''; position: absolute; left: 7px; top: 4px; width: 5px; height: 9px;
+      border: solid #22c55e; border-width: 0 2px 2px 0; transform: rotate(45deg);
+    }
     #cvNfts { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 0; }
     #cvNfts .nft { font-size: 0.66rem; }
     .cv-more {
@@ -3211,9 +3237,17 @@ body::after {
         <p class="cv-desc"></p>
       </div>
       <div class="cv-block">
-        <h2 class="cv-sec-title">Items <span class="cv-count cv-items-count"></span></h2>
-        <div class="cm-nfts" id="cvNfts"></div>
-        <button class="cv-more" id="cvMore" type="button" hidden>Load more items</button>
+        <div class="cv-tabs">
+          <button class="cv-tab is-active" type="button" data-cvtab="items">Items <span class="cv-count cv-items-count"></span></button>
+          <button class="cv-tab cv-tab-util" type="button" data-cvtab="utilities" hidden>Utilities</button>
+        </div>
+        <div class="cv-pane" data-cvpane="items">
+          <div class="cm-nfts" id="cvNfts"></div>
+          <button class="cv-more" id="cvMore" type="button" hidden>Load more items</button>
+        </div>
+        <div class="cv-pane" data-cvpane="utilities" hidden>
+          <ul class="cv-util-list"></ul>
+        </div>
       </div>
       <!-- Lien vers la collection : EN BAS du cadre, centré. -->
       <div class="cv-link-wrap">
@@ -3316,6 +3350,23 @@ body::after {
       "Cryptonauts": "May 2023"
     };
 
+    // Utilitaires d'une collection (affichés sous l'onglet « Utilities » de la vue détail).
+    // Une ligne par avantage (la coche est ajoutée par le CSS, pas d'emoji dans le texte).
+    const COLLECTION_UTILITIES = {
+      "Quantum Cryptonauts V3": [
+        "299 1/1 NFTs",
+        "207 Avatars (47 World Cup national teams) / 92 Worlds",
+        "Whitelist price 300 CRO / public price 400 CRO",
+        "Exclusive NFT airdrops for multiple buys: 10 or more, 20 or more",
+        "Special prize bundle (NFTs + merch + physical art) for the World Cup winner (collector holding the winning national team avatar)",
+        "Prize bundles for the top 3 buyers (NFTs + merch + physical art)",
+        "Framed print and merch giveaway among the top 10 buyers",
+        "Whitelist and exclusive access for future drops on Crovia",
+        "Huge CRO raffle among all collectors — every NFT bought is a ticket",
+        "Big discounts on merch and physical art for every single holder"
+      ]
+    };
+
     // Collections externes (Crovia / Cronos) — assets indexés on-chain (id, nom, CID image IPFS).
     // Vignettes servies redimensionnées via le proxy weserv pour rester légères.
     const EXTERNAL_ASSETS = {"0x840d5e2df597ab3dcfed4e5fc883c8d87606748d":[{"i":1,"n":"o0x228","c":"bafybeihbke5e64uxgbmbnf2fh3vle43slvblyk4h75c3qwk3jtz7c2uifa"},{"i":2,"n":"o0x13","c":"bafybeia4gnskzhfkkjls7xddia6v2q3prwpiqq45qiou2dzwtmouiqyhem"},{"i":3,"n":"o0x95","c":"bafybeifbkvfxbxejpc3wu6psxtmjweptdjo2jd7huxcm2326jq66gsviim"},{"i":4,"n":"o0x169","c":"bafybeibvr26e5ynyzxvq4uysfcuydouyitp4onp2jhvrabg5uouatey2ge"},{"i":5,"n":"o0x103","c":"bafybeigxavpexwhajyo5ya3xsmmzseohynn3su5uz3bvdoozwzhqfgpgme"},{"i":6,"n":"o0x174","c":"bafybeiblvlctu3yh3vsxdj5jvqo2uxiaoik7omy7y6rkgagydclqsrnaw4"},{"i":7,"n":"o0x244","c":"bafkreie4475tnwzseck56s5jo75jdnk5eo7p2nmy4wb3hhkyuzea4tsua4"},{"i":8,"n":"o0x114","c":"bafybeieqwv353aeipoapvzemzgolphscsjrm6bjjjzzgby4xs5sbu32qoa"},{"i":9,"n":"o0x229","c":"bafybeiblezpvjkyscmpvog7jtmgobrn2pqv6r2gcmq6m4fjxitxrew4hf4"},{"i":10,"n":"O0x253","c":"bafybeidfmgyw6krfm4pwsa2tueglttvl43unlbkc5zavxh22gvlcrhuole"},{"i":11,"n":"o0x180","c":"bafybeih5oltbocfwhdmzrqpzegukm64coxci3hshxkjnzeizboqghtz53q"},{"i":12,"n":"o0x22","c":"bafybeifxv3m43pka4cvu6cpkzwkdjjiwpbwkpcpm4no5cnmvoh5dgrzj7i"},{"i":13,"n":"o0x122","c":"bafybeih7atwygzapzrmnaxkxszude4xqh7lv5qxxvavdg2ghbfaar2krk4"},{"i":14,"n":"O0x290","c":"bafybeiflrrlylaxnq3ejqlsn6acrc4hxrvsbfnnqpi3eonvg77qsjk6s5a"},{"i":15,"n":"o0x140","c":"bafkreibr55paorntn6fnjus5bsomrblg4jwscfpmdrjjflzpaesiqjo2qy"},{"i":16,"n":"o0x57","c":"bafybeif3r6xajv6fklleeeamcskp2sa2x7j7zqc4qd5cmz3zawb56fzl34"},{"i":17,"n":"o0x19","c":"bafybeigikqvj26hufybqpy3nydukt4q3phebl2ge4a3oyskbk27qvzmfim"},{"i":18,"n":"o0x242","c":"bafybeic2jxh3uucfb3ajdv4cddo2lpdnmqvxarheymsjnokjs5mcko7wdi"},{"i":19,"n":"o0x240","c":"bafybeibyoqzwmulq7v2p3dhbaxfy4euqukmkvu2la26rpuveqbnipbqomq"},{"i":20,"n":"o0x198","c":"bafybeidn5caop5hkgrnpkxq6iatbu5y27ghnf7vsneplikobwjsq56tdve"},{"i":21,"n":"o0x05","c":"bafybeiav2th6iyzyvnsurhq3ttdirw5oiqs4kmptje4cqvxq47nljjkvzi"},{"i":22,"n":"o0x201","c":"bafybeidx6dbxzerhvsdmp77mbhcvk7q4wke4wxtx6sdkesuopvf3nfdc3i"},{"i":23,"n":"o0x237","c":"bafybeife6enjrnjdundmtk5aukrb46fkisqcjb5nskt4z2xen72iquj2ca"},{"i":24,"n":"o0x136","c":"bafybeifzts6bkdz6col5is45wfu5ozjkyzops7fqjw7rua6p6bf2l4kj3e"},{"i":25,"n":"o0x183","c":"bafybeiefrkondvcejvir2d6yzkrxx2avnuqfexl2gqxnsstmky74bkkqge"},{"i":26,"n":"o0x52","c":"bafybeieqbhzipy5l27ls523q2ibrbvzoy3icwz73pywd4xzwnxxj7ow72u"},{"i":27,"n":"o0x55","c":"bafybeieglldr7criskx4swkqmjh2zc2swatd3znsjgorbqcgwcm6thudz4"},{"i":28,"n":"o0x130","c":"bafybeifup6emxxfeiocvjfl5byqv6r6gpjh4qw6jwc6v2rhgd6japufcni"},{"i":29,"n":"O0x287","c":"bafybeidz3ftzk3svi3m5vpmsl7bqechlnjkqprwk6heukilzq2ysjyteha"},{"i":30,"n":"o0x185","c":"bafybeicc7wpxujhsfcrble4aq2ggigrqkxltqdmjpdybtr4kqzoguuant4"},{"i":31,"n":"o0x74","c":"bafybeif7nqt7jtea43kc6tqvqn6avt77sjltrkzhasqi363acxsagwkrke"},{"i":32,"n":"o0x194","c":"bafybeidhdnyokcknn5kq63hlkt3elfoooiyetdx7av25bcmm26ayg5m6vu"},{"i":33,"n":"o0x207","c":"bafybeig2t6npeuafk4gwe6btmv6lr3ctuqlr53gvlacmtxbfzgyjxqsn34"},{"i":34,"n":"o0x42","c":"bafybeidb7mfjg422drg4hypqwyugbi3l5b3l75bhiqq5zsclkejqzcq2uq"},{"i":35,"n":"o0x238","c":"bafybeicf7atj3i5vjxuku6y2x2f4plvbfsubnbryk5gzbrjblwqthu453a"},{"i":36,"n":"o0x82","c":"bafybeihzrv6vslmulwjo5pcpiachehibcjwq2urm6x5legdlqkzovxyrey"},{"i":37,"n":"o0x156","c":"bafybeieo3t77lq4njxqqkvsrp4tmvtthxjkod5jhi2doqlkiae5f75orge"},{"i":38,"n":"o0x78","c":"bafybeiefqfcdltlietklh3qoc32f6iky7cye4uvcfp3cutyxfdm6ufipza"},{"i":39,"n":"o0x155","c":"bafybeih42xkca3c5vhim4var6kmicytdkslr73fcd5omxihrv3l6dozzd4"},{"i":40,"n":"o0x26","c":"bafybeicxoz5akeuerln6cjzlzfhz54zxeggq6maoixbt76uemyxhjvoegu"},{"i":41,"n":"o0x192","c":"bafybeiheytnwatarevqxuhjenvvrlko6sr24uk3n54bhtryf7a4ksl3wvu"},{"i":42,"n":"o0x246","c":"bafkreigfmijidtpeeodnovsmerle2h6a5hhqnunoi44run4aoyf47tmjyi"},{"i":43,"n":"o0x108","c":"bafybeifpp4znnuh7vbo2wuwz3dkdc36gkidndhraiqc5yhesl7tu7qbbxi"},{"i":44,"n":"O0x291","c":"bafybeia7sopqpazt3hi5o6i2nmarsyxkbanxukqgynu4utb7otdfsvyx7q"},{"i":45,"n":"o0x200","c":"bafybeicb7n4i4zf2qtln45x46vchftmtcozkw4b6ijpv3nay6kuxje6ymy"},{"i":46,"n":"o0x142","c":"bafkreidnjzkbcwn4cdatam3vz3k2x73pcpl5japlg7jl3nqcqejfdauika"},{"i":47,"n":"O0x250","c":"bafkreieqfajqtexqxqrt7z3qpxv7d7ohwm2lguz7i7pk5kaeqy2dcxf2x4"},{"i":48,"n":"o0x17","c":"bafybeib7tdapggbt3wf5t2z6cxrqikk2q5t7yov37xloxpxr3npo6sb6ri"},{"i":49,"n":"O0x283","c":"bafybeig6injacjy6taswfpho34vzy4jrhwywlspyfmqa3afywy4we7dk7m"},{"i":50,"n":"o0x01","c":"bafybeiglmepctpeguvnpwfrk7v53zvlnqdswa42mxcsjyw75sywggigxwe"},{"i":51,"n":"o0x97","c":"bafybeig5sgc73ql3b6anzeoa5ngvvw5agjd3slang4bvkh5yypbt5kideu"},{"i":52,"n":"o0x120","c":"bafybeiharvxyz7imvvh75jak6qiyz2nzdtiwx4a3j5tme2cexfjngnqmgq"},{"i":53,"n":"o0x91","c":"bafybeibdaizd6napeumzmqqgpntwsy2njfwak2djni7igdi2ww2munc6bi"},{"i":54,"n":"O0x285","c":"bafybeiflgbyu5byjhgfahgtsl54tflhv67cltu2wvh2wkrbghkrpnnw4a4"},{"i":55,"n":"o0x53","c":"bafybeifsmkvemoaxoxv3l4hrmqcr5ngjei2omkxuby3s3nbyeva422t2fi"},{"i":56,"n":"o0x232","c":"bafybeiflbdl22blocbfxxq6eyuo65xbz5qqwauy6jhsgw4qym75k3pbm6u"},{"i":57,"n":"o0x243","c":"bafybeibjavb7dslg2hf6ctbvyct7d6trh4vfi5t7safv72io3cbp7r7aom"},{"i":58,"n":"O0x286","c":"bafybeihlmipjim4vvvhdzrlv3lpr7zpczeyhjbfy24r77uasye5vz74pne"},{"i":59,"n":"o0x247","c":"bafybeif3wx4bvpevukzehmrbiya7huwjoqlwiess4wdyx5flcpbfhnqtv4"},{"i":60,"n":"o0x49","c":"bafybeicrvfhqsitx5uon4nrqfsvplpkwlls3gjw6tfwxb5shr2i43wzz2y"},{"i":61,"n":"o0x85","c":"bafybeid3ag2n53pyhkazjugxliro56lztuhc4auavpkxjbennmjowt6su4"},{"i":62,"n":"o0x172","c":"bafybeiazv2t3etsmg3uaovrzmb5w46azzel7khm2wm2nc3gyhpz67fr53a"},{"i":63,"n":"o0x45","c":"bafybeievsd45ef2z7pchqbmzfpv2lsyqxbo2uyfvevsdidmwerdydtgwza"},{"i":64,"n":"o0x83","c":"bafybeianfpox2gwr65elazxbt3ktgl7fsooi2ovamfqkk55bmrbubmxrru"},{"i":65,"n":"o0x230","c":"bafybeigdzt5bwcwzv266qpfjbrrytnpyr6pjbd5pujl27pajabrb4o4o3y"},{"i":66,"n":"o0x178","c":"bafybeidtqabqze4ipeilyz47v6seutzwruxcdwu2s62auj6mk2cu67ye4u"},{"i":67,"n":"o0x116","c":"bafybeieglqagxo2kn4owxwinb6hdceohzp2vwdtlyndak2jxvwk5dz2j3m"},{"i":68,"n":"o0x248","c":"bafybeidqdny32tyrzs2xpqdt2nyvaevmsq6ua5dddmvdme26taqiwyp22a"},{"i":69,"n":"o0x187","c":"bafybeiagxmxoizt5zrkvdwrqcg2ncmaoi6hf7gfenaakfch7t4gapq6p4e"},{"i":70,"n":"o0x168","c":"bafybeihujmo3azexhmqzerbjeo4xpzpcp4s6uxnockffbwv6r7rdt2jcva"},{"i":71,"n":"o0x149","c":"bafybeihqygjpfzwkws5327oxf7asiy6izkm7h4xjl2r536nbcrq4sbyzoi"},{"i":72,"n":"O0x268","c":"bafybeignim3jczzsl4wodop7t67me6wvlxdtgb5emc5v2cpbiyyp4ol4tu"},{"i":73,"n":"o0x03","c":"bafybeiherowubwvyzsm4qnush6v7yae32elf7ofn43cp66fxnnujvg4exy"},{"i":74,"n":"o0x124","c":"bafybeihwgbkpjrfp7dfrvaxg3o2s6srkxpuv7xfo3fl66opkcc2admbtga"},{"i":75,"n":"o0x137","c":"bafybeibqsw3ai3ocncogzuqobt4du7dv6ueh23c7thil7fva27w22jf7ce"},{"i":76,"n":"o0x160","c":"bafybeievqbynjboct7dy4gs45iqufjzziqm3l6qiehoeeif4eeasq623c4"},{"i":77,"n":"o0x47","c":"bafybeierzfr5zjmfkin64l6e4rlgecnkp6cdo3slqt2dw2qolvan24gbje"},{"i":78,"n":"o0x16","c":"bafybeicnxkigurtnrjixhvkvmiy3oxfg36mbflzuqq4izerjvuynfdr37y"},{"i":79,"n":"o0x54","c":"bafybeif64xn5sr3n746oaanfpvxg47qk5n4ld4mxkw4qu7hz4f7xyvmttm"},{"i":80,"n":"O0x296","c":"bafybeievzechajelwyxao5e5z26kyiehdzbead47yslqayyclb5gxwanle"},{"i":81,"n":"o0x104","c":"bafybeiec2kxqgpn6n2ysu2xza2qoxj6iqqwnnt74c2jjqogju6pnwvmk3a"},{"i":82,"n":"O0x267","c":"bafybeih7ptlninw2qgnbp27prfiumzfispgaej7iiqgz6rfvzrzjn5pveu"},{"i":83,"n":"o0x218","c":"bafybeidqxyx6rjcaym6nh7loqyoubiwb2anz2h7fekgnsuk7leakljc2wm"},{"i":84,"n":"o0x196","c":"bafybeihqrehprstsxybt4pysfcjps7eoxrcfmqgdqwkdervcwkpey44zxe"},{"i":85,"n":"o0x141","c":"bafybeic2zjmepgwluxh6dueqcopvn5yh4quewchwmltn37gojaiyzazjlu"},{"i":86,"n":"o0x153","c":"bafybeidky4xkt4z6tcoqdpde4wlhycyhhdi5hxabth4lo3vthsqd6x6gde"},{"i":87,"n":"o0x204","c":"bafkreibzb5t6vt6xp22nbcmvj2ge47pr7hti3uqel4myhi6cjoz5wyz2km"},{"i":88,"n":"O0x299","c":"bafybeia2477t4amunfyt3vnfwbx36p3nouycgyppz6gxxyms4gauwwgiqe"},{"i":89,"n":"O0x288","c":"bafybeibcu5fox2rkt5uubin5npwgqi4nni7pk4ukvunhgsbikxqck6voyu"},{"i":90,"n":"o0x220","c":"bafybeif4jyyoxwksq7a7ykdawkgmj7bjaqpvvig73e6vmfwtnzfmbrr7ui"},{"i":91,"n":"O0x265","c":"bafybeiaqtzngrx74rj2tnvmu5qrw7bg22xsqlvwgtz4sc7uptorzz3tgvq"},{"i":92,"n":"o0x223","c":"bafybeignez4aegepqgnvrbhlabbdbi7wkg6dx2mlqpm7qikn6acmrfmcom"},{"i":93,"n":"o0x177","c":"bafkreicmqm3n6eeuvbmzeizf7canq2hapw5efi3reeqoeqfawt4h4p4ate"},{"i":94,"n":"O0x252","c":"bafybeifj2ecviqmbrhcr6j4auhzgmbk66ozscp7pi72mphpprvzil2yv7a"},{"i":95,"n":"o0x99","c":"bafybeibbnim6gvtnprdx7wl7x6vushs6h23xgyud5gblcdfye72zo2t2kq"},{"i":96,"n":"O0x264","c":"bafybeid7ineep2bjo3gjz5fsrvefal3kaynkctclider7p3oj7zlrzjuai"},{"i":97,"n":"o0x138","c":"bafybeifipymz6ahk2kdjlxse53cr6y77tgijnwhkig2htzffihao4md4nq"},{"i":98,"n":"o0x193","c":"bafybeic2ju6ebrhyipciine5rqewaic52nf7wm3gp5diopzl6bkhq7xlie"},{"i":99,"n":"o0x107","c":"bafybeic7drxbk6jmwd6simuqs4lff6pkmcpnjoqkjirfj5ljgvz5n74gsi"},{"i":100,"n":"o0x144","c":"bafybeiedxreyqq6s73ffe5n54vdrhfjed3gwpvynjguoaybcgxrhhiideu"},{"i":101,"n":"o0x93","c":"bafybeib47f3lvgb4sdc5reilejepxotaxm3pkgfoufbi7ljhaw6lnnwwn4"},{"i":102,"n":"o0x205","c":"bafybeiegaiqybs42efqqinqpecyngfxq7q5mo2zxl7643dcyul2xdc5lki"},{"i":103,"n":"O0x260","c":"bafkreidzhxrh7n3nnfko6zwv27fe2ieqww3m75joleavmo6h7toetw27om"},{"i":104,"n":"o0x161","c":"bafybeihci3qurzjg4wncinolm73blyuwhjwsg4g2mlcsbgvesafjlrofzi"}]};
@@ -3364,7 +3415,6 @@ body::after {
             <div class="col-grad"></div>
             ${dateBadge}
             ${badge}
-            <svg class="col-arrow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div class="col-body">
             <img class="col-logo" src="${collection.image}" alt="${escHtml(collection.alt)}" loading="lazy" decoding="async">
@@ -3379,6 +3429,7 @@ body::after {
               <div class="col-stat"><span class="cv">${st.sales != null ? st.sales.toLocaleString('fr-FR') : '—'}</span><span class="cl">Sales</span></div>
             </div>${mint}
           </div>
+          <svg class="col-arrow" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         `;
         const panel = document.createElement('div');
         panel.className = 'col-panel';   // reçoit le détail (#collectionView) quand la carte est dépliée
@@ -3509,6 +3560,15 @@ body::after {
       });
       syncNav(name);
       window.scrollTo(0, 0);
+      // Sur mobile, la ligne du temps s'ouvre alignée à droite (collection la plus récente / minting).
+      if (name === 'collections') scrollTimelineToEnd();
+    }
+    // Mobile : positionne la ligne du temps tout à droite (sur la collection la plus récente).
+    function scrollTimelineToEnd() {
+      if (!window.matchMedia('(max-width: 600px)').matches) return;
+      const tl = document.getElementById('collections-timeline');
+      if (!tl) return;
+      requestAnimationFrame(() => { try { tl.scrollLeft = tl.scrollWidth; } catch (e) { } });
     }
     // Onglet Collections : cliquer une carte l'AGRANDIT (accordéon) : le détail
     // (#collectionView, panneau unique réutilisé) est inséré DANS la carte (.col-panel)
@@ -3812,6 +3872,12 @@ body::after {
       }
     }
 
+    // Bascule l'onglet actif (Items / Utilities) de la vue détail.
+    function setCvTab(view, name) {
+      view.querySelectorAll('.cv-tab').forEach(t => t.classList.toggle('is-active', t.dataset.cvtab === name));
+      view.querySelectorAll('.cv-pane').forEach(p => { p.hidden = p.dataset.cvpane !== name; });
+    }
+
     function showCollectionView(idx) {
       const view = document.getElementById('collectionView');
       const collection = (typeof collectionsData !== 'undefined') ? collectionsData[idx] : null;
@@ -3860,6 +3926,19 @@ body::after {
       setStat('sales', isExternal ? '—' : (st.sales || 0).toLocaleString('fr-FR'));
       view.querySelector('.cv-items-count').textContent = st.supply ? '(' + st.supply.toLocaleString('fr-FR') + ')' : '';
       // (Liste des détenteurs déplacée dans l'onglet Leaderboard.)
+
+      // Onglet « Utilities » : présent uniquement pour les collections qui en définissent (ex. V3 Crovia).
+      const utils = COLLECTION_UTILITIES[title];
+      const utilTab = view.querySelector('.cv-tab-util');
+      const utilList = view.querySelector('.cv-util-list');
+      if (utils && utils.length && utilList) {
+        utilList.innerHTML = utils.map(u => '<li>' + escHtml(u) + '</li>').join('');
+        if (utilTab) utilTab.hidden = false;
+      } else {
+        if (utilList) utilList.innerHTML = '';
+        if (utilTab) utilTab.hidden = true;
+      }
+      setCvTab(view, 'items');   // à chaque ouverture, on revient sur l'onglet Items
 
       const bannerImg = view.querySelector('.cv-banner-img');
       bannerImg.removeAttribute('src');
@@ -4164,6 +4243,17 @@ body::after {
         return;
       }
 
+      // Progression du mint V3 (Crovia) : si data.json fournit minted/mintTotal (lus on-chain
+      // par Test.js à chaque run du workflow), on remplace la valeur figée du COLLECTION_META
+      // → le compteur « Mint progress » se met à jour automatiquement (plus de 231 en dur).
+      collectionsData.forEach(collection => {
+        const m = COLLECTION_META[collection.title];
+        if (m && Number.isFinite(collection.minted)) {
+          m.minted = collection.minted;
+          if (Number.isFinite(collection.mintTotal)) m.mintTotal = collection.mintTotal;
+        }
+      });
+
       // URL du profil reconstruite depuis le nom (non stockée dans les données → plus léger)
       collectionsData.forEach(collection => {
         if (collection.external) return; // collections externes : owners déjà munis de leur URL (cronoscan)
@@ -4225,20 +4315,35 @@ body::after {
         if (colGrid) {
           colGrid.addEventListener('click', (e) => {
             const row = e.target.closest('.col-row');
-            if (!row) return;                 // clic dans le panneau (NFT, lien…) → comportement normal
-            e.preventDefault();
-            const item = row.closest('.col-item');
-            if (!item) return;
-            if (item.classList.contains('is-open')) {
+            if (row) {
+              e.preventDefault();
+              const item = row.closest('.col-item');
+              if (!item) return;
+              if (item.classList.contains('is-open')) {
+                closeCollectionDetail();
+                history.replaceState(null, '', location.pathname + location.search);
+              } else {
+                const idx = parseInt(item.dataset.idx, 10);
+                showCollectionView(idx);
+                history.replaceState(null, '', '#c/' + idx);
+              }
+              return;
+            }
+            // Clic DANS une carte ouverte, en dehors d'un élément interactif (item NFT, lien,
+            // bouton, onglet) → on replie la carte.
+            const openItem = e.target.closest('.col-item.is-open');
+            if (openItem && !e.target.closest('a, button, input, .nft, .cv-tab')) {
               closeCollectionDetail();
               history.replaceState(null, '', location.pathname + location.search);
-            } else {
-              const idx = parseInt(item.dataset.idx, 10);
-              showCollectionView(idx);
-              history.replaceState(null, '', '#c/' + idx);
             }
           });
         }
+        // Onglets Items / Utilities de la vue détail (élément unique réutilisé).
+        const cvView = document.getElementById('collectionView');
+        if (cvView) cvView.addEventListener('click', (e) => {
+          const tab = e.target.closest('.cv-tab');
+          if (tab) setCvTab(cvView, tab.dataset.cvtab);
+        });
         const cvMoreBtn = document.getElementById('cvMore');
         if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
         const sbRefreshBtn = document.getElementById('sbRefresh');

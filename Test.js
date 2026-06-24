@@ -512,12 +512,16 @@ function buildV3Collection(ranking) {
     count,
     url: 'https://cronoscan.com/address/' + addr
   }));
+  // Total minté (= NFT détenus on-chain) : lu en direct → l'index l'affiche dans la barre
+  // « Mint progress » (plus de valeur figée dans index.html). mintTotal = supply max fixe (299).
+  const minted = ranking.reduce((s, r) => s + r.count, 0);
   return {
     id: 'collection-v3', title: 'Quantum Cryptonauts V3',
     image: 'assets/v3-logo.jpg?v=2', banner: 'assets/v3-banner.jpg?v=2',
     alt: 'Quantum Cryptonauts V3 COLLECTION ICON',
     ownersCount: owners.length, external: 'crovia', contract: V3_CONTRACT,
     croviaUrl: 'https://crovia.app/collections/' + V3_CONTRACT,
+    minted, mintTotal: 299,
     owners
   };
 }
