@@ -2981,7 +2981,6 @@ body::after {
     .sb-row:hover::before { opacity: 1; }
     .sb-thumb-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
     .sb-thumb { width: 60px; height: 60px; border-radius: 13px; object-fit: cover; background: rgba(255, 255, 255, 0.04); }
-    .sb-col-badge { position: absolute; bottom: -5px; right: -5px; width: 25px; height: 25px; border-radius: 50%; object-fit: cover; border: 2px solid #100c09; background: #100c09; box-shadow: 0 2px 6px rgba(0,0,0,0.5); }
     /* PC : infos l'une à côté de l'autre (nom · collection · vendeur→acheteur). */
     .sb-main { min-width: 0; display: flex; flex-direction: row; align-items: center; gap: 20px; }
     .sb-line1 { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
@@ -2992,16 +2991,17 @@ body::after {
     .sb-col { display: block; flex: 0 0 auto; font-size: 0.76rem; color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sb-parties { display: block; flex: 0 0 auto; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .sb-arrow { color: rgba(255, 106, 26, 0.8); margin: 0 1px; }
-    .sb-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; text-align: right; }
+    /* PC : prix et temps l'un À CÔTÉ de l'autre. */
+    .sb-right { display: flex; flex-direction: row; align-items: baseline; justify-content: flex-end; gap: 10px; text-align: right; }
+    .sb-tag--corner { display: none; }   /* badge type en coin : mobile uniquement */
     .sb-price { font-family: var(--font-display); font-size: 1.02rem; color: #ff6a1a; text-shadow: 0 0 14px rgba(255, 106, 26, 0.3); white-space: nowrap; }
     .sb-time { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(236, 228, 212, 0.4); white-space: nowrap; }
     .sb-empty { text-align: center; color: rgba(236, 228, 212, 0.55); padding: 40px 0; }
     .sb-skel { height: 76px; border-radius: 15px; background: linear-gradient(100deg, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.03) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; border: none; }
     @media screen and (max-width: 600px) {
-      .sb-row { grid-template-columns: 52px 1fr auto; gap: 11px; padding: 10px 12px 10px 11px; }
+      .sb-row { grid-template-columns: 52px 1fr auto; gap: 11px; padding: 10px 12px 10px 11px; align-items: start; }
       .sb-thumb-wrap { width: 52px; height: 52px; }
       .sb-thumb { width: 52px; height: 52px; border-radius: 11px; }
-      .sb-col-badge { width: 21px; height: 21px; bottom: -4px; right: -4px; }
       .sb-name { font-size: 0.9rem; }
       .sb-col, .sb-parties { font-size: 0.72rem; }
       .sb-price { font-size: 0.94rem; }
@@ -3009,6 +3009,10 @@ body::after {
       .sb-main { flex-direction: column; align-items: flex-start; gap: 3px; }
       .sb-line1 { width: 100%; flex: none; }
       .sb-col, .sb-parties { flex: none; max-width: 100%; }
+      /* Mobile : badge type dans le coin supérieur droit, AU-DESSUS du prix ; prix/temps empilés. */
+      .sb-right { flex-direction: column; align-items: flex-end; gap: 3px; }
+      .sb-tag--inline { display: none; }
+      .sb-tag--corner { display: inline-flex; margin-bottom: 2px; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
@@ -3794,16 +3798,19 @@ body::after {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
           const isMint = (s.seller === 'Mint');
-          const tag = isMint ? '<span class="sb-tag sb-tag-mint">Mint</span>' : '<span class="sb-tag sb-tag-sale">Sale</span>';
-          const badge = (s.colImg && s.colImg !== thumb) ? '<img class="sb-col-badge" src="' + escHtml(s.colImg) + '" alt="" loading="lazy" decoding="async">' : '';
+          const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
+          const tagTxt = isMint ? 'Mint' : 'Sale';
+          // Badge de type : version inline (à côté du nom, sur PC) + version coin sup. droit (mobile).
+          const tagInline = '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
+          const tagCorner = '<span class="sb-tag sb-tag--corner ' + tagCls + '">' + tagTxt + '</span>';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + ' alt="" loading="lazy" decoding="async">' + badge + '</span>'
+            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
             + '<div class="sb-main">'
-            + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tag + '</div>'
+            + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div>'
             + '<span class="sb-col">' + escHtml(s.col) + '</span>'
             + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>'
             + '</div>'
-            + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span>'
+            + '<div class="sb-right">' + tagCorner + '<span class="sb-price">' + escHtml(s.price) + '</span>'
             + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
         }).join('');
         if (countEl) countEl.textContent = top.length + ' recent sales';
