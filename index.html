@@ -3030,7 +3030,7 @@ body::after {
     .sb-batch-meta { flex: none; margin-left: auto; display: flex; align-items: baseline; gap: 9px; padding-left: 6px; }
     .sb-batch-sum { font-family: var(--font-display); font-size: 0.8rem; color: #ff8a4c; white-space: nowrap; }
     .sb-batch-qty { color: rgba(236, 228, 212, 0.5); font-family: var(--font-body); font-size: 0.82em; }
-    .sb-batch-time { flex: none; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(236, 228, 212, 0.42); white-space: nowrap; }
+    .sb-batch-time { flex: none; margin-left: auto; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(236, 228, 212, 0.42); white-space: nowrap; }
     /* Lignes NFT À L'INTÉRIEUR du cadre : plus de bordure/fond propre, juste un séparateur. */
     .sb-batch .sb-row { border: 0; background: transparent; border-radius: 0; padding: 8px 16px; }
     .sb-batch .sb-row--noprice { grid-template-columns: 60px 1fr; }
@@ -3914,19 +3914,18 @@ body::after {
         if (last && last.col === s.col) last.items.push(s);
         else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
       });
-      // Ligne d'un NFT dans un cadre de transfert : NFT mis en avant. Prix masqué si consolidé en en-tête.
-      const sbRowHTML = (s, hideBadge, hidePrice) => {
+      // Ligne d'un NFT dans un cadre de transfert : vignette + nom + PRIX à droite.
+      const sbRowHTML = (s, hideBadge) => {
         const thumb = s.thumb || s.colImg;
         const link = s.link || 'https://crypto.com/nft';
         const isMint = (s.seller === 'Mint');
         const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
         const tagTxt = isMint ? 'Mint' : 'Sale';
         const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
-        const priceHTML = hidePrice ? '' : '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div>';
-        return '<a class="sb-row' + (hidePrice ? ' sb-row--noprice' : '') + '" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
+        return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
           + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
           + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
-          + priceHTML + '</a>';
+          + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div></a>';
       };
       const partyKey = (s) => s.seller + '→' + s.buyer;
       let order = 0;   // délai d'entrée échelonné (animation premium)
@@ -3951,17 +3950,12 @@ body::after {
           const parties = isMintB
             ? '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
             : '<span class="sb-batch-from">' + escHtml(b.seller) + '</span><span class="sb-batch-arrow">→</span><span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>';
-          const n = b.items.length;
-          const uniformPrice = b.items.every(it => it.price === b.items[0].price);
-          const summary = uniformPrice
-            ? (n > 1 ? '<span class="sb-batch-qty">' + n + ' ×</span> ' + escHtml(b.items[0].price) : escHtml(b.items[0].price))
-            : '<span class="sb-batch-qty">' + n + ' items</span>';
           const bhead = '<div class="sb-batch-head">'
             + typeBadge + parties
-            + '<span class="sb-batch-meta"><span class="sb-batch-sum">' + summary + '</span>'
-            + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span></span>'
+            + (b.items.length > 1 ? '<span class="sb-batch-count">' + b.items.length + '</span>' : '')
+            + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span>'
             + '</div>';
-          return '<div class="sb-batch"' + stagger() + '>' + bhead + b.items.map(s => sbRowHTML(s, true, uniformPrice)).join('') + '</div>';
+          return '<div class="sb-batch"' + stagger() + '>' + bhead + b.items.map(s => sbRowHTML(s, true)).join('') + '</div>';
         }).join('');
         return head + body;
       }).join('');
