@@ -2985,6 +2985,14 @@ body::after {
     .sb-refresh svg { transition: transform 0.5s ease; }
     .sb-refresh:hover svg { transform: rotate(-180deg); }
     .sb-feed { display: grid; grid-template-columns: 1fr; gap: 9px; }   /* une seule colonne (avant : multi-colonnes sur PC) */
+    /* En-tête de collection coiffant une suite de ventes consécutives de cette collection. */
+    .sb-group-head { display: flex; align-items: center; gap: 9px; padding: 2px 4px; margin-top: 7px;
+      font-family: var(--font-display); font-size: 0.82rem; color: var(--gold); letter-spacing: 0.01em; min-width: 0; }
+    .sb-feed > .sb-group-head:first-child { margin-top: 0; }
+    .sb-group-logo { width: 22px; height: 22px; border-radius: 6px; object-fit: cover; flex: none; background: rgba(255, 255, 255, 0.04); }
+    .sb-group-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .sb-group-count { flex: none; font-family: var(--font-body); font-size: 0.62rem; color: var(--muted);
+      background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 8px; }
     .sb-row {
       position: relative; overflow: hidden;
       display: grid; grid-template-columns: 60px 1fr auto; gap: 15px; align-items: center;
@@ -3043,8 +3051,10 @@ body::after {
       .sb-price { font-size: 1.04rem; line-height: 1; }
       .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
       .sb-skel { height: 62px; border-radius: 12px; }
-      /* Nom de collection répété (même collection que la ligne au-dessus) : masqué → ligne plus basse. */
-      .sb-col-dup { display: none; }
+      /* En-tête de groupe : compact en mobile. */
+      .sb-group-head { font-size: 0.74rem; gap: 7px; margin-top: 6px; padding: 1px 2px; }
+      .sb-group-logo { width: 18px; height: 18px; border-radius: 5px; }
+      .sb-group-count { font-size: 0.56rem; padding: 0 6px; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
@@ -3865,12 +3875,18 @@ body::after {
         sales.sort((a, b) => b.ts - a.ts);
         const top = sales.slice(0, 50);
         if (!top.length) { feed.innerHTML = '<p class="sb-empty">No recent sales found.</p>'; if (countEl) countEl.textContent = ''; return; }
-        feed.innerHTML = top.map((s, i) => {
+        // Regroupe les ventes CONSÉCUTIVES de même collection (l'ordre récent→ancien est conservé) :
+        // un en-tête de collection coiffe chaque suite, les lignes ne répètent plus le nom.
+        const groups = [];
+        top.forEach(s => {
+          const last = groups[groups.length - 1];
+          if (last && last.col === s.col) last.items.push(s);
+          else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
+        });
+        const sbRowHTML = (s) => {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
           const isMint = (s.seller === 'Mint');
-          // Collection identique à la ligne précédente → on masque le nom répété (mobile) pour densifier.
-          const dupCol = (i > 0 && top[i - 1].col === s.col);
           const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
           const tagTxt = isMint ? 'Mint' : 'Sale';
           // Badge de type : version inline (à côté du nom, sur PC) + version coin sup. droit (mobile).
@@ -3880,11 +3896,18 @@ body::after {
             + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div>'
-            + '<span class="sb-col' + (dupCol ? ' sb-col-dup' : '') + '">' + escHtml(s.col) + '</span>'
             + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>'
             + '</div>'
             + '<div class="sb-right">' + tagCorner + '<span class="sb-price">' + escHtml(s.price) + '</span>'
             + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
+        };
+        feed.innerHTML = groups.map(g => {
+          const head = '<div class="sb-group-head">'
+            + (g.colImg ? '<img class="sb-group-logo" src="' + escHtml(g.colImg) + '" alt="" loading="lazy" decoding="async">' : '')
+            + '<span class="sb-group-name">' + escHtml(g.col) + '</span>'
+            + (g.items.length > 1 ? '<span class="sb-group-count">' + g.items.length + '</span>' : '')
+            + '</div>';
+          return head + g.items.map(sbRowHTML).join('');
         }).join('');
         if (countEl) countEl.textContent = top.length + ' recent sales';
         // Garde-fou : une vignette IPFS directe (pinata) qui « hang » > 12 s → bascule sur le logo
