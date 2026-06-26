@@ -2689,8 +2689,8 @@ body::after {
        Bande horizontale scrollable : chaque collection = une vignette ronde reliée
        par une ligne continue ; un clic fait défiler vers sa carte (data-target = idx). */
     /* En-tête « TIMELINE » : même style que l'eyebrow « THE COLLECTIONS ». */
-    .timeline-head { text-align: center; margin: 4px 0 16px; }
-    .timeline-head .eyebrow { margin-bottom: 0; }
+    /* Section Collections : pas de filet doré décoratif sous le sous-titre (juste avant la frise). */
+    #collections .section-head::after { display: none; }
     /* Filet doré sous la ligne du temps (identique à celui de .section-head). */
     .timeline-rule {
       width: 58px; height: 2px; margin: 18px auto 34px;
@@ -3063,7 +3063,6 @@ body::after {
         <h2 class="section-title">Twelve worlds, one crew</h2>
         <p class="section-sub">Twelve chapters of the Cryptonauts saga.<br>Eleven sold out on crypto.com, the twelfth minting now on Crovia.</p>
       </div>
-      <div class="timeline-head"><span class="eyebrow eyebrow-lines">Timeline</span></div>
       <div id="collections-timeline" class="col-timeline" role="list" aria-label="Timeline of the collections"></div>
       <div class="timeline-rule" aria-hidden="true"></div>
       <div id="collections-grid"></div>
