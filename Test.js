@@ -384,7 +384,11 @@ async function walkOwnersAndDates(collectionId) {
 const V3_CONTRACT = '0x840d5e2df597ab3dcfed4e5fc883c8d87606748d';
 const V3_CREATION_BLOCK = 77606321; // bloc de déploiement (fixe) — évite la recherche
 const V3_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-const CRONOS_RPCS = ['https://evm.cronos.org', 'https://cronos-evm-rpc.publicnode.com', 'https://1rpc.io/cro'];
+// RPC publics Cronos qui acceptent eth_getLogs sur des fenêtres de ~2000 blocs (archive).
+// NB (vérifié 2026-06) : publicnode exige désormais un "personal token" pour l'archive et
+// 1rpc.io plafonne getLogs à 50 blocs → tous deux inutilisables ici (faisaient échouer la
+// lecture on-chain V3, d'où le repli permanent sur V3_FALLBACK : mint/holders/ventes figés).
+const CRONOS_RPCS = ['https://evm.cronos.org', 'https://cronos.drpc.org', 'https://rpc.vvs.finance'];
 const RPC_LOG_STEP = 1999; // < limite de 2000 blocs/getLogs des RPC publics
 
 // API Explorer Cronos (Blockscout, compat Etherscan) — clé fournie via secret GitHub
@@ -407,17 +411,19 @@ const V3_NAMES = {
   '0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2': 'JAMUS0',
 };
 
-// Repli si la lecture on-chain échoue (snapshot du 2026-06-23) → data.json garde un V3 cohérent.
+// Repli si la lecture on-chain échoue (snapshot du 2026-06-26) → data.json garde un V3 cohérent.
 const V3_FALLBACK = [
-  { addr: '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b', count: 61 },
-  { addr: '0x2b8b37dd17fa67833b01e30229502169d1a8ae40', count: 49 },
-  { addr: '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee', count: 43 },
-  { addr: '0x740cd1001bf468e03a2cef898c4ce880f228da0d', count: 31 },
-  { addr: '0x183379144e7c8581f24b02b7eedd4e9995bb1048', count: 11 },
+  { addr: '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b', count: 76 },
+  { addr: '0x2b8b37dd17fa67833b01e30229502169d1a8ae40', count: 55 },
+  { addr: '0x740cd1001bf468e03a2cef898c4ce880f228da0d', count: 49 },
+  { addr: '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee', count: 45 },
+  { addr: '0x183379144e7c8581f24b02b7eedd4e9995bb1048', count: 12 },
   { addr: '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed', count: 10 },
   { addr: '0x7886acebc8401bd6b1cf397d84b85d01416e4c06', count: 6 },
   { addr: '0xedce0151656e82150a0835e9b9cbd1ec53a17eae', count: 5 },
   { addr: '0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2', count: 4 },
+  { addr: '0x105f4ed058dc3029c21489f0f1567475e0eeb242', count: 4 },
+  { addr: '0x17bb1d83b312ce76eba5ffd43226b8c98652c1f6', count: 4 },
   { addr: '0x478ffba8ea4945fb9327812231dfb1c6cafd2c49', count: 3 },
   { addr: '0x8147d4d7578e661004e25ffd3f9fd7bac1f6fb06', count: 2 },
   { addr: '0x1d9b981b7aba1a747883833fb8a1b5072eac5d8f', count: 2 },
@@ -425,6 +431,8 @@ const V3_FALLBACK = [
   { addr: '0x27ac7493fa8395ad35c260282522b3d9e314cee7', count: 1 },
   { addr: '0x2270cbad5072b7685357ec83ddc959ffde535b27', count: 1 },
   { addr: '0xf7e392c06c7691b44a06a0ec1e723bcc0533febf', count: 1 },
+  { addr: '0x8802ebcf0b6bbc97a00fe3495ec0dabf12a0fb2f', count: 1 },
+  { addr: '0xc54c922e7431f5fde646bca35f55adb8ff701ff9', count: 1 },
 ];
 
 let _v3RpcIdx = 0;
