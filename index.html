@@ -308,6 +308,7 @@ body::after {
       padding: 15px 20px;
       margin-bottom: 10px;
       border-radius: 8px;
+      border: 1px solid var(--hairline);   /* même bordure que le leaderboard de collection (.cv-lb-list) */
       font-size: 1.2rem;
       text-transform: uppercase;
       font-weight: bold;
@@ -988,15 +989,16 @@ body::after {
       background: linear-gradient(90deg, rgba(205, 127, 50, 0.24), rgba(205, 127, 50, 0.05));
       opacity: 1;
     }
+    /* Top-3 : bordure colorée sur toute la ligne (identique au leaderboard de collection .cv-lb-list). */
     #global-owners li.rank-1,
     #additional-owners li.rank-1,
-    .collection ul li.collection-rank-1 { border-left-color: #ffd700; }
+    .collection ul li.collection-rank-1 { border-color: rgba(255, 215, 0, 0.5); }
     #global-owners li.rank-2,
     #additional-owners li.rank-2,
-    .collection ul li.collection-rank-2 { border-left-color: #c0c0c0; }
+    .collection ul li.collection-rank-2 { border-color: rgba(214, 214, 222, 0.45); }
     #global-owners li.rank-3,
     #additional-owners li.rank-3,
-    .collection ul li.collection-rank-3 { border-left-color: #cd7f32; }
+    .collection ul li.collection-rank-3 { border-color: rgba(205, 127, 50, 0.5); }
 
     /* Compteur : juste le chiffre orange (ni pilule, ni mot « Cryptonauts »). */
     #global-owners li .count-container,
