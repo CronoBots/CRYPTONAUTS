@@ -2441,6 +2441,13 @@ body::after {
     .col-panel { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.38s ease; }
     .col-panel > * { min-height: 0; overflow: hidden; }
     .col-item.is-open .col-panel { grid-template-rows: 1fr; }
+    /* Carte ENTIÈREMENT ouverte (classe posée après l'animation) : on lève l'overflow:hidden pour que
+       les onglets puissent être collants (un parent overflow:hidden neutralise position:sticky).
+       Les DEUX classes sont requises → si is-open part, l'overflow:hidden revient automatiquement. */
+    .col-item.is-open.is-sticky-ready { overflow: visible; }
+    .col-item.is-open.is-sticky-ready .col-panel > * { overflow: visible; }
+    /* La bannière garde ses coins haut arrondis + son clip propre même sans overflow:hidden sur la carte. */
+    .col-banner { border-top-left-radius: 17px; border-top-right-radius: 17px; }
     /* Détail dans le panneau = prolongement TRANSPARENT : le fond continu et le cadre viennent
        de .col-item, donc aucune boîte ni couture, et pas de bordure propre (= pas de ligne au repli). */
     .col-panel #collectionView { background: transparent; border: none; border-radius: 0; }
@@ -2549,12 +2556,22 @@ body::after {
     .cv-block { margin-bottom: 44px; }
     .cv-sec-title { font-size: 1.4rem; margin: 0 0 16px; text-transform: none; }
     .cv-count { color: var(--muted); font-size: 0.9rem; font-family: var(--font-body); }
-    /* Onglets « Items » / « Utilities » dans la vue détail. */
-    .cv-tabs { display: flex; gap: 24px; margin: 0 0 20px; border-bottom: 1px solid var(--hairline); }
+    /* Onglets « Items » / « Leaderboard » / « Utilities » : barre pleine largeur, centrée, répartie,
+       et COLLANTE en haut du cadre au défilement (reste visible quand on parcourt la liste). */
+    .cv-tabs {
+      display: flex; gap: 6px; margin: 0 0 20px; border-bottom: 1px solid var(--hairline);
+      position: sticky; top: var(--nav-h, 64px); z-index: 6;
+      background: #120d0a;
+      /* déborde sur le padding latéral du cadre → le fond couvre toute la largeur quand collé. */
+      margin-left: calc(-1 * clamp(16px, 3vw, 34px)); margin-right: calc(-1 * clamp(16px, 3vw, 34px));
+      padding: 0 clamp(16px, 3vw, 34px);
+    }
     .cv-tab {
-      position: relative; background: none; border: 0; cursor: pointer; padding: 0 0 12px;
+      position: relative; background: none; border: 0; cursor: pointer; padding: 0 4px 12px;
+      flex: 1 1 0;                          /* chaque onglet occupe une part égale de la largeur du cadre */
       font-family: var(--font-display); font-size: 1.4rem; line-height: 1; color: var(--muted);
-      display: inline-flex; align-items: baseline; gap: 8px; transition: color .2s ease;
+      display: flex; align-items: baseline; justify-content: center; gap: 8px; white-space: nowrap;
+      transition: color .2s ease;
     }
     .cv-tab[hidden] { display: none; }   /* l'attribut hidden doit l'emporter sur display:inline-flex */
     .cv-tab::after {
@@ -2606,9 +2623,9 @@ body::after {
       .cv-lb-list .count-text { font-size: 0.5rem; }
       /* Onglets Items/Leaderboard/Utilities : à 1.4rem les 3 débordent (Utilities coupé).
          On réduit taille + espacement, sans retour à la ligne, avec scroll horizontal de secours. */
-      .cv-tabs { gap: 16px; overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
-      .cv-tabs::-webkit-scrollbar { display: none; }
-      .cv-tab { font-size: 1.02rem; white-space: nowrap; flex: 0 0 auto; padding-bottom: 10px; gap: 6px; }
+      .cv-tabs { gap: 4px; flex-wrap: nowrap; }
+      .cv-tab { font-size: 0.95rem; white-space: nowrap; flex: 1 1 0; padding: 0 2px 10px; gap: 4px; }
+      .cv-tab .cv-count { font-size: 0.72rem; }
       .cv-count { font-size: 0.74rem; }
     }
     #cvNfts { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); padding: 0; }
@@ -3622,7 +3639,7 @@ body::after {
       const item = grid && grid.querySelector('.col-item[data-idx="' + idx + '"]');
       if (!v || !item) return;
       // Replie toute autre carte ouverte (une seule à la fois).
-      grid.querySelectorAll('.col-item.is-open').forEach(o => { if (o !== item) o.classList.remove('is-open'); });
+      grid.querySelectorAll('.col-item.is-open').forEach(o => { if (o !== item) { o.classList.remove('is-open', 'is-sticky-ready'); clearTimeout(o._stickyT); } });
       const panel = item.querySelector('.col-panel');
       if (panel && v.parentElement !== panel) panel.appendChild(v);
       v.classList.remove('hidden-view');
@@ -3631,11 +3648,16 @@ body::after {
       requestAnimationFrame(() => {
         item.classList.add('is-open');
         requestAnimationFrame(() => { try { item.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (e) { } });
+        // Une fois l'accordéon ENTIÈREMENT ouvert (après la transition ~0.38s), on lève l'overflow:hidden
+        // pour que les onglets puissent être collants (position:sticky est neutralisé par un parent
+        // overflow:hidden). On le fait après l'anim pour ne pas casser l'ouverture en douceur.
+        clearTimeout(item._stickyT);
+        item._stickyT = setTimeout(() => { if (item.classList.contains('is-open')) item.classList.add('is-sticky-ready'); }, 430);
       });
     }
     function closeCollectionDetail() {
-      // On retire seulement is-open → le panneau se replie en douceur (grid-template-rows).
-      document.querySelectorAll('.col-item.is-open').forEach(o => o.classList.remove('is-open'));
+      // On retire is-open (repli en douceur) ET is-sticky-ready (remet l'overflow:hidden avant l'anim).
+      document.querySelectorAll('.col-item.is-open, .col-item.is-sticky-ready').forEach(o => { o.classList.remove('is-open', 'is-sticky-ready'); clearTimeout(o._stickyT); });
     }
 
     // ── Ligne du temps des collections ──
@@ -4690,7 +4712,12 @@ body::after {
         // Cale le décalage d'ancre (#section) sur la HAUTEUR RÉELLE de la navbar sticky.
         // Avant, scroll-padding-top était figé à 84px (≠ navbar mobile ~56px) → on
         // n'atterrissait pas au bon endroit sur mobile. Recalculé au load + resize.
-        const syncScrollPad = () => { if (navbar) document.documentElement.style.scrollPaddingTop = (navbar.offsetHeight + 10) + 'px'; };
+        const syncScrollPad = () => {
+          if (!navbar) return;
+          document.documentElement.style.scrollPaddingTop = (navbar.offsetHeight + 10) + 'px';
+          // Hauteur réelle de la navbar → offset du sticky des onglets de collection (.cv-tabs).
+          document.documentElement.style.setProperty('--nav-h', navbar.offsetHeight + 'px');
+        };
         syncScrollPad();
         window.addEventListener('resize', syncScrollPad);
         const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
