@@ -3043,6 +3043,8 @@ body::after {
       .sb-price { font-size: 1.04rem; line-height: 1; }
       .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
       .sb-skel { height: 62px; border-radius: 12px; }
+      /* Nom de collection répété (même collection que la ligne au-dessus) : masqué → ligne plus basse. */
+      .sb-col-dup { display: none; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
@@ -3860,10 +3862,12 @@ body::after {
         sales.sort((a, b) => b.ts - a.ts);
         const top = sales.slice(0, 50);
         if (!top.length) { feed.innerHTML = '<p class="sb-empty">No recent sales found.</p>'; if (countEl) countEl.textContent = ''; return; }
-        feed.innerHTML = top.map(s => {
+        feed.innerHTML = top.map((s, i) => {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
           const isMint = (s.seller === 'Mint');
+          // Collection identique à la ligne précédente → on masque le nom répété (mobile) pour densifier.
+          const dupCol = (i > 0 && top[i - 1].col === s.col);
           const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
           const tagTxt = isMint ? 'Mint' : 'Sale';
           // Badge de type : version inline (à côté du nom, sur PC) + version coin sup. droit (mobile).
@@ -3873,7 +3877,7 @@ body::after {
             + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div>'
-            + '<span class="sb-col">' + escHtml(s.col) + '</span>'
+            + '<span class="sb-col' + (dupCol ? ' sb-col-dup' : '') + '">' + escHtml(s.col) + '</span>'
             + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>'
             + '</div>'
             + '<div class="sb-right">' + tagCorner + '<span class="sb-price">' + escHtml(s.price) + '</span>'
