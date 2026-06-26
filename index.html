@@ -2708,12 +2708,12 @@ body::after {
     .tl-node {
       position: relative;
       flex: 1 1 0;              /* PC : les nœuds grandissent pour occuper toute la largeur des cadres */
-      min-width: 92px;          /* mobile : plancher → la bande déborde et devient scrollable */
+      min-width: 96px;          /* mobile : plancher → la bande déborde et devient scrollable */
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 9px;
-      padding: 8px 6px 4px;
+      gap: 0;
+      padding: 10px 6px 4px;
       background: none;
       border: 0;
       cursor: pointer;
@@ -2722,11 +2722,12 @@ body::after {
       scroll-snap-align: center;
       -webkit-tap-highlight-color: transparent;
     }
-    /* Ligne continue passant par le centre des vignettes (top = padding 8 + rayon 29 = 37). */
+    /* Rail horizontal passant SOUS les vignettes, au niveau des pastilles (plus à travers les images).
+       top = padding 10 + vignette 58 + tige 10 + 4 → centre de la pastille (≈ 82). */
     .tl-node::before {
       content: '';
       position: absolute;
-      top: 37px;
+      top: 82px;
       left: 0; right: 0;
       height: 2px;
       background: var(--hairline);
@@ -2734,49 +2735,77 @@ body::after {
     }
     .tl-node:first-child::before { left: 50%; }
     .tl-node:last-child::before  { right: 50%; }
+    /* Wrapper vignette : porte le n° de chapitre + la pastille live (positionnés en absolu). */
+    .tl-thumb-wrap { position: relative; z-index: 1; display: inline-flex; line-height: 0; }
     .tl-thumb {
-      position: relative;
-      z-index: 1;
       width: 58px; height: 58px;
       border-radius: 12px;                          /* même forme (carré arrondi) que .col-logo */
       object-fit: cover;
       border: 1px solid rgba(255, 106, 26, 0.5);    /* contour orange fin sur TOUTES les vignettes */
       background: var(--collection-bg);
-      transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
     }
+    /* N° de chapitre (ordre de la saga, du plus ancien au plus récent). */
+    .tl-num {
+      position: absolute; z-index: 2; left: -6px; top: -6px;
+      min-width: 19px; height: 19px; padding: 0 4px;
+      display: inline-flex; align-items: center; justify-content: center;
+      border-radius: 7px;
+      font-family: var(--font-display); font-size: 10.5px; line-height: 1; color: #1a0f08;
+      background: linear-gradient(135deg, #ffb066, #ff6a1a);
+      border: 1px solid rgba(3, 4, 10, 0.55);
+      box-shadow: 0 2px 7px rgba(0, 0, 0, 0.5);
+      transition: background .2s ease, color .2s ease;
+    }
+    /* Tige verticale reliant la vignette à sa pastille sur le rail. */
+    .tl-stem { z-index: 1; width: 2px; height: 10px; background: var(--hairline); transition: background .2s ease; }
+    /* Pastille sur le rail (centre du nœud). */
+    .tl-dot {
+      z-index: 1; width: 10px; height: 10px; border-radius: 50%;
+      background: #15100c; border: 2px solid var(--hairline);
+      transition: background .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+    }
+    .tl-date {
+      position: relative; z-index: 1; margin-top: 9px;
+      font-size: 11px; letter-spacing: 0.03em; white-space: nowrap;
+      color: var(--muted); transition: color .2s ease;
+    }
+    /* Survol / focus */
     .tl-node:hover .tl-thumb,
     .tl-node:focus-visible .tl-thumb {
-      transform: scale(1.12);
+      transform: translateY(-2px) scale(1.06);
       border-color: var(--primary-color);
-      box-shadow: 0 0 0 4px rgba(255,106,26,0.18);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55), 0 0 0 3px rgba(255, 106, 26, 0.18);
     }
-    .tl-node:focus-visible { outline: none; }
-    .tl-date {
-      position: relative;
-      z-index: 1;
-      font-size: 11px;
-      letter-spacing: 0.03em;
-      white-space: nowrap;
-      color: var(--muted);
-      transition: color .18s ease;
-    }
+    .tl-node:hover .tl-stem { background: rgba(255, 106, 26, 0.55); }
+    .tl-node:hover .tl-dot { border-color: var(--primary-color); }
     .tl-node:hover .tl-date { color: var(--text-dark); }
-    .tl-node.is-active .tl-thumb { border-color: var(--primary-color); box-shadow: 0 0 0 4px rgba(255,106,26,0.18); }
-    .tl-node.is-active .tl-date  { color: var(--primary-color); }
-    /* Wrapper de la vignette (porte la pastille live en absolu). */
-    .tl-thumb-wrap { position: relative; display: inline-flex; line-height: 0; }
-    /* Repère « minting » (Crovia) sur la ligne du temps : contour vert clignotant + pastille live. */
-    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22); animation: tlLivePulse 1.6s ease-in-out infinite; }
+    .tl-node:focus-visible { outline: none; }
+    /* Actif (collection ouverte / ciblée) */
+    .tl-node.is-active .tl-thumb { border-color: var(--primary-color); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(255, 106, 26, 0.24); }
+    .tl-node.is-active .tl-stem { background: var(--primary-color); }
+    .tl-node.is-active .tl-dot { background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(255, 106, 26, 0.7); transform: scale(1.18); }
+    .tl-node.is-active .tl-date { color: var(--primary-color); }
+    /* Minting (Crovia) : vert clignotant + pastille live */
+    .tl-live { position: absolute; top: -4px; right: -4px; z-index: 3; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #03040a; box-shadow: 0 0 8px rgba(34, 197, 94, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
+    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(34, 197, 94, 0.22); animation: tlLivePulse 1.6s ease-in-out infinite; }
+    .tl-node.tl-minting .tl-num { background: linear-gradient(135deg, #4ade80, #16a34a); color: #052e16; }
+    .tl-node.tl-minting .tl-stem { background: #22c55e; }
+    .tl-node.tl-minting .tl-dot { background: #22c55e; border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.7); }
     .tl-node.tl-minting .tl-date { color: #22c55e; }
-    .tl-live { position: absolute; top: -3px; right: -3px; z-index: 3; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #03040a; box-shadow: 0 0 8px rgba(34, 197, 94, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
-    @keyframes tlLivePulse { 0%, 100% { box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.22); } 50% { box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.36); } }
-    @media (prefers-reduced-motion: reduce) { .tl-thumb { transition: none; } }
+    @keyframes tlLivePulse { 0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px rgba(34, 197, 94, 0.22); } 50% { box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 5px rgba(34, 197, 94, 0.36); } }
+    @media (prefers-reduced-motion: reduce) {
+      .tl-thumb, .tl-dot, .tl-stem { transition: none; }
+      .tl-node.tl-minting .tl-thumb, .tl-live { animation: none; }
+    }
     @media (max-width: 600px) {
       .col-timeline { margin-bottom: 22px; }
-      .tl-node { min-width: 76px; gap: 7px; padding: 8px 5px 4px; }
+      .tl-node { min-width: 80px; padding: 10px 5px 4px; }
       .tl-thumb { width: 48px; height: 48px; border-radius: 10px; }
-      .tl-node::before { top: 32px; }
-      .tl-date { font-size: 10px; }
+      .tl-node::before { top: 72px; }   /* 10 + 48 + 10 + 4 */
+      .tl-num { min-width: 17px; height: 17px; font-size: 9.5px; border-radius: 6px; }
+      .tl-date { font-size: 10px; margin-top: 8px; }
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 24px; max-width: 1280px; margin: 0 auto; }
@@ -2813,6 +2842,9 @@ body::after {
       border-top: 1px solid rgba(255, 255, 255, 0.28); border-bottom: 1px solid rgba(0, 0, 0, 0.3);
       box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
     }
+    /* Variante « minting » (Crovia) : ruban vert clignotant (état live). */
+    .col-ribbon-mint { background: linear-gradient(135deg, #4ade80, #16a34a); animation: ribbonMintPulse 1.7s ease-in-out infinite; }
+    @keyframes ribbonMintPulse { 0%, 100% { box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45); } 50% { box-shadow: 0 6px 18px rgba(34, 197, 94, 0.6); } }
     /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
     .col-badge.col-date-badge { left: 10px; right: auto; }
     .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
@@ -3377,7 +3409,7 @@ body::after {
         const bgStyle = bgUrl ? ` style="background-image:url('${bgUrl}')"` : '';
         const minting = meta.status === 'minting';
         const badge = minting
-          ? '<span class="col-badge is-live"><span class="dot"></span>Minting on Crovia</span>'
+          ? '<span class="col-ribbon col-ribbon-mint">Minting</span>'
           : (meta.soldOut ? '<span class="col-ribbon">Sold out</span>' : '');
         const dateBadge = rel ? `<span class="col-badge col-date-badge">${escHtml(rel)}</span>` : '';
         const priceRow = meta.mintPriceCro ? `<div class="col-mint-row" style="margin:9px 0 0"><span class="lbl">Mint price</span><span class="num"><b>${meta.mintPriceCro.toLocaleString('fr-FR')}</b> CRO</span></div>` : '';
@@ -3603,7 +3635,7 @@ body::after {
       const entries = collectionsData
         .map((c, idx) => ({ idx, title: c.title, image: c.image, rank: tlReleaseRank(c.title) }))
         .sort((a, b) => a.rank - b.rank);
-      entries.forEach(e => {
+      entries.forEach((e, i) => {
         const rel = COLLECTION_RELEASE[e.title] || '';
         const minting = (COLLECTION_META[e.title] || {}).status === 'minting';
         const node = document.createElement('button');
@@ -3611,13 +3643,16 @@ body::after {
         node.className = 'tl-node' + (minting ? ' tl-minting' : '');
         node.dataset.target = e.idx;
         node.setAttribute('role', 'listitem');
-        node.setAttribute('aria-label', 'Go to ' + e.title + (rel ? ' (' + rel + ')' : '') + (minting ? ' — minting now' : ''));
-        node.title = e.title + (rel ? ' · ' + rel : '') + (minting ? ' · Minting now' : '');
+        node.setAttribute('aria-label', 'Chapter ' + (i + 1) + ': ' + e.title + (rel ? ' (' + rel + ')' : '') + (minting ? ' — minting now' : ''));
+        node.title = '#' + (i + 1) + ' · ' + e.title + (rel ? ' · ' + rel : '') + (minting ? ' · Minting now' : '');
         node.innerHTML =
           '<span class="tl-thumb-wrap">' +
             '<img class="tl-thumb" src="' + e.image + '" alt="' + escHtml(e.title) + '" loading="lazy" decoding="async">' +
+            '<span class="tl-num">' + (i + 1) + '</span>' +
             (minting ? '<span class="tl-live"></span>' : '') +
           '</span>' +
+          '<span class="tl-stem"></span>' +
+          '<span class="tl-dot"></span>' +
           '<span class="tl-date">' + (minting ? 'Minting' : escHtml(rel || '—')) + '</span>';
         tl.appendChild(node);
       });
