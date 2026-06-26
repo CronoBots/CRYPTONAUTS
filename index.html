@@ -2805,7 +2805,19 @@ body::after {
     .tl-node.tl-minting .tl-stem { background: #22c55e; }
     .tl-node.tl-minting .tl-dot { background: #22c55e; border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.7); }
     .tl-node.tl-minting .tl-date { color: #22c55e; }
-    @keyframes tlLivePulse { 0%, 100% { box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px rgba(34, 197, 94, 0.22); } 50% { box-shadow: 0 4px 12px rgba(0,0,0,0.4), 0 0 0 5px rgba(34, 197, 94, 0.36); } }
+    /* Repère « To be continued » (à droite de la dernière collection) : ghost pointillé pour les
+       sorties futures. Non cliquable, rail/tige/pastille en pointillés. */
+    .tl-soon { cursor: default; }
+    .tl-soon .tl-thumb-soon {
+      display: inline-flex; align-items: center; justify-content: center;
+      border-style: dashed; border-color: rgba(255, 106, 26, 0.5);
+      background: rgba(255, 106, 26, 0.06); color: rgba(255, 106, 26, 0.85); box-shadow: none;
+    }
+    .tl-soon:hover .tl-thumb-soon { transform: none; border-color: rgba(255, 106, 26, 0.7); box-shadow: none; }
+    .tl-soon::before { background: repeating-linear-gradient(90deg, var(--hairline) 0 5px, transparent 5px 11px); }
+    .tl-soon .tl-stem { background: repeating-linear-gradient(180deg, var(--hairline) 0 4px, transparent 4px 8px); }
+    .tl-soon .tl-dot { background: #15100c; border-style: dashed; border-color: rgba(236, 228, 212, 0.45); }
+    .tl-soon .tl-date { white-space: normal; max-width: 86px; line-height: 1.22; font-style: italic; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) {
       .tl-thumb, .tl-dot, .tl-stem { transition: none; }
       .tl-node.tl-minting .tl-thumb, .tl-live { animation: none; }
@@ -3666,6 +3678,22 @@ body::after {
           '<span class="tl-date">' + (minting ? 'Minting' : escHtml(rel || '—')) + '</span>';
         tl.appendChild(node);
       });
+      // Repère final « To be continued » (à droite de la dernière collection) : sorties futures.
+      const soon = document.createElement('span');
+      soon.className = 'tl-node tl-soon';
+      soon.setAttribute('role', 'listitem');
+      soon.setAttribute('aria-label', 'More collections to come');
+      soon.title = 'To be continued';
+      soon.innerHTML =
+        '<span class="tl-thumb-wrap">' +
+          '<span class="tl-thumb tl-thumb-soon" aria-hidden="true">' +
+            '<svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>' +
+          '</span>' +
+        '</span>' +
+        '<span class="tl-stem"></span>' +
+        '<span class="tl-dot"></span>' +
+        '<span class="tl-date">To be continued</span>';
+      tl.appendChild(soon);
       // Délégation : clic → scroll vers la carte (+ surbrillance du repère).
       tl.addEventListener('click', function (ev) {
         const node = ev.target.closest('.tl-node');
