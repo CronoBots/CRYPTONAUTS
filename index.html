@@ -409,9 +409,9 @@ body::after {
       transition: color 0.18s ease, transform 0.18s ease;
     }
     .twitter-link svg { display: block; width: 15px; height: 15px; }
-    /* Leaderboard global : grande police → logo X un peu plus grand (mais réduit) pour rester proportionné. */
-    #global-owners li .twitter-link svg, #additional-owners li .twitter-link svg { width: 19px; height: 19px; }
-    #global-owners li .twitter-link, #additional-owners li .twitter-link { top: -2px; }
+    /* Logo X : même taille (19px) et même réglage vertical dans le leaderboard général ET de collection. */
+    #global-owners li .twitter-link svg, #additional-owners li .twitter-link svg, .cv-lb-list .twitter-link svg { width: 19px; height: 19px; }
+    #global-owners li .twitter-link, #additional-owners li .twitter-link, .cv-lb-list .twitter-link { top: -2px; }
     .twitter-link:hover {
       color: #fff !important;
       transform: translateY(-1px);
@@ -1966,6 +1966,23 @@ body::after {
     .install-btn:hover { box-shadow: 0 0 22px rgba(255, 106, 26, 0.4); }
     /* Sur PC, installer la PWA n'a aucun intérêt : le bouton n'apparaît que sur mobile. */
     @media (min-width: 601px) { .install-btn { display: none !important; } }
+    /* Bouton « Installer » : même style que le bouton scroll (#scrollTopBtn), mais coin inférieur GAUCHE. */
+    #installBtn.install-btn {
+      position: fixed; bottom: 22px; left: 22px; right: auto; z-index: 900;
+      width: 52px; height: 52px; padding: 0; gap: 0;
+      border: 1px solid rgba(255, 106, 26, 0.4); border-radius: 50%;
+      background: rgba(20, 22, 38, 0.85); color: #ff6a1a;
+      display: inline-flex; align-items: center; justify-content: center;
+      box-shadow: 0 0 18px rgba(255, 106, 26, 0.35);
+      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+    }
+    #installBtn.install-btn:hover { background: rgba(255, 106, 26, 0.18); box-shadow: 0 0 26px rgba(255, 106, 26, 0.55); transform: none; }
+    #installBtn.install-btn:active { transform: scale(0.92); }
+    #installBtn .install-label { display: none; }   /* icône seule, comme le bouton scroll */
+    #installBtn.install-btn[hidden] { display: none; }   /* l'id ne doit pas réafficher le bouton masqué (mode standalone) */
+    @media screen and (max-width: 600px) {
+      #installBtn.install-btn { width: 46px; height: 46px; bottom: 16px; left: 16px; }
+    }
 
     @media screen and (max-width: 600px) {
       .sep { margin: 0 12px; }
@@ -2568,7 +2585,7 @@ body::after {
     .cv-lb-search:focus { outline: none; border-color: rgba(255, 106, 26, 0.5); }
     .cv-lb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
     .cv-lb-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); border-left: 3px solid rgba(255, 106, 26, 0.35); }   /* bord gauche 3px, comme le leaderboard général */
-    .cv-lb-list .left-container { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
+    .cv-lb-list .left-container { display: flex; align-items: center; gap: 8px; flex: 1 1 auto; min-width: 0; }   /* espacement aligné sur le leaderboard général */
     .cv-lb-list .left-container > a:not(.twitter-link) { min-width: 0; flex: 0 1 auto; }   /* le nom tronque, le compteur ne déborde pas */
     .cv-lb-list .rank { font-family: var(--font-display); color: var(--muted); min-width: 22px; text-align: center; flex: none; }
     .cv-lb-list li.rank-1 .rank { color: #ffd700; }
@@ -3277,9 +3294,9 @@ body::after {
       <img src="assets/logo.png" alt="Cronobots">
       <p>Built by <a href="https://x.com/Cronos_WTF" target="_blank" rel="noopener">Unscoop</a></p>
     </div>
-    <button id="installBtn" class="install-btn">
-      <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Install app
+    <button id="installBtn" class="install-btn" aria-label="Install app" title="Install app">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="install-label">Install app</span>
     </button>
     <div class="footer-social" aria-label="Cryptonauts on social media">
       <a href="https://x.com/cryptonautscdc" target="_blank" rel="noopener" aria-label="X">
