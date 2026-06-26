@@ -504,6 +504,8 @@ body::after {
       align-items: center;
       gap: 8px;
     }
+    /* « Built by … » descendu d'un cheveu pour s'aligner optiquement sur le centre du logo. */
+    .footer-left p { margin: 0; transform: translateY(2px); }
 
     .footer-right {
       text-align: right;
@@ -1974,9 +1976,12 @@ body::after {
       background: rgba(20, 22, 38, 0.85); color: #ff6a1a;
       display: inline-flex; align-items: center; justify-content: center;
       box-shadow: 0 0 18px rgba(255, 106, 26, 0.35);
-      transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+      /* Visible uniquement en bas de page (classe .visible posée par le scroll) — comme #scrollTopBtn. */
+      opacity: 0; visibility: hidden; transform: translateY(12px);
+      transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s, box-shadow 0.2s, background 0.2s;
     }
-    #installBtn.install-btn:hover { background: rgba(255, 106, 26, 0.18); box-shadow: 0 0 26px rgba(255, 106, 26, 0.55); transform: none; }
+    #installBtn.install-btn.visible { opacity: 1; visibility: visible; transform: translateY(0); }
+    #installBtn.install-btn:hover { background: rgba(255, 106, 26, 0.18); box-shadow: 0 0 26px rgba(255, 106, 26, 0.55); }
     #installBtn.install-btn:active { transform: scale(0.92); }
     #installBtn .install-label { display: none; }   /* icône seule, comme le bouton scroll */
     #installBtn.install-btn[hidden] { display: none; }   /* l'id ne doit pas réafficher le bouton masqué (mode standalone) */
@@ -4167,7 +4172,6 @@ body::after {
             <ul id="global-owners"></ul>
             <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
           </div>
-          <img src="assets/Footer.png" alt="Cryptonauts Footer Banner" class="footer-image" loading="lazy" decoding="async">
         `;
         return section;
       } catch (error) {
@@ -4700,8 +4704,14 @@ body::after {
         window.addEventListener('resize', syncScrollPad);
         const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let starTicking = false;
+        const installBtnEl = document.getElementById('installBtn');
         const onScroll = () => {
           if (scrollTopBtn) scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+          // Bouton « Installer » : visible seulement quand on atteint le bas de la page.
+          if (installBtnEl && !installBtnEl.hidden) {
+            const nearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 90);
+            installBtnEl.classList.toggle('visible', nearBottom);
+          }
           if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
           if (!prefersReduced && !starTicking) {
             starTicking = true;
