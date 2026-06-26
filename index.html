@@ -2813,10 +2813,10 @@ body::after {
     .tl-node.is-active .tl-dot { background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(255, 106, 26, 0.7); transform: scale(1.18); }
     .tl-node.is-active .tl-date { color: var(--primary-color); }
     /* Minting (Crovia) : la vignette a un HALO VERT qui clignote (plus de point vert séparé). */
-    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(34, 197, 94, 0.55), 0 0 12px rgba(34, 197, 94, 0.4); animation: tlLivePulse 1.5s ease-in-out infinite; }
+    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(34, 197, 94, 0.5), 0 0 8px rgba(34, 197, 94, 0.28); animation: tlLivePulse 1.6s ease-in-out infinite; }
     @keyframes tlLivePulse {
-      0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(34, 197, 94, 0.55), 0 0 10px rgba(34, 197, 94, 0.3); }
-      50%      { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(34, 197, 94, 0.5), 0 0 26px rgba(34, 197, 94, 0.9); }
+      0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(34, 197, 94, 0.45), 0 0 7px rgba(34, 197, 94, 0.22); }
+      50%      { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(34, 197, 94, 0.45), 0 0 15px rgba(34, 197, 94, 0.5); }
     }
     .tl-node.tl-minting .tl-num { background: linear-gradient(135deg, #4ade80, #16a34a); color: #052e16; }
     .tl-node.tl-minting .tl-stem { background: #22c55e; }
@@ -3579,7 +3579,8 @@ body::after {
 
     // ───────── Page détaillée d'une collection (vue plein écran, routage #c/<i>) ─────────
     const bannerCache = {};
-    const cv = { id: null, idx: -1, skip: 0, total: 0, loading: false };
+    const cv = { id: null, idx: -1, skip: 0, total: 0, loading: false, extList: null, extShown: 0, extHref: '#', extImage: '' };
+    const CV_PAGE = 50;   // items affichés par lot (identique à la pagination crypto.com)
 
     async function fetchBanner(id) {
       if (bannerCache[id] !== undefined) return bannerCache[id];
@@ -4103,12 +4104,27 @@ body::after {
     function renderExternalAssets(collection, grid) {
       const list = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[collection.contract]) || [];
       if (!list.length) { grid.innerHTML = '<p class="cm-empty">No items available.</p>'; return; }
-      const href = collection.croviaUrl || '#';
-      grid.innerHTML = list.map((a, i) =>
-        '<a class="nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
-        + '<span class="nft-img"><img ' + (a.c ? ipfsAttrs(a.c, 320, { gw: i, fallback: collection.image }) : ('src="' + escHtml(collection.image) + '"')) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
-        + '<span class="nft-name">' + escHtml(a.n) + '</span></a>'
-      ).join('');
+      // Pagination côté client (comme les collections crypto.com) : 1er lot puis « Load more ».
+      cv.extList = list;
+      cv.extHref = collection.croviaUrl || '#';
+      cv.extImage = collection.image;
+      cv.extShown = 0;
+      grid.innerHTML = '';
+      renderMoreExternal();
+    }
+    function externalAssetHTML(a, i, href, image) {
+      return '<a class="nft" href="' + escHtml(href) + '" target="_blank" rel="noopener" title="' + escHtml(a.n) + '">'
+        + '<span class="nft-img"><img ' + (a.c ? ipfsAttrs(a.c, 320, { gw: i, fallback: image }) : ('src="' + escHtml(image) + '"')) + ' alt="' + escHtml(a.n) + '" loading="lazy" decoding="async"></span>'
+        + '<span class="nft-name">' + escHtml(a.n) + '</span></a>';
+    }
+    function renderMoreExternal() {
+      const grid = document.getElementById('cvNfts');
+      const moreBtn = document.getElementById('cvMore');
+      const list = cv.extList || [];
+      const next = list.slice(cv.extShown, cv.extShown + CV_PAGE);
+      grid.insertAdjacentHTML('beforeend', next.map((a, k) => externalAssetHTML(a, cv.extShown + k, cv.extHref, cv.extImage)).join(''));
+      cv.extShown += next.length;
+      if (moreBtn) moreBtn.hidden = cv.extShown >= list.length;
     }
 
     async function cvLoadMore(idx) {
@@ -4584,7 +4600,11 @@ body::after {
           if (more) more.style.display = 'none';
         }, 200));
         const cvMoreBtn = document.getElementById('cvMore');
-        if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => cvLoadMore(cv.idx));
+        if (cvMoreBtn) cvMoreBtn.addEventListener('click', () => {
+          const c = (typeof collectionsData !== 'undefined') ? collectionsData[cv.idx] : null;
+          if (c && c.external) renderMoreExternal();   // Crovia/on-chain : lot suivant côté client
+          else cvLoadMore(cv.idx);                      // crypto.com : page suivante via GraphQL
+        });
         const sbRefreshBtn = document.getElementById('sbRefresh');
         if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', () => loadSales());
         // Vidéo de fond du hero retirée pour l'instant (sera retravaillée plus tard) :
