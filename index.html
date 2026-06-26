@@ -2993,6 +2993,8 @@ body::after {
     .sb-group-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-group-count { flex: none; font-family: var(--font-body); font-size: 0.62rem; color: var(--muted);
       background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 8px; }
+    /* Badge de type (Mint/Sale) porté par l'en-tête quand tout le groupe est du même type. */
+    .sb-group-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
     .sb-row {
       position: relative; overflow: hidden;
       display: grid; grid-template-columns: 60px 1fr auto; gap: 15px; align-items: center;
@@ -3055,6 +3057,7 @@ body::after {
       .sb-group-head { font-size: 0.74rem; gap: 7px; margin-top: 6px; padding: 1px 2px; }
       .sb-group-logo { width: 18px; height: 18px; border-radius: 5px; }
       .sb-group-count { font-size: 0.56rem; padding: 0 6px; }
+      .sb-group-tag { font-size: 0.46rem; padding: 1px 6px; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
@@ -3883,31 +3886,48 @@ body::after {
           if (last && last.col === s.col) last.items.push(s);
           else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
         });
-        const sbRowHTML = (s) => {
+        // hideBadge : le badge type est porté par l'en-tête (groupe homogène) → inutile sur la ligne.
+        // hideParties : transfert identique à la ligne précédente du groupe → on ne le répète pas.
+        const sbRowHTML = (s, hideBadge, hideParties) => {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
           const isMint = (s.seller === 'Mint');
           const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
           const tagTxt = isMint ? 'Mint' : 'Sale';
-          // Badge de type : version inline (à côté du nom, sur PC) + version coin sup. droit (mobile).
-          const tagInline = '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
-          const tagCorner = '<span class="sb-tag sb-tag--corner ' + tagCls + '">' + tagTxt + '</span>';
+          const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
+          const tagCorner = hideBadge ? '' : '<span class="sb-tag sb-tag--corner ' + tagCls + '">' + tagTxt + '</span>';
+          const parties = hideParties ? '' : '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
             + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div>'
-            + '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>'
+            + parties
             + '</div>'
             + '<div class="sb-right">' + tagCorner + '<span class="sb-price">' + escHtml(s.price) + '</span>'
             + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
         };
+        const partyKey = (s) => s.seller + '→' + s.buyer;
         feed.innerHTML = groups.map(g => {
+          // Badge dans l'en-tête seulement si TOUT le groupe est du même type (Mint xor Sale).
+          const firstMint = (g.items[0].seller === 'Mint');
+          const uniformType = g.items.every(it => (it.seller === 'Mint') === firstMint);
+          const headTag = uniformType
+            ? '<span class="sb-tag sb-group-tag ' + (firstMint ? 'sb-tag-mint' : 'sb-tag-sale') + '">' + (firstMint ? 'Mint' : 'Sale') + '</span>'
+            : '';
           const head = '<div class="sb-group-head">'
             + (g.colImg ? '<img class="sb-group-logo" src="' + escHtml(g.colImg) + '" alt="" loading="lazy" decoding="async">' : '')
             + '<span class="sb-group-name">' + escHtml(g.col) + '</span>'
+            + headTag
             + (g.items.length > 1 ? '<span class="sb-group-count">' + g.items.length + '</span>' : '')
             + '</div>';
-          return head + g.items.map(sbRowHTML).join('');
+          let prevParty = null;
+          const rows = g.items.map(s => {
+            const k = partyKey(s);
+            const dupParty = (k === prevParty);   // même transfert que la ligne précédente du groupe
+            prevParty = k;
+            return sbRowHTML(s, uniformType, dupParty);
+          }).join('');
+          return head + rows;
         }).join('');
         if (countEl) countEl.textContent = top.length + ' recent sales';
         // Garde-fou : une vignette IPFS directe (pinata) qui « hang » > 12 s → bascule sur le logo
