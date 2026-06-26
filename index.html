@@ -2426,16 +2426,17 @@ body::after {
     .col-item {
       position: relative; display: block;
       border-radius: 18px; overflow: hidden;
-      border: 1px solid rgba(255, 106, 26, 0.45);   /* contour orange sur TOUTES les cartes */
+      border: 1px solid var(--primary-color);   /* contour orange plein sur TOUTES les cartes */
       background: linear-gradient(135deg, #100c09, #15110d);
-      /* Halo orange TOUJOURS présent (même au repos, sur toutes les cartes). */
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35), 0 0 26px rgba(255, 106, 26, 0.22);
+      /* Halo orange comme une carte SÉLECTIONNÉE, en permanence sur toutes les cartes
+         (anneau + glow, identique à .col-item.is-open). */
+      box-shadow: 0 0 0 2px rgba(255, 106, 26, 0.22), 0 16px 38px rgba(255, 106, 26, 0.28);
       opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .col-item:hover, .col-item:focus-within {
-      border-color: rgba(255, 106, 26, 0.65);
-      box-shadow: 0 16px 38px rgba(255, 106, 26, 0.2);
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(255, 106, 26, 0.34), 0 18px 44px rgba(255, 106, 26, 0.38);
     }
     /* Carte active (dépliée) : halo orange. */
     .col-item.is-open { border-color: var(--primary-color); box-shadow: 0 0 0 2px rgba(255, 106, 26, 0.22), 0 16px 38px rgba(255, 106, 26, 0.28); }
