@@ -2573,7 +2573,7 @@ body::after {
     .cv-lb-search::placeholder { color: var(--muted); }
     .cv-lb-search:focus { outline: none; border-color: rgba(255, 106, 26, 0.5); }
     .cv-lb-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-    .cv-lb-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
+    .cv-lb-list li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 14px; border-radius: 10px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); border-left: 3px solid rgba(255, 106, 26, 0.35); }   /* bord gauche 3px, comme le leaderboard général */
     .cv-lb-list .left-container { display: flex; align-items: center; gap: 12px; flex: 1 1 auto; min-width: 0; }
     .cv-lb-list .left-container > a:not(.twitter-link) { min-width: 0; flex: 0 1 auto; }   /* le nom tronque, le compteur ne déborde pas */
     .cv-lb-list .rank { font-family: var(--font-display); color: var(--muted); min-width: 22px; text-align: center; flex: none; }
