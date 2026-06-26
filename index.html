@@ -2843,7 +2843,7 @@ body::after {
     .col-item.is-open .col-arrow { opacity: 0; pointer-events: none; }
     /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
     /* padding-top réservé pour la moitié basse du logo à cheval (92px → ~46px sous la bannière). */
-    .col-body { position: relative; padding: 52px clamp(16px, 3vw, 28px) 38px; transition: padding-bottom 0.25s ease; }   /* bas réservé pour la flèche (centrée en bas) */
+    .col-body { position: relative; padding: 62px clamp(16px, 3vw, 28px) 38px; transition: padding-bottom 0.25s ease; }   /* bas réservé pour la flèche (centrée en bas) */
     /* Carte dépliée : la flèche disparaît, on récupère son espace → moins de vide avant la description. */
     .col-item.is-open .col-body { padding-bottom: 6px; }
     /* Nom de la collection : aligné verticalement sur le centre du logo (bord bannière/corps) et
@@ -2860,7 +2860,7 @@ body::after {
     @media screen and (max-width: 600px) {
       .col-banner { aspect-ratio: 16 / 6; max-height: 140px; }
       .col-logo { width: 60px; height: 60px; left: 13px; border-radius: 13px; }
-      .col-body { padding: 36px 13px 32px; }
+      .col-body { padding: 44px 13px 32px; }
       .col-title-wrap { left: 73px; right: 13px; gap: 2px; }
       .col-title { font-size: 1.04rem; }
       .col-date { font-size: 0.56rem; letter-spacing: 0.12em; }
