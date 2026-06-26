@@ -3009,11 +3009,15 @@ body::after {
     .sb-batch-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
     .sb-batch-from { font-size: 0.72rem; color: rgba(236, 228, 212, 0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
     .sb-batch-arrow { color: var(--primary-color); flex: none; }
-    .sb-batch-buyer { font-family: var(--font-display); font-size: 0.95rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-    .sb-batch-count { flex: none; font-family: var(--font-body); font-size: 0.6rem; color: #ffc195; background: rgba(255, 106, 26, 0.14); border: 1px solid rgba(255, 106, 26, 0.32); border-radius: 999px; padding: 1px 8px; }
-    .sb-batch-time { flex: none; margin-left: auto; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(236, 228, 212, 0.42); white-space: nowrap; }
+    .sb-batch-buyer { flex: 0 1 auto; font-family: var(--font-display); font-size: 0.95rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    /* Récap à droite : prix consolidé (qté × prix) + temps. */
+    .sb-batch-meta { flex: none; margin-left: auto; display: flex; align-items: baseline; gap: 9px; padding-left: 6px; }
+    .sb-batch-sum { font-family: var(--font-display); font-size: 0.8rem; color: #ff8a4c; white-space: nowrap; }
+    .sb-batch-qty { color: rgba(236, 228, 212, 0.5); font-family: var(--font-body); font-size: 0.82em; }
+    .sb-batch-time { flex: none; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(236, 228, 212, 0.42); white-space: nowrap; }
     /* Lignes NFT À L'INTÉRIEUR du cadre : plus de bordure/fond propre, juste un séparateur. */
     .sb-batch .sb-row { border: 0; background: transparent; border-radius: 0; padding: 8px 16px; }
+    .sb-batch .sb-row--noprice { grid-template-columns: 60px 1fr; }
     .sb-batch .sb-row::before { display: none; }
     .sb-batch .sb-row:hover { transform: none; background: rgba(255, 255, 255, 0.03); border-color: transparent; }
     .sb-batch .sb-row + .sb-row { border-top: 1px solid rgba(255, 255, 255, 0.05); }
@@ -3083,6 +3087,9 @@ body::after {
       .sb-batch-buyer { font-size: 0.86rem; }
       .sb-batch-tag { font-size: 0.44rem; padding: 1px 6px; }
       .sb-batch-from { font-size: 0.62rem; }
+      .sb-batch-meta { gap: 7px; padding-left: 5px; }
+      .sb-batch-sum { font-size: 0.72rem; }
+      .sb-batch .sb-row--noprice { grid-template-columns: 46px 1fr; }
       .sb-batch-count { font-size: 0.54rem; padding: 0 6px; }
       .sb-batch-time { font-size: 0.52rem; }
       .sb-batch .sb-row { padding: 7px 12px; }
@@ -3914,18 +3921,19 @@ body::after {
           if (last && last.col === s.col) last.items.push(s);
           else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
         });
-        // Ligne d'un NFT à l'intérieur d'un cadre de transfert (acheteur) : NFT mis en avant + prix.
-        const sbRowHTML = (s, hideBadge) => {
+        // Ligne d'un NFT dans un cadre de transfert : NFT mis en avant. Prix masqué si consolidé en en-tête.
+        const sbRowHTML = (s, hideBadge, hidePrice) => {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
           const isMint = (s.seller === 'Mint');
           const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
           const tagTxt = isMint ? 'Mint' : 'Sale';
           const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
-          return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
+          const priceHTML = hidePrice ? '' : '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div>';
+          return '<a class="sb-row' + (hidePrice ? ' sb-row--noprice' : '') + '" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
             + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
             + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
-            + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div></a>';
+            + priceHTML + '</a>';
         };
         const partyKey = (s) => s.seller + '→' + s.buyer;
         feed.innerHTML = groups.map(g => {
@@ -3949,12 +3957,19 @@ body::after {
             const parties = isMintB
               ? '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
               : '<span class="sb-batch-from">' + escHtml(b.seller) + '</span><span class="sb-batch-arrow">→</span><span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>';
+            const n = b.items.length;
+            // Prix unitaire identique partout → on le consolide (qté × prix) dans l'en-tête et on le retire
+            // des lignes (showcase NFT épuré). Sinon on garde le prix par ligne et on indique le nombre.
+            const uniformPrice = b.items.every(it => it.price === b.items[0].price);
+            const summary = uniformPrice
+              ? (n > 1 ? '<span class="sb-batch-qty">' + n + ' ×</span> ' + escHtml(b.items[0].price) : escHtml(b.items[0].price))
+              : '<span class="sb-batch-qty">' + n + ' items</span>';
             const bhead = '<div class="sb-batch-head">'
               + typeBadge + parties
-              + (b.items.length > 1 ? '<span class="sb-batch-count">' + b.items.length + '</span>' : '')
-              + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span>'
+              + '<span class="sb-batch-meta"><span class="sb-batch-sum">' + summary + '</span>'
+              + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span></span>'
               + '</div>';
-            return '<div class="sb-batch">' + bhead + b.items.map(s => sbRowHTML(s, true)).join('') + '</div>';
+            return '<div class="sb-batch">' + bhead + b.items.map(s => sbRowHTML(s, true, uniformPrice)).join('') + '</div>';
           }).join('');
           return head + body;
         }).join('');
