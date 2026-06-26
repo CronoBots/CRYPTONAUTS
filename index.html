@@ -2895,7 +2895,15 @@ body::after {
     .sb-row:hover { transform: translateY(-2px); border-color: rgba(255, 106, 26, 0.45); background: rgba(28, 20, 14, 0.8); text-decoration: none; }
     .sb-row:hover::before { opacity: 1; }
     .sb-thumb-wrap { position: relative; width: 60px; height: 60px; flex-shrink: 0; }
-    .sb-thumb { width: 60px; height: 60px; border-radius: 13px; object-fit: cover; background: rgba(255, 255, 255, 0.04); }
+    .sb-thumb { width: 60px; height: 60px; border-radius: 13px; object-fit: cover; background: rgba(255, 255, 255, 0.04); opacity: 0; transition: opacity 0.3s ease; }
+    .sb-thumb-wrap.is-loaded .sb-thumb { opacity: 1; }
+    /* Skeleton shimmer tant que la vignette (IPFS lente) n'est pas chargée. */
+    .sb-thumb-wrap::after {
+      content: ''; position: absolute; inset: 0; border-radius: 13px; pointer-events: none;
+      background: linear-gradient(100deg, rgba(255,255,255,0.03) 30%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 70%);
+      background-size: 200% 100%; animation: shimmer 1.3s linear infinite;
+    }
+    .sb-thumb-wrap.is-loaded::after { display: none; }
     /* PC : infos l'une à côté de l'autre (nom · collection · vendeur→acheteur). */
     .sb-main { min-width: 0; display: flex; flex-direction: row; align-items: center; gap: 20px; }
     .sb-line1 { display: flex; align-items: center; gap: 8px; min-width: 0; flex: 1 1 auto; }
@@ -3427,7 +3435,15 @@ body::after {
     // (event 'error' capturé en phase de capture car il ne « bubble » pas.)
     document.addEventListener('error', function (e) {
       const img = e.target;
-      if (!img || img.tagName !== 'IMG' || !img.dataset || !img.dataset.ipfs) return;
+      if (!img || img.tagName !== 'IMG' || !img.dataset) return;
+      // Vignette IPFS directe (mints V3, via pinata) en échec → logo de collection.
+      if (img.dataset.sbFallback) {
+        const fb = img.dataset.sbFallback;
+        delete img.dataset.sbFallback;
+        img.src = fb;
+        return;
+      }
+      if (!img.dataset.ipfs) return;
       const tries = parseInt(img.dataset.tries || '0', 10) + 1;
       img.dataset.tries = String(tries);
       if (tries < IPFS_GW.length) {
@@ -3446,6 +3462,8 @@ body::after {
       if (!img || img.tagName !== 'IMG' || !img.closest) return;
       const wrap = img.closest('.nft-img');
       if (wrap) wrap.classList.add('is-loaded');
+      const sbWrap = img.closest('.sb-thumb-wrap');   // Sales Bot : retire le skeleton du thumb
+      if (sbWrap) sbWrap.classList.add('is-loaded');
     }, true);
     function nftCardsHTML(assets, collectionId) {
       return (assets || []).map(a => {
@@ -3645,10 +3663,12 @@ body::after {
       // chaque entrée v3Sales (c = CID image, n = nom). Repli sur le logo si non encore résolu.
       V3_SALES.slice(0, 12).forEach(m => {
         const cid = m.c || '';
-        const thumb = cid ? ipfsThumb(cid, 120, 0) : 'assets/v3-logo.jpg?v=2';
+        // weserv et la plupart des passerelles IPFS publiques timeout/504 sur ces CID ;
+        // seule pinata répond → on charge la vignette EN DIRECT depuis pinata (repli logo).
+        const thumb = cid ? ('https://gateway.pinata.cloud/ipfs/' + cid) : 'assets/v3-logo.jpg?v=2';
         sales.push({
           col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg?v=2',
-          thumb: thumb, ipfs: cid,
+          thumb: thumb, ipfs: '', directFb: cid ? 'assets/v3-logo.jpg?v=2' : '',
           link: meta.croviaUrl || 'https://crovia.app',
           asset: m.n || ('#' + m.t),
           price: sbPrice(m.cro, 'CRO'),
@@ -3721,7 +3741,7 @@ body::after {
           const tagInline = '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
           const tagCorner = '<span class="sb-tag sb-tag--corner ' + tagCls + '">' + tagTxt + '</span>';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
+            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
             + '<div class="sb-main">'
             + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div>'
             + '<span class="sb-col">' + escHtml(s.col) + '</span>'
@@ -3731,6 +3751,15 @@ body::after {
             + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
         }).join('');
         if (countEl) countEl.textContent = top.length + ' recent sales';
+        // Garde-fou : une vignette IPFS directe (pinata) qui « hang » > 12 s → bascule sur le logo
+        // (évite un skeleton infini si la passerelle ne répond ni en load ni en error).
+        feed.querySelectorAll('.sb-thumb[data-sb-fallback]').forEach(img => {
+          setTimeout(() => {
+            if (!img.complete || img.naturalWidth === 0) {
+              const fb = img.dataset.sbFallback; if (fb) { delete img.dataset.sbFallback; img.src = fb; }
+            }
+          }, 12000);
+        });
       } catch (e) {
         feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>';
         if (countEl) countEl.textContent = '';
