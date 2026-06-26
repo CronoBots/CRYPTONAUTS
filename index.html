@@ -2594,10 +2594,11 @@ body::after {
     .cv-lb-list li.rank-1 .rank { color: #ffd700; }
     .cv-lb-list li.rank-2 .rank { color: #c0c0c0; }
     .cv-lb-list li.rank-3 .rank { color: #cd7f32; }
-    /* Top-3 (collections) : même fond teinté + bordure colorée que le leaderboard global. */
-    .cv-lb-list li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02) 62%); border-color: rgba(255, 215, 0, 0.5); }
-    .cv-lb-list li.rank-2 { background: linear-gradient(90deg, rgba(214, 214, 222, 0.13), rgba(214, 214, 222, 0.02) 62%); border-color: rgba(214, 214, 222, 0.45); }
-    .cv-lb-list li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); border-color: rgba(205, 127, 50, 0.5); }
+    /* Top-3 (collections) : même fond teinté + bordure colorée + halo lumineux que le leaderboard global
+       (le halo fait ressortir la bordure tout autour, bord gauche inclus). */
+    .cv-lb-list li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02) 62%); border-color: rgba(255, 215, 0, 0.5); box-shadow: 0 0 22px rgba(255, 215, 0, 0.30); }
+    .cv-lb-list li.rank-2 { background: linear-gradient(90deg, rgba(214, 214, 222, 0.13), rgba(214, 214, 222, 0.02) 62%); border-color: rgba(214, 214, 222, 0.45); box-shadow: 0 0 22px rgba(192, 192, 192, 0.26); }
+    .cv-lb-list li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); border-color: rgba(205, 127, 50, 0.5); box-shadow: 0 0 22px rgba(205, 127, 50, 0.26); }
     .cv-lb-list a { color: #ece4d4; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cv-lb-list a:hover { color: #fff; }
     .cv-lb-list .twitter-link { color: var(--muted); font-size: 0.82em; margin-left: 8px; flex: none; }
