@@ -305,37 +305,29 @@ body::after {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 15px 20px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid var(--hairline);   /* même bordure que le leaderboard de collection (.cv-lb-list) */
-      font-size: 1.2rem;
+      padding: 11px 14px;                       /* présentation identique au leaderboard de collection (.cv-lb-list) */
+      margin-bottom: 8px;
+      border-radius: 10px;
+      border: 1px solid var(--hairline);
+      border-left: 3px solid rgba(255, 106, 26, 0.35);   /* bord gauche orange, comme .cv-lb-list */
+      font-size: 1rem;                          /* écriture plus petite, comme le leaderboard de collection */
       text-transform: uppercase;
-      font-weight: bold;
-      background: none;
+      font-weight: 500;
+      background: rgba(255, 255, 255, 0.03);
       position: relative;
       transition: transform 0.2s;
-      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
       opacity: 1;
       will-change: transform;
       z-index: 1;
       break-inside: avoid;
     }
 
+    /* Plus de calque blanc lourd : le fond subtil de la ligne suffit (comme .cv-lb-list).
+       Les médailles (rank-1/2/3) gardent leur dégradé via ::before plus bas. */
     #global-owners li::before,
     #additional-owners li::before,
     .collection ul li::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(255, 255, 255, 0.2);
-      opacity: 0.7;
-      border-radius: 8px;
-      z-index: -1;
-      transform: translateZ(0);
+      content: none;
     }
 
     #global-owners li:hover,
@@ -347,7 +339,7 @@ body::after {
     /* PC : lignes du leaderboard plus compactes (mobile garde sa hauteur tactile). */
     @media (min-width: 601px) {
       #global-owners li, #additional-owners li {
-        padding: 9px 18px; margin-bottom: 7px; font-size: 1.05rem;
+        padding: 11px 14px; margin-bottom: 8px; font-size: 1rem;
       }
     }
 
@@ -363,7 +355,6 @@ body::after {
       opacity: 1 !important;
       color: #fff;
     }
-
     #global-owners li.rank-1 a:not(.twitter-link),
     #additional-owners li.rank-1 a:not(.twitter-link),
     .collection ul li.collection-rank-1 a:not(.twitter-link),
@@ -440,7 +431,7 @@ body::after {
     #global-owners li .count-number,
     #additional-owners li .count-number,
     .collection ul li .count-number {
-      font-size: 1.4rem; color: var(--primary-color);
+      font-size: 1.05rem; color: var(--primary-color);
     }
     #global-owners li .count-text,
     #additional-owners li .count-text,
@@ -1013,17 +1004,12 @@ body::after {
     #global-owners li.rank-3,
     #additional-owners li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); }
 
-    /* Compteur : juste le chiffre orange (ni pilule, ni mot « Cryptonauts »). */
+    /* Compteur : chiffre orange + « CRYPTONAUTS » (comme le leaderboard de collection). */
     #global-owners li .count-container,
     #additional-owners li .count-container,
     .collection ul li .count-container {
       gap: 6px;
       flex-shrink: 0;
-    }
-    #global-owners li .count-text,
-    #additional-owners li .count-text,
-    .collection ul li .count-text {
-      display: none;
     }
 
     /* ── Cartes de collection ── */
@@ -1419,8 +1405,6 @@ body::after {
       .stat-chip .l { font-size: 0.5rem; }
       .cm-header .cm-cover { width: 74px; height: 74px; }
       .cm-header .cm-title { font-size: 1.05rem; }
-      #global-owners li .count-text,
-      #additional-owners li .count-text { display: none; }
       .cm-list li .lb-count .t { display: none; }
     }
     /* ════════════════════ SHELL SITE WEB (hero, nav, sections) ════════════════════ */
@@ -2595,7 +2579,7 @@ body::after {
     .cv-lb-list li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02) 62%); border-color: rgba(255, 215, 0, 0.5); box-shadow: 0 0 22px rgba(255, 215, 0, 0.30); }
     .cv-lb-list li.rank-2 { background: linear-gradient(90deg, rgba(214, 214, 222, 0.13), rgba(214, 214, 222, 0.02) 62%); border-color: rgba(214, 214, 222, 0.45); box-shadow: 0 0 22px rgba(192, 192, 192, 0.26); }
     .cv-lb-list li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); border-color: rgba(205, 127, 50, 0.5); box-shadow: 0 0 22px rgba(205, 127, 50, 0.26); }
-    .cv-lb-list a { color: #ece4d4; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cv-lb-list a { color: #ece4d4; text-decoration: none; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .cv-lb-list a:hover { color: #fff; }
     .cv-lb-list .twitter-link { color: var(--muted); font-size: 0.82em; margin-left: 8px; flex: none; }
     .cv-lb-list .count-container { display: flex; align-items: baseline; gap: 6px; flex: none; }
