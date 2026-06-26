@@ -2460,6 +2460,14 @@ body::after {
     /* Lien vers la collection : centré, en bas du cadre. */
     .cv-link-wrap { display: flex; justify-content: center; padding: 20px 0 22px; }
     .cv-link-wrap .cv-link { margin: 0; }
+    /* ── Bas du panneau déplié : pied d'action net ──
+       On supprime le grand vide (cv-block 44px), on rapproche « Load more », et on sépare l'action
+       « voir la collection » du contenu par un filet → un vrai footer de carte (au lieu de deux
+       boutons qui flottent dans le vide). */
+    .col-panel .cv-block { margin-bottom: 0; }
+    .col-panel .cv-more { margin-top: 16px; }
+    .col-panel .cv-link-wrap { margin-top: 20px; padding: 16px 0 2px; border-top: 1px solid var(--hairline); }
+    .col-panel .cv-link { box-sizing: border-box; min-width: min(248px, 100%); max-width: 100%; justify-content: center; }
 
     .nav-links a.is-active { color: #fff; }
     .nav-links a.is-active::after { width: 100%; }
