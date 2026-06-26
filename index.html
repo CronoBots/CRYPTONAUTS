@@ -265,23 +265,15 @@ body::after {
       margin: 0 auto;
     }
 
+    /* Barre de recherche : même forme (pilule) et même police que celle des collections (.cv-lb-search). */
     #searchInput {
-      width: 100%;
-      padding: 8px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 16px;
+      width: 100%; max-width: 360px; margin: 0 0 16px; padding: 11px 16px; border-radius: 999px;
+      border: 1px solid var(--hairline); background: rgba(255, 255, 255, 0.04); color: #fff;
+      font-family: var(--font-body); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase;
       box-sizing: border-box;
-      background-color: rgba(255, 255, 255, 0.1);
-      color: var(--text-dark);
-      font-family: 'Geomanist-Bold', sans-serif;
     }
-
-    #searchInput::placeholder {
-      color: rgba(255, 255, 255, 0.5);
-      text-transform: uppercase;
-    }
+    #searchInput::placeholder { color: var(--muted); }
+    #searchInput:focus { outline: none; border-color: rgba(255, 106, 26, 0.5); }
 
     .leaderboard-section {
       margin-top: 0;
@@ -747,7 +739,7 @@ body::after {
     @media screen and (min-width: 601px) {
       #searchInput {
         width: 100%;
-        max-width: 100%;
+        max-width: 360px;
       }
       /* PC : icônes sociales toujours visibles, en bas à gauche de l'écran. */
       .footer-social {
@@ -1940,13 +1932,12 @@ body::after {
     .cm-title { text-shadow: none; }
 
     /* Champs & libellés en police de corps */
-    #searchInput { font-family: var(--font-body); font-weight: 500; }
     .stat-chip .l, .cm-stat .l, .count-text, .lb-count .t { font-family: var(--font-body); font-weight: 500; }
 
     /* Footer affiné */
     footer {
       border-top: 1px solid var(--hairline);
-      margin-top: 46px;
+      margin-top: 20px;
       padding: 24px 26px;
       font-family: var(--font-body);
       font-size: 0.82rem;
@@ -4168,7 +4159,7 @@ body::after {
             <p class="section-sub" id="lbSub">${escHtml(LB_BOARDS[0].sub)}</p>
           </div>
           <div class="summary">
-            <input type="text" id="searchInput" placeholder="SEARCH OWNER" aria-label="Search owners">
+            <input type="text" id="searchInput" placeholder="SEARCH HOLDER" aria-label="Search holders">
             <ul id="global-owners"></ul>
             <span class="show-more-btn" id="show-more-owners" aria-expanded="false" aria-label="Toggle additional owners">SHOW MORE</span>
           </div>
