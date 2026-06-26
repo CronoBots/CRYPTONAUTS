@@ -2828,7 +2828,9 @@ body::after {
     /* Disparaît quand la carte est dépliée, réapparaît au repli. */
     .col-item.is-open .col-arrow { opacity: 0; pointer-events: none; }
     /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
-    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 38px; }   /* bas réservé pour la flèche (centrée en bas) */
+    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 38px; transition: padding-bottom 0.25s ease; }   /* bas réservé pour la flèche (centrée en bas) */
+    /* Carte dépliée : la flèche disparaît, on récupère son espace → moins de vide avant la description. */
+    .col-item.is-open .col-body { padding-bottom: 14px; }
     .col-title-wrap { padding-left: 116px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
     .col-title { margin: 0; font-size: clamp(1.25rem, 2.2vw, 1.9rem); line-height: 1.12; color: #fff; }
     .col-date { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236, 228, 212, 0.6); }
