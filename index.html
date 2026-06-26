@@ -4208,6 +4208,35 @@ body::after {
       selectBoard(0); // état initial : Global
     }
 
+    // Stats marché LIVE côté client (sans attendre le workflow) : crypto.com autorise le CORS
+    // depuis crypto-nauts.com sur son GraphQL. Requête LÉGÈRE (1 appel/collection) → volume,
+    // floor, ventes, supply à chaque visite. Le gros snapshot des holders (liste) et le V3
+    // on-chain restent produits par le workflow (trop lourds pour le navigateur).
+    // Renvoie { [titre]: {vol,sales,floor,supply} } ; jamais rejeté (best-effort).
+    async function fetchLiveMarketStats() {
+      const Q = 'query GetCollectionMetric($collectionId:ID!){public{collectionMetric(id:$collectionId){totalSupply totalSalesCount owners totalSalesDecimal minSaleListingPriceDecimal}}}';
+      const entries = Object.entries(COLLECTION_META).filter(([, m]) => m && m.id && !m.external);
+      const out = {};
+      await Promise.all(entries.map(async ([title, m]) => {
+        try {
+          const r = await fetch(NFT_GQL, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ operationName: 'GetCollectionMetric', variables: { collectionId: m.id }, query: Q })
+          });
+          if (!r.ok) return;
+          const cm = (await r.json())?.data?.public?.collectionMetric;
+          if (!cm) return;
+          out[title] = {
+            vol: Number(cm.totalSalesDecimal) || 0,
+            sales: Number(cm.totalSalesCount) || 0,
+            floor: Number(cm.minSaleListingPriceDecimal) || 0,
+            supply: Number(cm.totalSupply) || 0
+          };
+        } catch (e) { /* une collection en échec n'empêche pas les autres */ }
+      }));
+      return out;
+    }
+
     // Charge le classement (collections + leaderboard global) depuis data.json,
     // produit par la GitHub Action — l'index ne contient plus aucune donnée en dur.
     async function loadLeaderboard() {
@@ -4217,6 +4246,8 @@ body::after {
         console.error('Collections container or main element not found');
         return;
       }
+      // Lancé EN PARALLÈLE du fetch data.json (ne bloque pas) : métriques marché live crypto.com.
+      const livePromise = fetchLiveMarketStats().catch(() => ({}));
       try {
         const res = await fetch('data.json', { cache: 'no-cache' });
         if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -4240,10 +4271,19 @@ body::after {
         }
       });
 
-      // Stats marché LIVE (volume/ventes/floor/supply) lues dans data.json — capturées par Test.js
-      // via GetCollectionMetric (totalSalesDecimal = volume USD, minSaleListingPriceDecimal = floor).
-      // Elles écrasent COLLECTION_STATS (cartes + détail) puis on recalcule les totaux du home.
-      // Repli sur les valeurs figées tant que data.json ne fournit pas encore ces champs.
+      // Métriques marché LIVE crypto.com (récupérées côté client ci-dessus, en parallèle) :
+      // elles priment sur data.json (plus fraîches). Timeout 4s → si crypto.com lent/HS, on
+      // garde simplement les valeurs de data.json. Le V3 (Crovia) n'est pas concerné (on-chain).
+      let liveStats = {};
+      try { liveStats = await Promise.race([livePromise, new Promise(r => setTimeout(() => r({}), 4000))]) || {}; } catch (e) { liveStats = {}; }
+      collectionsData.forEach(c => {
+        const ls = liveStats[c.title];
+        if (!ls) return;
+        c.volume = ls.vol; c.sales = ls.sales; c.floor = ls.floor; c.supply = ls.supply;
+      });
+
+      // Stats marché (volume/ventes/floor/supply) : live crypto.com si dispo, sinon data.json (workflow),
+      // sinon valeurs figées. Elles écrasent COLLECTION_STATS (cartes + détail) puis on recalcule les totaux.
       collectionsData.forEach(c => {
         const live = {};
         if (Number(c.volume) > 0) live.vol = Number(c.volume);
