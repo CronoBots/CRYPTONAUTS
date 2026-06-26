@@ -2428,7 +2428,8 @@ body::after {
       border-radius: 18px; overflow: hidden;
       border: 1px solid rgba(255, 106, 26, 0.45);   /* contour orange sur TOUTES les cartes */
       background: linear-gradient(135deg, #100c09, #15110d);
-      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35);
+      /* Halo orange TOUJOURS présent (même au repos, sur toutes les cartes). */
+      box-shadow: 0 6px 22px rgba(0, 0, 0, 0.35), 0 0 26px rgba(255, 106, 26, 0.22);
       opacity: 0; translate: 0 18px; animation: cardIn 0.5s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
       transition: border-color 0.25s ease, box-shadow 0.25s ease;
     }
@@ -2455,7 +2456,7 @@ body::after {
     .col-panel .cv-inner { padding: 0 clamp(16px, 3vw, 34px) 8px; }
     .col-panel .cv-meta { padding: 0; }
     /* Description : pleine largeur du cadre dans le panneau (pas la limite de lecture 680px). */
-    .col-panel .cv-desc { margin-top: 4px; max-width: none; }
+    .col-panel .cv-desc { margin-top: 12px; max-width: none; }
     /* Lien vers la collection : centré, en bas du cadre. */
     .cv-link-wrap { display: flex; justify-content: center; padding: 20px 0 22px; }
     .cv-link-wrap .cv-link { margin: 0; }
@@ -2779,6 +2780,8 @@ body::after {
     }
     /* ════════ GALERIE : lignes-bannières (1 collection / ligne) ════════ */
     #collections-grid { display: flex; flex-direction: column; gap: 24px; max-width: 1280px; margin: 0 auto; }
+    /* Filet doré (même style que .timeline-rule / .section-head) entre deux collections. */
+    .col-sep { flex: 0 0 auto; align-self: center; width: min(440px, 72%); height: 2px; margin: 2px 0; background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent); opacity: 0.75; }
     /* Le lien ne porte plus le cadre (sur .col-item). Jamais souligné, même au hover/tap mobile. */
     .col-row {
       position: relative; display: block; height: auto;
@@ -2799,6 +2802,17 @@ body::after {
     /* Badge « minting » : bordure verte, fond légèrement transparent, clignotant (style live). */
     .col-badge.is-live { background: rgba(34, 197, 94, 0.16); border-color: rgba(34, 197, 94, 0.9); color: #eafff1; animation: liveBadgePulse 1.6s ease-in-out infinite; }
     .col-badge.is-live .dot { background: #22c55e; box-shadow: 0 0 8px rgba(34, 197, 94, 0.95); }
+    /* « Sold out » : étiquette EN BIAIS (ruban diagonal) dans le coin supérieur droit.
+       La bannière (overflow:hidden) coupe les débords → vrai ruban d'angle. */
+    .col-ribbon {
+      position: absolute; z-index: 4; top: 20px; right: -48px; width: 168px; padding: 5px 0;
+      transform: rotate(45deg); text-align: center; pointer-events: none;
+      font-family: var(--font-body); font-size: 0.6rem; font-weight: 800; line-height: 1;
+      letter-spacing: 0.16em; text-indent: 0.16em; text-transform: uppercase; color: #fff;
+      background: linear-gradient(135deg, #ff7a2e, #d2480a);
+      border-top: 1px solid rgba(255, 255, 255, 0.28); border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+    }
     /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
     .col-badge.col-date-badge { left: 10px; right: auto; }
     .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
@@ -2828,10 +2842,13 @@ body::after {
     /* Disparaît quand la carte est dépliée, réapparaît au repli. */
     .col-item.is-open .col-arrow { opacity: 0; pointer-events: none; }
     /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
-    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 38px; transition: padding-bottom 0.25s ease; }   /* bas réservé pour la flèche (centrée en bas) */
+    /* padding-top réservé pour la moitié basse du logo à cheval (92px → ~46px sous la bannière). */
+    .col-body { position: relative; padding: 52px clamp(16px, 3vw, 28px) 38px; transition: padding-bottom 0.25s ease; }   /* bas réservé pour la flèche (centrée en bas) */
     /* Carte dépliée : la flèche disparaît, on récupère son espace → moins de vide avant la description. */
     .col-item.is-open .col-body { padding-bottom: 6px; }
-    .col-title-wrap { padding-left: 116px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
+    /* Nom de la collection : aligné verticalement sur le centre du logo (bord bannière/corps) et
+       centré horizontalement dans la bande comprise entre le bord droit du logo et le bord du cadre. */
+    .col-title-wrap { position: absolute; z-index: 3; left: calc(clamp(16px, 3vw, 28px) + 92px); right: clamp(16px, 3vw, 28px); top: 0; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 4px; }
     .col-title { margin: 0; font-size: clamp(1.25rem, 2.2vw, 1.9rem); line-height: 1.12; color: #fff; }
     .col-date { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236, 228, 212, 0.6); }
     .col-stats { display: flex; align-items: stretch; gap: 0; margin-top: 16px; }
@@ -2843,8 +2860,8 @@ body::after {
     @media screen and (max-width: 600px) {
       .col-banner { aspect-ratio: 16 / 6; max-height: 140px; }
       .col-logo { width: 60px; height: 60px; left: 13px; border-radius: 13px; }
-      .col-body { padding: 10px 13px 32px; }
-      .col-title-wrap { padding-left: 74px; min-height: 36px; gap: 2px; }
+      .col-body { padding: 36px 13px 32px; }
+      .col-title-wrap { left: 73px; right: 13px; gap: 2px; }
       .col-title { font-size: 1.04rem; }
       .col-date { font-size: 0.56rem; letter-spacing: 0.12em; }
       .col-stats { margin-top: 12px; }
@@ -2852,6 +2869,7 @@ body::after {
       .col-stat .cl { font-size: 0.5rem; }
       .col-badge { top: 8px; right: 8px; font-size: 0.5rem; padding: 4px 8px; gap: 5px; }
       .col-badge .dot { width: 6px; height: 6px; }
+      .col-ribbon { top: 15px; right: -52px; width: 150px; font-size: 0.5rem; padding: 4px 0; letter-spacing: 0.12em; text-indent: 0.12em; }
       .col-mint { margin-top: 12px; }
       .col-mint-row .num { font-size: 0.82rem; }
     }
@@ -3359,7 +3377,7 @@ body::after {
         const minting = meta.status === 'minting';
         const badge = minting
           ? '<span class="col-badge is-live"><span class="dot"></span>Minting on Crovia</span>'
-          : (meta.soldOut ? '<span class="col-badge">Sold out</span>' : '');
+          : (meta.soldOut ? '<span class="col-ribbon">Sold out</span>' : '');
         const dateBadge = rel ? `<span class="col-badge col-date-badge">${escHtml(rel)}</span>` : '';
         const priceRow = meta.mintPriceCro ? `<div class="col-mint-row" style="margin:9px 0 0"><span class="lbl">Mint price</span><span class="num"><b>${meta.mintPriceCro.toLocaleString('fr-FR')}</b> CRO</span></div>` : '';
         const mint = (minting && meta.mintTotal) ? `
@@ -4360,6 +4378,13 @@ body::after {
 
       collectionsData.forEach((collection, i) => {
         collectionsContainer.appendChild(renderCollection(collection, i));
+        // Filet doré entre deux collections (pas après la dernière).
+        if (i < collectionsData.length - 1) {
+          const sep = document.createElement('div');
+          sep.className = 'col-sep';
+          sep.setAttribute('aria-hidden', 'true');
+          collectionsContainer.appendChild(sep);
+        }
       });
 
       buildCollectionsTimeline();
