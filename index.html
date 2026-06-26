@@ -2984,6 +2984,22 @@ body::after {
     .sb-refresh:hover { background: rgba(255, 106, 26, 0.14); border-color: rgba(255, 106, 26, 0.5); color: #fff; }
     .sb-refresh svg { transition: transform 0.5s ease; }
     .sb-refresh:hover svg { transform: rotate(-180deg); }
+    /* Filtres segmentés Tout / Mints / Ventes — les compteurs servent aussi de stats. */
+    .sb-filters { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--hairline); }
+    .sb-chip {
+      display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+      font-family: var(--font-body); font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase;
+      color: rgba(236, 228, 212, 0.6); padding: 6px 14px; border-radius: 999px; border: 0; background: transparent;
+      transition: color 0.2s ease, background 0.2s ease;
+    }
+    .sb-chip:hover { color: #fff; }
+    .sb-chip.is-active { color: #1a0f08; background: var(--primary-color); font-weight: 600; }
+    .sb-chip-n { font-family: var(--font-display); font-size: 0.72rem; opacity: 0.75; }
+    .sb-chip.is-active .sb-chip-n { opacity: 0.85; }
+    /* Animation d'entrée échelonnée (délai posé en inline lors du rendu). */
+    @keyframes sbIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
+    .sb-feed > .sb-batch, .sb-feed > .sb-group-head { animation: sbIn 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+    @media (prefers-reduced-motion: reduce) { .sb-feed > .sb-batch, .sb-feed > .sb-group-head { animation: none; } }
     .sb-feed { display: grid; grid-template-columns: 1fr; gap: 9px; }   /* une seule colonne (avant : multi-colonnes sur PC) */
     /* En-tête de collection coiffant une suite de ventes consécutives de cette collection. */
     .sb-group-head { display: flex; align-items: center; gap: 9px; padding: 2px 4px; margin-top: 7px;
@@ -3062,6 +3078,12 @@ body::after {
     @media screen and (max-width: 600px) {
       /* ── Sales Bot mobile : lignes COMPACTES (plus de ventes visibles à l'écran) ── */
       .sb-feed { gap: 7px; }
+      .sb-bar { gap: 8px; }
+      .sb-filters { gap: 2px; padding: 3px; flex: 1 1 auto; }
+      .sb-chip { padding: 6px 8px; font-size: 0.62rem; gap: 4px; flex: 1 1 0; justify-content: center; letter-spacing: 0.03em; }
+      .sb-chip-n { font-size: 0.62rem; }
+      .sb-refresh { padding: 8px 11px; flex: none; }
+      .sb-refresh-tx { display: none; }   /* icône seule sur mobile */
       .sb-row { grid-template-columns: 46px 1fr auto; gap: 11px; padding: 8px 12px; align-items: center; border-radius: 12px; }
       .sb-thumb-wrap { width: 46px; height: 46px; }
       .sb-thumb { width: 46px; height: 46px; border-radius: 10px; }
@@ -3296,10 +3318,14 @@ body::after {
       </div>
       <div class="sb-wrap">
         <div class="sb-bar">
-          <span class="sb-count" id="sbCount"></span>
+          <div class="sb-filters" role="group" aria-label="Filter the feed">
+            <button class="sb-chip is-active" type="button" data-sbfilter="all">All<span class="sb-chip-n" id="sbnAll">—</span></button>
+            <button class="sb-chip" type="button" data-sbfilter="mint">Mints<span class="sb-chip-n" id="sbnMint">—</span></button>
+            <button class="sb-chip" type="button" data-sbfilter="sale">Sales<span class="sb-chip-n" id="sbnSale">—</span></button>
+          </div>
           <button class="sb-refresh" id="sbRefresh" type="button" aria-label="Refresh sales">
             <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-            Refresh
+            <span class="sb-refresh-tx">Refresh</span>
           </button>
         </div>
         <div id="salesFeed" class="sb-feed"></div>
@@ -3860,6 +3886,101 @@ body::after {
       });
     }
 
+    // ── État + rendu du flux Sales Bot (piloté par les filtres Tout / Mints / Ventes) ──
+    let SB_TOP = [];
+    let SB_FILTER = 'all';
+    function renderSalesFeed() {
+      const feed = document.getElementById('salesFeed');
+      if (!feed) return;
+      const all = SB_TOP || [];
+      // Compteurs des filtres (font aussi office de stats de synthèse).
+      const nMint = all.filter(s => s.seller === 'Mint').length;
+      const nSale = all.length - nMint;
+      const setN = (id, v) => { const e = document.getElementById(id); if (e) e.textContent = v; };
+      setN('sbnAll', all.length); setN('sbnMint', nMint); setN('sbnSale', nSale);
+      const list = SB_FILTER === 'mint' ? all.filter(s => s.seller === 'Mint')
+                 : SB_FILTER === 'sale' ? all.filter(s => s.seller !== 'Mint')
+                 : all;
+      if (!list.length) {
+        feed.innerHTML = '<p class="sb-empty">' + (all.length
+          ? 'No ' + (SB_FILTER === 'mint' ? 'mints' : SB_FILTER === 'sale' ? 'sales' : 'recent sales') + ' in the latest feed.'
+          : 'No recent sales found.') + '</p>';
+        return;
+      }
+      // Regroupe par collection consécutive (ordre récent→ancien conservé).
+      const groups = [];
+      list.forEach(s => {
+        const last = groups[groups.length - 1];
+        if (last && last.col === s.col) last.items.push(s);
+        else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
+      });
+      // Ligne d'un NFT dans un cadre de transfert : NFT mis en avant. Prix masqué si consolidé en en-tête.
+      const sbRowHTML = (s, hideBadge, hidePrice) => {
+        const thumb = s.thumb || s.colImg;
+        const link = s.link || 'https://crypto.com/nft';
+        const isMint = (s.seller === 'Mint');
+        const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
+        const tagTxt = isMint ? 'Mint' : 'Sale';
+        const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
+        const priceHTML = hidePrice ? '' : '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div>';
+        return '<a class="sb-row' + (hidePrice ? ' sb-row--noprice' : '') + '" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
+          + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
+          + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
+          + priceHTML + '</a>';
+      };
+      const partyKey = (s) => s.seller + '→' + s.buyer;
+      let order = 0;   // délai d'entrée échelonné (animation premium)
+      const stagger = () => ' style="animation-delay:' + (Math.min(order++, 14) * 0.035).toFixed(3) + 's"';
+      feed.innerHTML = groups.map(g => {
+        const head = '<div class="sb-group-head"' + stagger() + '>'
+          + (g.colImg ? '<img class="sb-group-logo" src="' + escHtml(g.colImg) + '" alt="" loading="lazy" decoding="async">' : '')
+          + '<span class="sb-group-name">' + escHtml(g.col) + '</span>'
+          + (g.items.length > 1 ? '<span class="sb-group-count">' + g.items.length + '</span>' : '')
+          + '</div>';
+        // Sous-groupe par TRANSFERT (acheteur) consécutif → un cadre distinct par acheteur.
+        const batches = [];
+        g.items.forEach(s => {
+          const last = batches[batches.length - 1];
+          const k = partyKey(s);
+          if (last && last.key === k) last.items.push(s);
+          else batches.push({ key: k, seller: s.seller, buyer: s.buyer, items: [s] });
+        });
+        const body = batches.map(b => {
+          const isMintB = (b.seller === 'Mint');
+          const typeBadge = '<span class="sb-tag sb-batch-tag ' + (isMintB ? 'sb-tag-mint' : 'sb-tag-sale') + '">' + (isMintB ? 'Mint' : 'Sale') + '</span>';
+          const parties = isMintB
+            ? '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
+            : '<span class="sb-batch-from">' + escHtml(b.seller) + '</span><span class="sb-batch-arrow">→</span><span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>';
+          const n = b.items.length;
+          const uniformPrice = b.items.every(it => it.price === b.items[0].price);
+          const summary = uniformPrice
+            ? (n > 1 ? '<span class="sb-batch-qty">' + n + ' ×</span> ' + escHtml(b.items[0].price) : escHtml(b.items[0].price))
+            : '<span class="sb-batch-qty">' + n + ' items</span>';
+          const bhead = '<div class="sb-batch-head">'
+            + typeBadge + parties
+            + '<span class="sb-batch-meta"><span class="sb-batch-sum">' + summary + '</span>'
+            + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span></span>'
+            + '</div>';
+          return '<div class="sb-batch"' + stagger() + '>' + bhead + b.items.map(s => sbRowHTML(s, true, uniformPrice)).join('') + '</div>';
+        }).join('');
+        return head + body;
+      }).join('');
+      // Garde-fou : vignette IPFS directe (pinata) qui « hang » > 12 s → bascule sur le logo.
+      feed.querySelectorAll('.sb-thumb[data-sb-fallback]').forEach(img => {
+        setTimeout(() => {
+          if (!img.complete || img.naturalWidth === 0) {
+            const fb = img.dataset.sbFallback; if (fb) { delete img.dataset.sbFallback; img.src = fb; }
+          }
+        }, 12000);
+      });
+    }
+    // Bascule de filtre (Tout / Mints / Ventes) → re-rendu instantané du flux déjà chargé.
+    function setSalesFilter(f) {
+      SB_FILTER = (f === 'mint' || f === 'sale') ? f : 'all';
+      document.querySelectorAll('.sb-chip').forEach(c => c.classList.toggle('is-active', c.dataset.sbfilter === SB_FILTER));
+      renderSalesFeed();
+    }
+
     async function loadSales(silent) {
       const feed = document.getElementById('salesFeed');
       const countEl = document.getElementById('sbCount');
@@ -3911,78 +4032,8 @@ body::after {
         // Collections externes (Crovia/Cronos) : injecte les mints comme des ventes.
         await appendExternalSales(sales);
         sales.sort((a, b) => b.ts - a.ts);
-        const top = sales.slice(0, 50);
-        if (!top.length) { feed.innerHTML = '<p class="sb-empty">No recent sales found.</p>'; if (countEl) countEl.textContent = ''; return; }
-        // Regroupe les ventes CONSÉCUTIVES de même collection (l'ordre récent→ancien est conservé) :
-        // un en-tête de collection coiffe chaque suite, les lignes ne répètent plus le nom.
-        const groups = [];
-        top.forEach(s => {
-          const last = groups[groups.length - 1];
-          if (last && last.col === s.col) last.items.push(s);
-          else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
-        });
-        // Ligne d'un NFT dans un cadre de transfert : NFT mis en avant. Prix masqué si consolidé en en-tête.
-        const sbRowHTML = (s, hideBadge, hidePrice) => {
-          const thumb = s.thumb || s.colImg;
-          const link = s.link || 'https://crypto.com/nft';
-          const isMint = (s.seller === 'Mint');
-          const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
-          const tagTxt = isMint ? 'Mint' : 'Sale';
-          const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
-          const priceHTML = hidePrice ? '' : '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div>';
-          return '<a class="sb-row' + (hidePrice ? ' sb-row--noprice' : '') + '" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-            + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
-            + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
-            + priceHTML + '</a>';
-        };
-        const partyKey = (s) => s.seller + '→' + s.buyer;
-        feed.innerHTML = groups.map(g => {
-          const head = '<div class="sb-group-head">'
-            + (g.colImg ? '<img class="sb-group-logo" src="' + escHtml(g.colImg) + '" alt="" loading="lazy" decoding="async">' : '')
-            + '<span class="sb-group-name">' + escHtml(g.col) + '</span>'
-            + (g.items.length > 1 ? '<span class="sb-group-count">' + g.items.length + '</span>' : '')
-            + '</div>';
-          // Sous-groupe par TRANSFERT (acheteur) consécutif → un cadre distinct par acheteur.
-          const batches = [];
-          g.items.forEach(s => {
-            const last = batches[batches.length - 1];
-            const k = partyKey(s);
-            if (last && last.key === k) last.items.push(s);
-            else batches.push({ key: k, seller: s.seller, buyer: s.buyer, items: [s] });
-          });
-          const body = batches.map(b => {
-            const isMintB = (b.seller === 'Mint');
-            // Type À GAUCHE du transfert. Mint : badge + acheteur (pas de flèche). Sale : badge + vendeur → acheteur.
-            const typeBadge = '<span class="sb-tag sb-batch-tag ' + (isMintB ? 'sb-tag-mint' : 'sb-tag-sale') + '">' + (isMintB ? 'Mint' : 'Sale') + '</span>';
-            const parties = isMintB
-              ? '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
-              : '<span class="sb-batch-from">' + escHtml(b.seller) + '</span><span class="sb-batch-arrow">→</span><span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>';
-            const n = b.items.length;
-            // Prix unitaire identique partout → on le consolide (qté × prix) dans l'en-tête et on le retire
-            // des lignes (showcase NFT épuré). Sinon on garde le prix par ligne et on indique le nombre.
-            const uniformPrice = b.items.every(it => it.price === b.items[0].price);
-            const summary = uniformPrice
-              ? (n > 1 ? '<span class="sb-batch-qty">' + n + ' ×</span> ' + escHtml(b.items[0].price) : escHtml(b.items[0].price))
-              : '<span class="sb-batch-qty">' + n + ' items</span>';
-            const bhead = '<div class="sb-batch-head">'
-              + typeBadge + parties
-              + '<span class="sb-batch-meta"><span class="sb-batch-sum">' + summary + '</span>'
-              + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span></span>'
-              + '</div>';
-            return '<div class="sb-batch">' + bhead + b.items.map(s => sbRowHTML(s, true, uniformPrice)).join('') + '</div>';
-          }).join('');
-          return head + body;
-        }).join('');
-        if (countEl) countEl.textContent = top.length + ' recent sales';
-        // Garde-fou : une vignette IPFS directe (pinata) qui « hang » > 12 s → bascule sur le logo
-        // (évite un skeleton infini si la passerelle ne répond ni en load ni en error).
-        feed.querySelectorAll('.sb-thumb[data-sb-fallback]').forEach(img => {
-          setTimeout(() => {
-            if (!img.complete || img.naturalWidth === 0) {
-              const fb = img.dataset.sbFallback; if (fb) { delete img.dataset.sbFallback; img.src = fb; }
-            }
-          }, 12000);
-        });
+        SB_TOP = sales.slice(0, 50);
+        renderSalesFeed();
       } catch (e) {
         feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>';
         if (countEl) countEl.textContent = '';
@@ -4704,6 +4755,12 @@ body::after {
         });
         const sbRefreshBtn = document.getElementById('sbRefresh');
         if (sbRefreshBtn) sbRefreshBtn.addEventListener('click', () => loadSales());
+        // Filtres segmentés Tout / Mints / Ventes (délégation).
+        const sbFilters = document.querySelector('.sb-filters');
+        if (sbFilters) sbFilters.addEventListener('click', (e) => {
+          const chip = e.target.closest('.sb-chip');
+          if (chip && chip.dataset.sbfilter) setSalesFilter(chip.dataset.sbfilter);
+        });
         // Vidéo de fond du hero retirée pour l'instant (sera retravaillée plus tard) :
         // seul le poster statique (assets/nebula-poster.jpg) reste affiché.
         window.addEventListener('hashchange', handleRoute);
