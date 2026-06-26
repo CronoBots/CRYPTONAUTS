@@ -3630,6 +3630,9 @@ body::after {
       });
       syncNav(name);
       window.scrollTo(0, 0);
+      // Recalcule les boutons flottants (install) : la hauteur de page a changé.
+      window.dispatchEvent(new Event('view:changed'));
+      requestAnimationFrame(() => window.dispatchEvent(new Event('view:changed')));
       // Sur mobile, la ligne du temps s'ouvre alignée à droite (collection la plus récente / minting).
       if (name === 'collections') scrollTimelineToEnd();
     }
@@ -4755,9 +4758,13 @@ body::after {
         const installBtnEl = document.getElementById('installBtn');
         const onScroll = () => {
           if (scrollTopBtn) scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
-          // Bouton « Installer » : visible seulement quand on atteint le bas de la page.
+          // Bouton « Installer » : visible UNIQUEMENT quand la page est réellement défilable
+          // ET qu'on en atteint le bas (évite l'affichage par défaut sur une vue courte / en cours
+          // de chargement, où innerHeight+scrollY dépasse déjà scrollHeight).
           if (installBtnEl && !installBtnEl.hidden) {
-            const nearBottom = (window.innerHeight + window.scrollY) >= (document.documentElement.scrollHeight - 90);
+            const doc = document.documentElement;
+            const scrollable = (doc.scrollHeight - window.innerHeight) > 140;
+            const nearBottom = scrollable && (window.innerHeight + window.scrollY >= doc.scrollHeight - 90);
             installBtnEl.classList.toggle('visible', nearBottom);
           }
           if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 30);
@@ -4770,6 +4777,19 @@ body::after {
           }
         };
         window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll, { passive: true });
+        // Recalcule l'état des boutons flottants au changement de vue / chargement de contenu
+        // (la hauteur de page change sans qu'un scroll soit déclenché).
+        window.addEventListener('view:changed', onScroll);
+        window.addEventListener('load', onScroll);
+        // Filet de sécurité : tout changement de hauteur de page (contenu async) recalcule l'état.
+        if (window.ResizeObserver) {
+          let roTick = false;
+          new ResizeObserver(() => {
+            if (roTick) return; roTick = true;
+            requestAnimationFrame(() => { roTick = false; onScroll(); });
+          }).observe(document.body);
+        }
         onScroll();
         if (scrollTopBtn) {
           scrollTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
