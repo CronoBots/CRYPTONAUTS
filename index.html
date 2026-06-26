@@ -2689,8 +2689,10 @@ body::after {
        Bande horizontale scrollable : chaque collection = une vignette ronde reliée
        par une ligne continue ; un clic fait défiler vers sa carte (data-target = idx). */
     /* En-tête « TIMELINE » : même style que l'eyebrow « THE COLLECTIONS ». */
-    /* Section Collections : pas de filet doré décoratif sous le sous-titre (juste avant la frise). */
+    /* Section Collections : pas de filet doré décoratif sous le sous-titre (juste avant la frise),
+       et espace réduit entre l'en-tête et la frise. */
     #collections .section-head::after { display: none; }
+    #collections .section-head { margin-bottom: 20px; }
     /* Filet doré sous la ligne du temps (identique à celui de .section-head). */
     .timeline-rule {
       width: 58px; height: 2px; margin: 18px auto 34px;
