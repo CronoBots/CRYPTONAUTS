@@ -3255,8 +3255,10 @@ body::after {
       "Cryptonauts": { id: "c942e9924b01fae996d8f817060611eb", items: 24, soldOut: true, desc: "Fran Rodríguez presents Cryptonauts, the first saga of his universe on Crypto.com. The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — brave quantum astronauts whose technology lets them reach the deepest corners of the mind, and a world of endless possibilities." }
     };
 
-    // Statistiques de marché réelles (crypto.com GraphQL — GetCollectionMetric) :
-    // floor, volume échangé (USD), nombre de ventes secondaires, supply on-chain.
+    // Stats de marché par collection — VALEURS DE REPLI uniquement.
+    // À chaque chargement, loadLeaderboard() les écrase avec les chiffres LIVE de data.json
+    // (Test.js → GetCollectionMetric : totalSalesDecimal=volume USD, minSaleListingPriceDecimal=floor,
+    // totalSalesCount=ventes, totalSupply=items). Servent tant que data.json n'a pas encore ces champs.
     const COLLECTION_STATS = {
       "Quantum Cryptonauts V3": { floor: null, vol: null, sales: null, supply: 299 },
       "Legendary Cryptonauts V2": { floor: 45, vol: 11607, sales: 233, supply: 328 },
@@ -3271,6 +3273,7 @@ body::after {
       "Cryptonauts: The dark side of the dune": { floor: 42, vol: 17393, sales: 299, supply: 22 },
       "Cryptonauts": { floor: 52, vol: 35758, sales: 611, supply: 24 }
     };
+    // Totaux saga — VALEURS DE REPLI ; recalculées en direct par loadLeaderboard() (somme des collections live).
     const SAGA_STATS = { volume: 193922, sales: 3914, items: 2002 };
 
     // Date de sortie sur crypto.com (mint du 1er NFT) — pour l'ordre chronologique.
@@ -4070,16 +4073,19 @@ body::after {
         const uniqueOwners = globalOwnersData.length;
         const totalNFTs = globalOwnersData.reduce((sum, o) => sum + (o.count || 0), 0);
         const collectionsCount = collectionsData.length;
-        // Toutes les stats de l'accueil regroupées ici (live + saga), sans doublon.
+        // Toutes les stats de l'accueil regroupées ici, calculées en direct depuis data.json
+        // (SAGA_STATS = totaux live agrégés ; sold-out = compte des collections sold-out).
         // value → compteur animé ; text → valeur figée (ex. « $194K »).
+        const soldOutCount = Object.values(COLLECTION_META).filter(m => m && m.soldOut).length;
+        const volK = SAGA_STATS.volume ? '$' + Math.round(SAGA_STATS.volume / 1000) + 'K' : '—';
         const stats = [
           { value: uniqueOwners, label: 'Holders' },
           { value: totalNFTs, label: 'Cryptonauts' },
           { value: collectionsCount, label: 'Collections' },
-          { text: '$194K', label: 'Traded volume' },
-          { value: 3914, label: 'Secondary sales' },
-          { value: 2002, label: 'Items minted' },
-          { value: 11, label: 'Sold-out drops' }
+          { text: volK, label: 'Traded volume' },
+          { value: SAGA_STATS.sales, label: 'Secondary sales' },
+          { value: SAGA_STATS.items, label: 'Items minted' },
+          { value: soldOutCount, label: 'Sold-out drops' }
         ];
         const band = document.createElement('section');
         band.className = 'stats-band';
@@ -4233,6 +4239,34 @@ body::after {
           if (Number.isFinite(collection.mintTotal)) m.mintTotal = collection.mintTotal;
         }
       });
+
+      // Stats marché LIVE (volume/ventes/floor/supply) lues dans data.json — capturées par Test.js
+      // via GetCollectionMetric (totalSalesDecimal = volume USD, minSaleListingPriceDecimal = floor).
+      // Elles écrasent COLLECTION_STATS (cartes + détail) puis on recalcule les totaux du home.
+      // Repli sur les valeurs figées tant que data.json ne fournit pas encore ces champs.
+      collectionsData.forEach(c => {
+        const live = {};
+        if (Number(c.volume) > 0) live.vol = Number(c.volume);
+        if (Number(c.sales) > 0) live.sales = Number(c.sales);
+        if (Number(c.floor) > 0) live.floor = Number(c.floor);
+        if (Number(c.supply) > 0) live.supply = Number(c.supply);
+        if (Object.keys(live).length) COLLECTION_STATS[c.title] = Object.assign({}, COLLECTION_STATS[c.title], live);
+      });
+      // On ne recalcule QUE si data.json fournit réellement les stats marché (champ volume/supply
+      // présent) — sinon on garde les valeurs de repli (évite d'afficher un total partiel pendant
+      // la transition, p.ex. avant le 1er run du workflow avec la nouvelle version de Test.js).
+      const hasLiveStats = collectionsData.some(c => Number(c.volume) > 0 || Number(c.supply) > 0);
+      if (hasLiveStats) {
+        let vol = 0, sales = 0, items = 0;
+        collectionsData.forEach(c => {
+          vol += Number(c.volume) || 0;
+          sales += Number(c.sales) || 0;
+          items += Number.isFinite(c.minted) ? Number(c.minted) : (Number(c.supply) || 0);  // V3 = minted, autres = supply
+        });
+        SAGA_STATS.volume = vol;
+        SAGA_STATS.sales = sales;
+        SAGA_STATS.items = items;
+      }
 
       // URL du profil reconstruite depuis le nom (non stockée dans les données → plus léger)
       collectionsData.forEach(collection => {

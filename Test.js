@@ -156,7 +156,7 @@ const Q_COLLECTION_INFO = `query GetCollection($collectionId:ID!,$cacheId:ID){
 
 const Q_COLLECTION_METRIC = `query GetCollectionMetric($collectionId:ID!,$cacheId:ID){
   public(cacheId:$cacheId){collectionMetric(id:$collectionId){
-    totalSupply totalSalesCount owners
+    totalSupply totalSalesCount owners totalSalesDecimal minSaleListingPriceDecimal
   }}}`;
 
 const Q_ALL_ASSETS = `query GetCollectionAssets($collectionId:ID,$first:Int!,$skip:Int!,$cacheId:ID){
@@ -570,6 +570,9 @@ function buildV3Collection(ranking) {
     ownersCount: owners.length, external: 'crovia', contract: V3_CONTRACT,
     croviaUrl: 'https://crovia.app/collections/' + V3_CONTRACT,
     minted, mintTotal: 299,
+    // Crovia n'expose pas de marché secondaire crypto.com → volume/ventes/floor inconnus (0).
+    // supply = NFT mintés on-chain (pour l'agrégat « Items minted » du home).
+    supply: minted, sales: 0, volume: 0, floor: 0,
     owners
   };
 }
@@ -581,6 +584,9 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Co
       collectionName: collection.name,
       totalSupply: 0,
       owners: 0,
+      sales: 0,
+      volume: 0,
+      floor: 0,
       ownerNFTs: {}
     };
     return {
@@ -589,6 +595,10 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Co
       image: collection.image,
       alt: `${collection.name} COLLECTION ICON`,
       ownersCount: scrapedData.owners,
+      supply: scrapedData.totalSupply || 0,   // items (totalSupply live)
+      sales: scrapedData.sales || 0,          // ventes secondaires (live)
+      volume: scrapedData.volume || 0,        // volume échangé USD (live)
+      floor: scrapedData.floor || 0,          // floor USD (live)
       // url reconstruite côté client, rank recalculé côté client, twitter omis si vide → JSON plus léger
       owners: Object.entries(scrapedData.ownerNFTs).map(([name, count]) => {
         const owner = { name, count };
@@ -636,6 +646,9 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
     // ── PHASE A — Infos collection (nom + métriques officielles) ──────────────
     let officialItems = 0;
     let officialOwners = 0;
+    let officialSales = 0;     // ventes secondaires (totalSalesCount)
+    let officialVolume = 0;    // volume échangé USD (totalSalesDecimal)
+    let officialFloor = 0;     // floor USD (minSaleListingPriceDecimal)
     try {
       const [info, metric] = await Promise.all([
         gql('GetCollection', { collectionId, cacheId: 'snap-col-' + collectionId }, Q_COLLECTION_INFO),
@@ -644,9 +657,13 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
       const c = info?.public?.collection;
       if (c) collectionName = c.name || '';
       const items = Number(c?.metrics?.items) || 0;
-      const totalSupply = Number(metric?.public?.collectionMetric?.totalSupply) || 0;
+      const m = metric?.public?.collectionMetric;
+      const totalSupply = Number(m?.totalSupply) || 0;
       officialItems = Math.max(items, totalSupply);
-      officialOwners = Number(metric?.public?.collectionMetric?.owners) || 0;
+      officialOwners = Number(m?.owners) || 0;
+      officialSales = Number(m?.totalSalesCount) || 0;
+      officialVolume = Number(m?.totalSalesDecimal) || 0;
+      officialFloor = Number(m?.minSaleListingPriceDecimal) || 0;
     } catch (e) {
       console.warn(`Could not fetch collection info: ${e.message}`);
     }
@@ -865,6 +882,9 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
       collectionName,
       totalSupply: officialItems > 0 ? officialItems : totalAttributed,
       owners: officialOwners > 0 ? officialOwners : scrapedOwnersCount,
+      sales: officialSales,      // ventes secondaires (live crypto.com)
+      volume: officialVolume,    // volume échangé USD (live crypto.com)
+      floor: officialFloor,      // floor USD (live crypto.com)
       ownerNFTs
     });
 
