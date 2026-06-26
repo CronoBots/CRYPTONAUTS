@@ -1909,21 +1909,39 @@ body::after {
     .nav-social a::after { display: none; }
     .live-pill { font-family: var(--font-body); font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; }
 
-    /* Métriques du hero : rangée à filets, sans cadre lourd */
+    /* Métriques du hero : toutes les stats de l'accueil regroupées en grille de cartes. */
     .hero-metrics .stats-band {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(116px, 1fr));
+      gap: 10px;
       background: none;
       border: none;
       box-shadow: none;
       border-radius: 0;
-      border-top: 1px solid var(--hairline);
-      border-bottom: 1px solid var(--hairline);
-      padding: 6px 0;
-      max-width: 460px;
+      padding: 0;
+      max-width: 600px;
+      overflow: visible;
     }
-    .hero-metrics .stat-card { border-left: none; padding: 14px 10px; }
-    .hero-metrics .stat-card + .stat-card { border-left: 1px solid var(--hairline); }
+    .hero-metrics .stat-card {
+      flex: none;
+      padding: 16px 10px;
+      border: 1px solid rgba(255, 106, 26, 0.22);
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(20, 22, 38, 0.55), rgba(255, 106, 26, 0.05));
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hero-metrics .stat-card:hover {
+      border-color: rgba(255, 106, 26, 0.45);
+      box-shadow: 0 0 18px rgba(255, 106, 26, 0.12);
+    }
+    .hero-metrics .stat-number { font-size: 1.9rem; }
     .stat-number { text-shadow: 0 0 18px rgba(255, 106, 26, 0.3); }
     .stat-label { font-family: var(--font-body); font-weight: 500; }
+    @media screen and (max-width: 600px) {
+      .hero-metrics .stats-band { grid-template-columns: 1fr 1fr; gap: 8px; max-width: 380px; }
+      .hero-metrics .stat-card:first-child { grid-column: 1 / -1; }   /* Holders en vedette, pleine largeur */
+      .hero-metrics .stat-number { font-size: 1.55rem; }
+    }
 
     /* Titres de section : glow retenu */
     .section-title { text-shadow: 0 0 22px rgba(255, 106, 26, 0.22); letter-spacing: 0.04em; text-transform: uppercase; }
@@ -2072,43 +2090,9 @@ body::after {
       color: var(--muted);
     }
 
-    /* Stats marché de la modale + chiffres de la saga */
+    /* Stats marché de la modale */
     .cm-stats { flex-wrap: wrap; }
-    .saga-stats {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);   /* PC : 5 colonnes égales, pleine largeur des cadres */
-      gap: 16px;
-      max-width: 1280px;
-      margin: 0 auto 30px;
-    }
-    .saga-stat {
-      text-align: center;
-      padding: 24px 18px;
-      border-radius: 16px;
-      background: linear-gradient(135deg, rgba(20, 22, 38, 0.55), rgba(255, 106, 26, 0.05));
-      border: 1px solid rgba(255, 106, 26, 0.22);
-    }
-    .saga-stat .v {
-      display: block;
-      font-family: var(--font-display);
-      font-size: 2.2rem;
-      line-height: 1;
-      color: var(--primary-color);
-      text-shadow: 0 0 18px rgba(255, 106, 26, 0.3);
-    }
-    .saga-stat .l {
-      display: block;
-      margin-top: 10px;
-      font-size: 0.72rem;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
     @media screen and (max-width: 600px) {
-      .saga-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-      .saga-stat { min-width: 0; padding: 14px 8px; }
-      .saga-stat:first-child { grid-column: 1 / -1; }   /* « Collections » en tête, pleine largeur */
-      .saga-stat .v { font-size: 1.4rem; }
       .tab-bar { gap: 6px; }
       .tab-btn { padding: 9px 13px; font-size: 0.72rem; letter-spacing: 0.04em; }
     }
@@ -2987,15 +2971,6 @@ body::after {
   </header>
 
   <main>
-    <section class="section reveal" id="universStats" data-view="home" aria-label="The saga in numbers">
-      <div class="saga-stats">
-        <div class="saga-stat"><span class="v">12</span><span class="l">Collections</span></div>
-        <div class="saga-stat"><span class="v">$194K</span><span class="l">Traded volume</span></div>
-        <div class="saga-stat"><span class="v">3,914</span><span class="l">Secondary sales</span></div>
-        <div class="saga-stat"><span class="v">2,002</span><span class="l">Items minted</span></div>
-        <div class="saga-stat"><span class="v">11</span><span class="l">Sold-out drops</span></div>
-      </div>
-    </section>
     <section class="section reveal spot-section" id="spotlight" data-view="home">
       <div class="section-head">
         <span class="eyebrow">Spotlight</span>
@@ -4093,10 +4068,16 @@ body::after {
         const uniqueOwners = globalOwnersData.length;
         const totalNFTs = globalOwnersData.reduce((sum, o) => sum + (o.count || 0), 0);
         const collectionsCount = collectionsData.length;
+        // Toutes les stats de l'accueil regroupées ici (live + saga), sans doublon.
+        // value → compteur animé ; text → valeur figée (ex. « $194K »).
         const stats = [
           { value: uniqueOwners, label: 'Holders' },
           { value: totalNFTs, label: 'Cryptonauts' },
-          { value: collectionsCount, label: 'Collections' }
+          { value: collectionsCount, label: 'Collections' },
+          { text: '$194K', label: 'Traded volume' },
+          { value: 3914, label: 'Secondary sales' },
+          { value: 2002, label: 'Items minted' },
+          { value: 11, label: 'Sold-out drops' }
         ];
         const band = document.createElement('section');
         band.className = 'stats-band';
@@ -4105,14 +4086,14 @@ body::after {
           card.className = 'stat-card';
           const num = document.createElement('div');
           num.className = 'stat-number';
-          num.textContent = '0';
           const lab = document.createElement('div');
           lab.className = 'stat-label';
           lab.textContent = s.label;
           card.appendChild(num);
           card.appendChild(lab);
           band.appendChild(card);
-          animateCount(num, s.value);
+          if (s.text != null) { num.textContent = s.text; }
+          else { num.textContent = '0'; animateCount(num, s.value); }
         });
         const statsHost = document.getElementById('heroStats');
         if (statsHost) statsHost.appendChild(band);
