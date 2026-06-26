@@ -3024,22 +3024,25 @@ body::after {
     .sb-empty { text-align: center; color: rgba(236, 228, 212, 0.55); padding: 40px 0; }
     .sb-skel { height: 76px; border-radius: 15px; background: linear-gradient(100deg, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.03) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; border: none; }
     @media screen and (max-width: 600px) {
-      /* ── Sales Bot mobile : 2 zones équilibrées, alignées sur le même axe vertical ── */
-      .sb-row { grid-template-columns: 54px 1fr auto; gap: 13px; padding: 12px 14px; align-items: center; border-radius: 14px; }
-      .sb-thumb-wrap { width: 54px; height: 54px; }
-      .sb-thumb { width: 54px; height: 54px; border-radius: 12px; }
-      /* Zone gauche : nom (titre) · collection (or) · parties (discret), empilées et centrées. */
-      .sb-main { flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; min-width: 0; }
+      /* ── Sales Bot mobile : lignes COMPACTES (plus de ventes visibles à l'écran) ── */
+      .sb-feed { gap: 7px; }
+      .sb-row { grid-template-columns: 46px 1fr auto; gap: 11px; padding: 8px 12px; align-items: center; border-radius: 12px; }
+      .sb-thumb-wrap { width: 46px; height: 46px; }
+      .sb-thumb { width: 46px; height: 46px; border-radius: 10px; }
+      .sb-thumb-wrap::after { border-radius: 10px; }
+      /* Zone gauche : nom (titre) · collection (or, allégée) · parties (très discret), empilées serrées. */
+      .sb-main { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; min-width: 0; }
       .sb-line1 { width: 100%; flex: none; }
-      .sb-name { font-size: 0.95rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-      .sb-col { font-size: 0.73rem; color: var(--gold); letter-spacing: 0.01em; max-width: 100%; flex: none; }
-      .sb-parties { font-size: 0.65rem; color: rgba(236, 228, 212, 0.4); max-width: 100%; flex: none; }
-      /* Zone droite : prix en HÉROS, badge type au-dessus, temps en dessous — groupe compact centré. */
-      .sb-right { flex-direction: column; align-items: flex-end; justify-content: center; gap: 4px; min-width: 56px; }
+      .sb-name { font-size: 0.88rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+      .sb-col { font-size: 0.66rem; color: rgba(232, 192, 105, 0.85); letter-spacing: 0.01em; max-width: 100%; flex: none; }
+      .sb-parties { font-size: 0.58rem; color: rgba(236, 228, 212, 0.38); max-width: 100%; flex: none; }
+      /* Zone droite : prix prioritaire, badge type au-dessus, temps en dessous — compact. */
+      .sb-right { flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; min-width: 50px; }
       .sb-tag--inline { display: none; }
-      .sb-tag--corner { display: inline-flex; font-size: 0.5rem; letter-spacing: 0.1em; padding: 2px 8px; }
-      .sb-price { font-size: 1.2rem; line-height: 1; }
-      .sb-time { font-size: 0.56rem; letter-spacing: 0.07em; color: rgba(236, 228, 212, 0.42); }
+      .sb-tag--corner { display: inline-flex; font-size: 0.46rem; letter-spacing: 0.08em; padding: 1px 6px; }
+      .sb-price { font-size: 1.04rem; line-height: 1; }
+      .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
+      .sb-skel { height: 62px; border-radius: 12px; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
