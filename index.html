@@ -2825,7 +2825,8 @@ body::after {
     .col-mint-row .num { font-family: var(--font-display); font-size: 0.95rem; color: #ecdfc7; white-space: nowrap; }
     .col-mint-row .num b { color: var(--primary-color); }
     .col-mint-bar { height: 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
-    .col-mint-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #ff6a1a, #ffb066); box-shadow: 0 0 12px rgba(255, 106, 26, 0.5); }
+    .col-mint-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, #16a34a, #4ade80); box-shadow: 0 0 12px rgba(34, 197, 94, 0.55); }
+    .col-mint-pct { color: #4ade80; }
     /* Logo À CHEVAL : ancré au bord HAUT du corps (= bas de la bannière), il déborde
        vers le haut sur la bannière. Dans .col-body (sans overflow) pour ne pas être rogné. */
     .col-logo {
@@ -3380,10 +3381,11 @@ body::after {
           : (meta.soldOut ? '<span class="col-ribbon">Sold out</span>' : '');
         const dateBadge = rel ? `<span class="col-badge col-date-badge">${escHtml(rel)}</span>` : '';
         const priceRow = meta.mintPriceCro ? `<div class="col-mint-row" style="margin:9px 0 0"><span class="lbl">Mint price</span><span class="num"><b>${meta.mintPriceCro.toLocaleString('fr-FR')}</b> CRO</span></div>` : '';
+        const mintPct = meta.mintTotal ? Math.min(100, Math.round((meta.minted || 0) / meta.mintTotal * 100)) : 0;
         const mint = (minting && meta.mintTotal) ? `
             <div class="col-mint">
-              <div class="col-mint-row"><span class="lbl">Mint progress</span><span class="num"><b>${(meta.minted || 0).toLocaleString('fr-FR')}</b> / ${meta.mintTotal.toLocaleString('fr-FR')}</span></div>
-              <div class="col-mint-bar"><div class="col-mint-fill" style="width:${Math.min(100, Math.round((meta.minted || 0) / meta.mintTotal * 100))}%"></div></div>
+              <div class="col-mint-row"><span class="lbl">Mint progress</span><span class="num"><b class="col-mint-pct">${mintPct}%</b> · ${(meta.minted || 0).toLocaleString('fr-FR')} / ${meta.mintTotal.toLocaleString('fr-FR')}</span></div>
+              <div class="col-mint-bar"><div class="col-mint-fill" style="width:${mintPct}%"></div></div>
               ${priceRow}
             </div>` : '';
         a.innerHTML = `
