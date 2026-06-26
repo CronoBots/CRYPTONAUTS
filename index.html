@@ -1000,6 +1000,19 @@ body::after {
     #additional-owners li.rank-3,
     .collection ul li.collection-rank-3 { border-color: rgba(205, 127, 50, 0.5); }
 
+    /* Fond identique au leaderboard de collection (.cv-lb-list) : un vrai background sur la ligne
+       (couvre jusqu'au bord, sous la bordure) au lieu du ::before qui laissait un trou sombre à gauche. */
+    #global-owners li::before,
+    #additional-owners li::before { display: none; }
+    #global-owners li,
+    #additional-owners li { background: rgba(255, 255, 255, 0.03); }
+    #global-owners li.rank-1,
+    #additional-owners li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02) 62%); }
+    #global-owners li.rank-2,
+    #additional-owners li.rank-2 { background: linear-gradient(90deg, rgba(214, 214, 222, 0.13), rgba(214, 214, 222, 0.02) 62%); }
+    #global-owners li.rank-3,
+    #additional-owners li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); }
+
     /* Compteur : juste le chiffre orange (ni pilule, ni mot « Cryptonauts »). */
     #global-owners li .count-container,
     #additional-owners li .count-container,
