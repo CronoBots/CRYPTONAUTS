@@ -2995,6 +2995,26 @@ body::after {
       background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 8px; }
     /* Badge de type (Mint/Sale) porté par l'en-tête quand tout le groupe est du même type. */
     .sb-group-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
+    /* ── Cadre de TRANSFERT (acheteur) : regroupe les NFT d'un même acheteur consécutif ── */
+    .sb-batch {
+      position: relative; overflow: hidden; border-radius: 15px;
+      border: 1px solid rgba(255, 255, 255, 0.07); background: rgba(16, 14, 11, 0.55);
+      transition: border-color 0.18s ease, background 0.18s ease;
+    }
+    .sb-batch::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--primary-color), rgba(255, 106, 26, 0.2)); opacity: 0.5; }
+    .sb-batch:hover { border-color: rgba(255, 106, 26, 0.3); }
+    /* En-tête du cadre : ACHETEUR mis en avant. */
+    .sb-batch-head { display: flex; align-items: center; gap: 7px; padding: 9px 16px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); min-width: 0; }
+    .sb-batch-from { font-size: 0.72rem; color: rgba(236, 228, 212, 0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
+    .sb-batch-arrow { color: var(--primary-color); flex: none; }
+    .sb-batch-buyer { font-family: var(--font-display); font-size: 0.95rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+    .sb-batch-count { flex: none; font-family: var(--font-body); font-size: 0.6rem; color: #ffc195; background: rgba(255, 106, 26, 0.14); border: 1px solid rgba(255, 106, 26, 0.32); border-radius: 999px; padding: 1px 8px; }
+    .sb-batch-time { flex: none; margin-left: auto; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(236, 228, 212, 0.42); white-space: nowrap; }
+    /* Lignes NFT À L'INTÉRIEUR du cadre : plus de bordure/fond propre, juste un séparateur. */
+    .sb-batch .sb-row { border: 0; background: transparent; border-radius: 0; padding: 8px 16px; }
+    .sb-batch .sb-row::before { display: none; }
+    .sb-batch .sb-row:hover { transform: none; background: rgba(255, 255, 255, 0.03); border-color: transparent; }
+    .sb-batch .sb-row + .sb-row { border-top: 1px solid rgba(255, 255, 255, 0.05); }
     .sb-row {
       position: relative; overflow: hidden;
       display: grid; grid-template-columns: 60px 1fr auto; gap: 15px; align-items: center;
@@ -3048,8 +3068,6 @@ body::after {
       .sb-parties { font-size: 0.58rem; color: rgba(236, 228, 212, 0.38); max-width: 100%; flex: none; }
       /* Zone droite : prix prioritaire, badge type au-dessus, temps en dessous — compact. */
       .sb-right { flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; min-width: 50px; }
-      .sb-tag--inline { display: none; }
-      .sb-tag--corner { display: inline-flex; font-size: 0.46rem; letter-spacing: 0.08em; padding: 1px 6px; }
       .sb-price { font-size: 1.04rem; line-height: 1; }
       .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
       .sb-skel { height: 62px; border-radius: 12px; }
@@ -3058,6 +3076,13 @@ body::after {
       .sb-group-logo { width: 18px; height: 18px; border-radius: 5px; }
       .sb-group-count { font-size: 0.56rem; padding: 0 6px; }
       .sb-group-tag { font-size: 0.46rem; padding: 1px 6px; }
+      /* Cadre de transfert : en-tête acheteur compact en mobile. */
+      .sb-batch-head { padding: 7px 12px 6px; gap: 6px; }
+      .sb-batch-buyer { font-size: 0.86rem; }
+      .sb-batch-from { font-size: 0.62rem; }
+      .sb-batch-count { font-size: 0.54rem; padding: 0 6px; }
+      .sb-batch-time { font-size: 0.52rem; }
+      .sb-batch .sb-row { padding: 7px 12px; }
     }
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
@@ -3886,25 +3911,18 @@ body::after {
           if (last && last.col === s.col) last.items.push(s);
           else groups.push({ col: s.col, colImg: s.colImg, items: [s] });
         });
-        // hideBadge : le badge type est porté par l'en-tête (groupe homogène) → inutile sur la ligne.
-        // hideParties : transfert identique à la ligne précédente du groupe → on ne le répète pas.
-        const sbRowHTML = (s, hideBadge, hideParties) => {
+        // Ligne d'un NFT à l'intérieur d'un cadre de transfert (acheteur) : NFT mis en avant + prix.
+        const sbRowHTML = (s, hideBadge) => {
           const thumb = s.thumb || s.colImg;
           const link = s.link || 'https://crypto.com/nft';
           const isMint = (s.seller === 'Mint');
           const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
           const tagTxt = isMint ? 'Mint' : 'Sale';
           const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
-          const tagCorner = hideBadge ? '' : '<span class="sb-tag sb-tag--corner ' + tagCls + '">' + tagTxt + '</span>';
-          const parties = hideParties ? '' : '<span class="sb-parties">' + escHtml(s.seller) + ' <span class="sb-arrow">→</span> ' + escHtml(s.buyer) + '</span>';
           return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
             + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
-            + '<div class="sb-main">'
-            + '<div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div>'
-            + parties
-            + '</div>'
-            + '<div class="sb-right">' + tagCorner + '<span class="sb-price">' + escHtml(s.price) + '</span>'
-            + '<span class="sb-time">' + sbTimeAgo(s.t) + '</span></div></a>';
+            + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
+            + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div></a>';
         };
         const partyKey = (s) => s.seller + '→' + s.buyer;
         feed.innerHTML = groups.map(g => {
@@ -3920,14 +3938,25 @@ body::after {
             + headTag
             + (g.items.length > 1 ? '<span class="sb-group-count">' + g.items.length + '</span>' : '')
             + '</div>';
-          let prevParty = null;
-          const rows = g.items.map(s => {
+          // Sous-groupe par TRANSFERT (acheteur) consécutif → un cadre distinct par acheteur.
+          const batches = [];
+          g.items.forEach(s => {
+            const last = batches[batches.length - 1];
             const k = partyKey(s);
-            const dupParty = (k === prevParty);   // même transfert que la ligne précédente du groupe
-            prevParty = k;
-            return sbRowHTML(s, uniformType, dupParty);
+            if (last && last.key === k) last.items.push(s);
+            else batches.push({ key: k, seller: s.seller, buyer: s.buyer, items: [s] });
+          });
+          const body = batches.map(b => {
+            const sellerTxt = (b.seller && b.seller !== 'Mint') ? '<span class="sb-batch-from">' + escHtml(b.seller) + '</span>' : '';
+            const bhead = '<div class="sb-batch-head">'
+              + sellerTxt + '<span class="sb-batch-arrow">→</span>'
+              + '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
+              + (b.items.length > 1 ? '<span class="sb-batch-count">' + b.items.length + '</span>' : '')
+              + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span>'
+              + '</div>';
+            return '<div class="sb-batch">' + bhead + b.items.map(s => sbRowHTML(s, uniformType)).join('') + '</div>';
           }).join('');
-          return head + rows;
+          return head + body;
         }).join('');
         if (countEl) countEl.textContent = top.length + ' recent sales';
         // Garde-fou : une vignette IPFS directe (pinata) qui « hang » > 12 s → bascule sur le logo
