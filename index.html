@@ -2791,7 +2791,9 @@ body::after {
        de l'image. Compromis : léger rognage centré (au lieu de bandes floues variables), mais toutes
        les bannières semblent alors exactement de même largeur/hauteur. */
     .col-bg { position: absolute; inset: 0; z-index: 1; background-size: cover; background-repeat: no-repeat; background-position: center; }
-    .col-grad { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, rgba(8, 6, 10, 0.78) 0%, rgba(8, 6, 10, 0.22) 38%, transparent 70%); }
+    /* Image bien visible (haut transparent), fondu sombre seulement en bas vers la couleur du
+       fond de carte (~#120d0a) → transition douce avec le corps/stats, sans bord net. */
+    .col-grad { position: absolute; z-index: 2; inset: 0; background: linear-gradient(to top, #120d0a 0%, rgba(18, 13, 10, 0.85) 12%, rgba(18, 13, 10, 0.30) 34%, transparent 58%); }
     /* Badge de statut en haut À DROITE de la bannière (sold out / drop en cours). */
     .col-badge { position: absolute; z-index: 4; top: 10px; right: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-family: var(--font-body); font-size: 0.6rem; font-weight: 700; line-height: 1; letter-spacing: 0.12em; text-indent: 0.12em; text-transform: uppercase; color: #fff; background: rgba(3, 4, 10, 0.62); border: 1px solid rgba(255, 255, 255, 0.22); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
     /* Badge « minting » : bordure verte, fond légèrement transparent, clignotant (style live). */
@@ -2820,10 +2822,13 @@ body::after {
       transition: box-shadow 0.25s ease, border-color 0.25s ease;
     }
     .col-row:hover .col-logo { border-color: rgba(255, 106, 26, 0.65); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6), 0 0 22px rgba(255, 106, 26, 0.3); }
-    .col-arrow { position: absolute; z-index: 3; right: 12px; bottom: 10px; color: rgba(236, 228, 212, 0.85); background: rgba(3, 4, 10, 0.5); border-radius: 50%; padding: 3px; transition: transform 0.3s ease, color 0.25s ease; }
-    .col-item.is-open .col-arrow { transform: rotate(180deg); color: var(--primary-color); }
+    /* Flèche « déplier » : centrée horizontalement en bas de la carte (sous les stats). */
+    .col-arrow { position: absolute; z-index: 3; left: 50%; bottom: 8px; transform: translateX(-50%); color: rgba(236, 228, 212, 0.85); background: rgba(3, 4, 10, 0.5); border-radius: 50%; padding: 3px; transition: opacity 0.25s ease, color 0.25s ease; }
+    .col-row:hover .col-arrow { color: #fff; }
+    /* Disparaît quand la carte est dépliée, réapparaît au repli. */
+    .col-item.is-open .col-arrow { opacity: 0; pointer-events: none; }
     /* Corps sous la bannière : titre (à droite du logo à cheval) + stats pleine largeur. */
-    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 38px; }   /* bas réservé pour la flèche (coin inf. droit) */
+    .col-body { position: relative; padding: 14px clamp(16px, 3vw, 28px) 38px; }   /* bas réservé pour la flèche (centrée en bas) */
     .col-title-wrap { padding-left: 116px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; gap: 4px; }
     .col-title { margin: 0; font-size: clamp(1.25rem, 2.2vw, 1.9rem); line-height: 1.12; color: #fff; }
     .col-date { font-size: 0.78rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(236, 228, 212, 0.6); }
