@@ -3003,8 +3003,10 @@ body::after {
     }
     .sb-batch::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: linear-gradient(180deg, var(--primary-color), rgba(255, 106, 26, 0.2)); opacity: 0.5; }
     .sb-batch:hover { border-color: rgba(255, 106, 26, 0.3); }
-    /* En-tête du cadre : ACHETEUR mis en avant. */
-    .sb-batch-head { display: flex; align-items: center; gap: 7px; padding: 9px 16px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.06); min-width: 0; }
+    /* En-tête du cadre : TYPE à gauche + ACHETEUR mis en avant. Fond distinct (≠ lignes NFT). */
+    .sb-batch-head { display: flex; align-items: center; gap: 7px; padding: 9px 16px 8px; min-width: 0;
+      background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
+    .sb-batch-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
     .sb-batch-from { font-size: 0.72rem; color: rgba(236, 228, 212, 0.45); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
     .sb-batch-arrow { color: var(--primary-color); flex: none; }
     .sb-batch-buyer { font-family: var(--font-display); font-size: 0.95rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
@@ -3079,6 +3081,7 @@ body::after {
       /* Cadre de transfert : en-tête acheteur compact en mobile. */
       .sb-batch-head { padding: 7px 12px 6px; gap: 6px; }
       .sb-batch-buyer { font-size: 0.86rem; }
+      .sb-batch-tag { font-size: 0.44rem; padding: 1px 6px; }
       .sb-batch-from { font-size: 0.62rem; }
       .sb-batch-count { font-size: 0.54rem; padding: 0 6px; }
       .sb-batch-time { font-size: 0.52rem; }
@@ -3926,16 +3929,9 @@ body::after {
         };
         const partyKey = (s) => s.seller + '→' + s.buyer;
         feed.innerHTML = groups.map(g => {
-          // Badge dans l'en-tête seulement si TOUT le groupe est du même type (Mint xor Sale).
-          const firstMint = (g.items[0].seller === 'Mint');
-          const uniformType = g.items.every(it => (it.seller === 'Mint') === firstMint);
-          const headTag = uniformType
-            ? '<span class="sb-tag sb-group-tag ' + (firstMint ? 'sb-tag-mint' : 'sb-tag-sale') + '">' + (firstMint ? 'Mint' : 'Sale') + '</span>'
-            : '';
           const head = '<div class="sb-group-head">'
             + (g.colImg ? '<img class="sb-group-logo" src="' + escHtml(g.colImg) + '" alt="" loading="lazy" decoding="async">' : '')
             + '<span class="sb-group-name">' + escHtml(g.col) + '</span>'
-            + headTag
             + (g.items.length > 1 ? '<span class="sb-group-count">' + g.items.length + '</span>' : '')
             + '</div>';
           // Sous-groupe par TRANSFERT (acheteur) consécutif → un cadre distinct par acheteur.
@@ -3947,14 +3943,18 @@ body::after {
             else batches.push({ key: k, seller: s.seller, buyer: s.buyer, items: [s] });
           });
           const body = batches.map(b => {
-            const sellerTxt = (b.seller && b.seller !== 'Mint') ? '<span class="sb-batch-from">' + escHtml(b.seller) + '</span>' : '';
+            const isMintB = (b.seller === 'Mint');
+            // Type À GAUCHE du transfert. Mint : badge + acheteur (pas de flèche). Sale : badge + vendeur → acheteur.
+            const typeBadge = '<span class="sb-tag sb-batch-tag ' + (isMintB ? 'sb-tag-mint' : 'sb-tag-sale') + '">' + (isMintB ? 'Mint' : 'Sale') + '</span>';
+            const parties = isMintB
+              ? '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
+              : '<span class="sb-batch-from">' + escHtml(b.seller) + '</span><span class="sb-batch-arrow">→</span><span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>';
             const bhead = '<div class="sb-batch-head">'
-              + sellerTxt + '<span class="sb-batch-arrow">→</span>'
-              + '<span class="sb-batch-buyer">' + escHtml(b.buyer) + '</span>'
+              + typeBadge + parties
               + (b.items.length > 1 ? '<span class="sb-batch-count">' + b.items.length + '</span>' : '')
               + '<span class="sb-batch-time">' + sbTimeAgo(b.items[0].t) + '</span>'
               + '</div>';
-            return '<div class="sb-batch">' + bhead + b.items.map(s => sbRowHTML(s, uniformType)).join('') + '</div>';
+            return '<div class="sb-batch">' + bhead + b.items.map(s => sbRowHTML(s, true)).join('') + '</div>';
           }).join('');
           return head + body;
         }).join('');
