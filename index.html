@@ -2812,9 +2812,12 @@ body::after {
     .tl-node.is-active .tl-stem { background: var(--primary-color); }
     .tl-node.is-active .tl-dot { background: var(--primary-color); border-color: var(--primary-color); box-shadow: 0 0 10px rgba(255, 106, 26, 0.7); transform: scale(1.18); }
     .tl-node.is-active .tl-date { color: var(--primary-color); }
-    /* Minting (Crovia) : vert clignotant + pastille live */
-    .tl-live { position: absolute; top: -4px; right: -4px; z-index: 3; width: 11px; height: 11px; border-radius: 50%; background: #22c55e; border: 2px solid #03040a; box-shadow: 0 0 8px rgba(34, 197, 94, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
-    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 3px rgba(34, 197, 94, 0.22); animation: tlLivePulse 1.6s ease-in-out infinite; }
+    /* Minting (Crovia) : la vignette a un HALO VERT qui clignote (plus de point vert séparé). */
+    .tl-node.tl-minting .tl-thumb { border-color: #22c55e; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(34, 197, 94, 0.55), 0 0 12px rgba(34, 197, 94, 0.4); animation: tlLivePulse 1.5s ease-in-out infinite; }
+    @keyframes tlLivePulse {
+      0%, 100% { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 2px rgba(34, 197, 94, 0.55), 0 0 10px rgba(34, 197, 94, 0.3); }
+      50%      { box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 6px rgba(34, 197, 94, 0.5), 0 0 26px rgba(34, 197, 94, 0.9); }
+    }
     .tl-node.tl-minting .tl-num { background: linear-gradient(135deg, #4ade80, #16a34a); color: #052e16; }
     .tl-node.tl-minting .tl-stem { background: #22c55e; }
     .tl-node.tl-minting .tl-dot { background: #22c55e; border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.7); }
@@ -2831,13 +2834,14 @@ body::after {
     /* Rail / tige / pastille : couleur identique au reste de la frise (pas de blanc). */
     .tl-soon::before { background: repeating-linear-gradient(90deg, var(--hairline) 0 5px, transparent 5px 11px); }
     .tl-soon .tl-stem { background: repeating-linear-gradient(180deg, var(--hairline) 0 4px, transparent 4px 8px); }
-    .tl-soon .tl-dot { background: #15100c; border-style: dashed; border-color: rgba(236, 228, 212, 0.45); }
+    /* Pastille identique aux autres collections : petit cercle gris plein (pas en pointillés). */
+    .tl-soon .tl-dot { background: #15100c; border-style: solid; border-color: var(--hairline); }
     /* Date sur la MÊME ligne que les mois des autres collections : une seule ligne, et on n'écrase
        PAS margin-top (hérité de .tl-date) → même niveau au desktop comme au mobile. */
     .tl-soon .tl-date { white-space: nowrap; font-style: italic; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) {
       .tl-thumb, .tl-dot, .tl-stem { transition: none; }
-      .tl-node.tl-minting .tl-thumb, .tl-live { animation: none; }
+      .tl-node.tl-minting .tl-thumb { animation: none; }
     }
     @media (max-width: 600px) {
       .col-timeline { margin-bottom: 22px; }
@@ -2874,9 +2878,9 @@ body::after {
     /* « Sold out » : étiquette EN BIAIS (ruban diagonal) dans le coin supérieur droit.
        La bannière (overflow:hidden) coupe les débords → vrai ruban d'angle. */
     .col-ribbon {
-      position: absolute; z-index: 4; top: 20px; right: -48px; width: 168px; padding: 5px 0;
+      position: absolute; z-index: 4; top: 24px; right: -50px; width: 192px; padding: 7px 0;
       transform: rotate(45deg); text-align: center; pointer-events: none;
-      font-family: var(--font-body); font-size: 0.6rem; font-weight: 800; line-height: 1;
+      font-family: var(--font-body); font-size: 0.72rem; font-weight: 800; line-height: 1;
       letter-spacing: 0.16em; text-indent: 0.16em; text-transform: uppercase; color: #fff;
       background: linear-gradient(135deg, #ff7a2e, #d2480a);
       border-top: 1px solid rgba(255, 255, 255, 0.28); border-bottom: 1px solid rgba(0, 0, 0, 0.3);
@@ -2942,7 +2946,7 @@ body::after {
       .col-stat .cl { font-size: 0.5rem; }
       .col-badge { top: 8px; right: 8px; font-size: 0.5rem; padding: 4px 8px; gap: 5px; }
       .col-badge .dot { width: 6px; height: 6px; }
-      .col-ribbon { top: 15px; right: -52px; width: 150px; font-size: 0.5rem; padding: 4px 0; letter-spacing: 0.12em; text-indent: 0.12em; }
+      .col-ribbon { top: 19px; right: -52px; width: 168px; font-size: 0.6rem; padding: 6px 0; letter-spacing: 0.12em; text-indent: 0.12em; }
       .col-mint { margin-top: 12px; }
       .col-mint-row .num { font-size: 0.82rem; }
     }
@@ -3693,7 +3697,6 @@ body::after {
           '<span class="tl-thumb-wrap">' +
             '<img class="tl-thumb" src="' + e.image + '" alt="' + escHtml(e.title) + '" loading="lazy" decoding="async">' +
             '<span class="tl-num">' + (i + 1) + '</span>' +
-            (minting ? '<span class="tl-live"></span>' : '') +
           '</span>' +
           '<span class="tl-stem"></span>' +
           '<span class="tl-dot"></span>' +
