@@ -2810,14 +2810,14 @@ body::after {
     .tl-soon { cursor: default; }
     .tl-soon .tl-thumb-soon {
       display: inline-flex; align-items: center; justify-content: center;
-      border-style: dashed; border-color: rgba(255, 106, 26, 0.5);
-      background: rgba(255, 106, 26, 0.06); color: rgba(255, 106, 26, 0.85); box-shadow: none;
+      border-style: dashed; border-color: rgba(255, 255, 255, 0.55);
+      background: rgba(255, 255, 255, 0.04); color: rgba(255, 255, 255, 0.85); box-shadow: none;
     }
-    .tl-soon:hover .tl-thumb-soon { transform: none; border-color: rgba(255, 106, 26, 0.7); box-shadow: none; }
-    .tl-soon::before { background: repeating-linear-gradient(90deg, var(--hairline) 0 5px, transparent 5px 11px); }
-    .tl-soon .tl-stem { background: repeating-linear-gradient(180deg, var(--hairline) 0 4px, transparent 4px 8px); }
-    .tl-soon .tl-dot { background: #15100c; border-style: dashed; border-color: rgba(236, 228, 212, 0.45); }
-    .tl-soon .tl-date { white-space: normal; max-width: 86px; line-height: 1.22; font-style: italic; color: var(--muted); }
+    .tl-soon:hover .tl-thumb-soon { transform: none; border-color: rgba(255, 255, 255, 0.8); box-shadow: none; }
+    .tl-soon::before { background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.32) 0 5px, transparent 5px 11px); }
+    .tl-soon .tl-stem { background: repeating-linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0 4px, transparent 4px 8px); }
+    .tl-soon .tl-dot { background: #15100c; border-style: dashed; border-color: rgba(255, 255, 255, 0.6); }
+    .tl-soon .tl-date { white-space: nowrap; font-style: italic; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) {
       .tl-thumb, .tl-dot, .tl-stem { transition: none; }
       .tl-node.tl-minting .tl-thumb, .tl-live { animation: none; }
