@@ -3641,16 +3641,16 @@ body::after {
     async function appendExternalSales(sales) {
       if (typeof V3_SALES === 'undefined' || !V3_SALES.length) return;
       const meta = (typeof COLLECTION_META !== 'undefined' && COLLECTION_META['Quantum Cryptonauts V3']) || {};
-      const assets = (typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[meta.contract]) || [];
-      const byId = {}; assets.forEach(a => { byId[a.i] = a; });
+      // Image + nom du VRAI NFT minté : fournis par Test.js (tokenURI → métadonnée IPFS) dans
+      // chaque entrée v3Sales (c = CID image, n = nom). Repli sur le logo si non encore résolu.
       V3_SALES.slice(0, 12).forEach(m => {
-        const a = byId[m.t] || {};
-        const thumb = a.c ? ipfsThumb(a.c, 120, 0) : 'assets/v3-logo.jpg?v=2';
+        const cid = m.c || '';
+        const thumb = cid ? ipfsThumb(cid, 120, 0) : 'assets/v3-logo.jpg?v=2';
         sales.push({
           col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg?v=2',
-          thumb: thumb, ipfs: a.c || '',
+          thumb: thumb, ipfs: cid,
           link: meta.croviaUrl || 'https://crovia.app',
-          asset: a.n || ('#' + m.t),
+          asset: m.n || ('#' + m.t),
           price: sbPrice(m.cro, 'CRO'),
           seller: 'Mint', buyer: sbShort(m.b),
           t: new Date(m.ts * 1000).toISOString(), ts: m.ts * 1000

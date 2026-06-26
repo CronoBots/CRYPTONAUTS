@@ -577,6 +577,53 @@ function buildV3Collection(ranking) {
   };
 }
 
+// Décode une string ABI (retour d'eth_call) : [offset][length][data utf8].
+function decodeAbiString(hex) {
+  if (!hex || hex === '0x') return '';
+  const h = hex.slice(2);
+  const off = parseInt(h.slice(0, 64), 16) * 2;
+  const len = parseInt(h.slice(off, off + 64), 16) * 2;
+  return Buffer.from(h.slice(off + 64, off + 64 + len), 'hex').toString('utf8');
+}
+
+// tokenURI(tokenId) du contrat V3 (ERC-721) via eth_call on-chain → ipfs://FOLDER/N.json.
+async function v3TokenURI(tokenId) {
+  const data = '0xc87b56dd' + BigInt(tokenId).toString(16).padStart(64, '0'); // selector tokenURI(uint256)
+  return decodeAbiString(await cronosRpc('eth_call', [{ to: V3_CONTRACT, data }, 'latest']));
+}
+
+// Métadonnée JSON sur IPFS, avec repli multi-gateway (les passerelles publiques timeout souvent).
+const V3_IPFS_GATEWAYS = ['https://gateway.pinata.cloud', 'https://dweb.link', 'https://ipfs.io', 'https://w3s.link', 'https://nftstorage.link'];
+async function fetchIpfsJson(pathNoScheme) {
+  for (const g of V3_IPFS_GATEWAYS) {
+    try {
+      const r = await axios.get(g + '/ipfs/' + pathNoScheme, { timeout: 15000 });
+      if (r.data) return typeof r.data === 'string' ? JSON.parse(r.data) : r.data;
+    } catch (e) { /* gateway suivante */ }
+  }
+  return null;
+}
+
+// Enrichit chaque mint affiché dans le Sales Bot avec le VRAI NFT minté : nom (n) + image (c, CID IPFS),
+// résolus via tokenURI(id) on-chain → métadonnée IPFS. Best-effort : sans ça, le Sales Bot retombe
+// sur le logo de collection (l'ancienne table EXTERNAL_ASSETS n'était PAS indexable par token id).
+async function enrichV3MintImages(mints) {
+  if (!mints || !mints.length) return;
+  let ok = 0;
+  await mapPool(mints, 4, async (m) => {
+    try {
+      const uri = await v3TokenURI(m.t);
+      if (!uri) return;
+      const meta = await fetchIpfsJson(uri.replace(/^ipfs:\/\//, ''));
+      if (!meta) return;
+      if (meta.name) m.n = meta.name;
+      const img = String(meta.image || '').replace(/^ipfs:\/\//, '').replace(/^.*\/ipfs\//, '');
+      if (img) { m.c = img; ok++; }
+    } catch (e) { /* repli logo */ }
+  });
+  console.log(`✅ Images des mints V3 résolues : ${ok}/${mints.length} (tokenURI → métadonnée IPFS).`);
+}
+
 function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Sales) {
   // Prepare collectionsData, including all collections from the collections array
   const allCollectionsData = collections.map(collection => {
@@ -949,6 +996,10 @@ async function main() {
     const explorerMints = await fetchV3MintsExplorer();
     const v3Mints = explorerMints || (v3 && v3.mints) || [];
     const v3Collection = buildV3Collection(v3Ranking);
+
+    // Résout l'image + le nom de chaque NFT minté (tokenURI on-chain → métadonnée IPFS)
+    // pour que le Sales Bot affiche le bon visuel au lieu du logo de collection.
+    await enrichV3MintImages(v3Mints);
 
     writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Mints);
 
