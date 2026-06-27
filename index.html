@@ -2996,10 +2996,21 @@ body::after {
     .sb-chip.is-active { color: #1a0f08; background: var(--primary-color); font-weight: 600; }
     .sb-chip-n { font-family: var(--font-display); font-size: 0.72rem; opacity: 0.75; }
     .sb-chip.is-active .sb-chip-n { opacity: 0.85; }
-    /* Animation d'entrée échelonnée (délai posé en inline lors du rendu). */
+    /* Animation d'entrée échelonnée — UNIQUEMENT au 1er affichage / refresh manuel / filtre (.sb-cascade).
+       Pas sur l'auto-refresh : seules les nouvelles ventes y flashent (sb-new), le reste ne bouge pas. */
     @keyframes sbIn { from { opacity: 0; transform: translateY(9px); } to { opacity: 1; transform: none; } }
-    .sb-feed > .sb-batch, .sb-feed > .sb-group-head { animation: sbIn 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
-    @media (prefers-reduced-motion: reduce) { .sb-feed > .sb-batch, .sb-feed > .sb-group-head { animation: none; } }
+    .sb-feed.sb-cascade > .sb-batch, .sb-feed.sb-cascade > .sb-group-head { animation: sbIn 0.42s cubic-bezier(0.2, 0.7, 0.3, 1) both; }
+    /* Nouvelle vente arrivée en live : flash vert qui s'estompe. */
+    @keyframes sbNew { 0%, 18% { background: rgba(52, 226, 154, 0.22); } 100% { background: transparent; } }
+    .sb-row.sb-new { animation: sbNew 1.7s ease-out; }
+    /* Indicateur LIVE (point vert pulsant dans l'eyebrow du Sales Bot). */
+    #salesbot .eyebrow { display: inline-flex; align-items: center; }
+    .sb-live-dot { width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #34e29a;
+      box-shadow: 0 0 8px rgba(52, 226, 154, 0.95); animation: livePulse 1.5s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .sb-feed.sb-cascade > .sb-batch, .sb-feed.sb-cascade > .sb-group-head { animation: none; }
+      .sb-row.sb-new { animation: none; } .sb-live-dot { animation: none; }
+    }
     .sb-feed { display: grid; grid-template-columns: 1fr; gap: 9px; }   /* une seule colonne (avant : multi-colonnes sur PC) */
     /* En-tête de collection coiffant une suite de ventes consécutives de cette collection. */
     .sb-group-head { display: flex; align-items: center; gap: 9px; padding: 2px 4px; margin-top: 7px;
@@ -3312,7 +3323,7 @@ body::after {
 
     <section class="section reveal hidden-view" id="salesbot" data-view="salesbot">
       <div class="section-head">
-        <span class="eyebrow">Live feed</span>
+        <span class="eyebrow"><span class="sb-live-dot" aria-hidden="true"></span>Live feed</span>
         <h2 class="section-title">Sales Bot</h2>
         <p class="section-sub">The latest sales and mints across every Cryptonauts collection.</p>
       </div>
@@ -3709,6 +3720,8 @@ body::after {
       requestAnimationFrame(() => window.dispatchEvent(new Event('view:changed')));
       // Sur mobile, la ligne du temps s'ouvre alignée à droite (collection la plus récente / minting).
       if (name === 'collections') scrollTimelineToEnd();
+      // Sales Bot : rafraîchit silencieusement à l'ouverture de l'onglet (effet temps réel).
+      if (name === 'salesbot' && typeof loadSales === 'function') loadSales(true);
     }
     // Mobile : positionne la ligne du temps tout à droite (sur la collection la plus récente).
     function scrollTimelineToEnd() {
@@ -3886,13 +3899,18 @@ body::after {
       });
     }
 
-    // ── État + rendu du flux Sales Bot (piloté par les filtres Tout / Mints / Ventes) ──
+    // ── État + rendu du flux Sales Bot (filtres + temps réel) ──
     let SB_TOP = [];
     let SB_FILTER = 'all';
-    function renderSalesFeed() {
+    let SB_SEEN = null;   // clés des ventes déjà affichées → repère les NOUVELLES (flash live)
+    let SB_AUTO = null;   // handle de l'auto-refresh
+    const sbSaleKey = (s) => s.ts + '|' + (s.asset || '') + '|' + s.col + '|' + s.seller + '|' + s.buyer;
+    function renderSalesFeed(silent) {
       const feed = document.getElementById('salesFeed');
       if (!feed) return;
       const all = SB_TOP || [];
+      const prevSeen = SB_SEEN;                 // état AVANT ce rendu (pour détecter les nouvelles)
+      const isNew = (s) => !!prevSeen && !prevSeen.has(sbSaleKey(s));
       // Compteurs des filtres (font aussi office de stats de synthèse).
       const nMint = all.filter(s => s.seller === 'Mint').length;
       const nSale = all.length - nMint;
@@ -3922,14 +3940,19 @@ body::after {
         const tagCls = isMint ? 'sb-tag-mint' : 'sb-tag-sale';
         const tagTxt = isMint ? 'Mint' : 'Sale';
         const tagInline = hideBadge ? '' : '<span class="sb-tag sb-tag--inline ' + tagCls + '">' + tagTxt + '</span>';
-        return '<a class="sb-row" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
-          + '<span class="sb-thumb-wrap"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
+        // Lors d'un refresh silencieux, les vignettes déjà vues sont en cache → on les marque chargées
+        // (pas de re-fondu/clignotement). Seules les vignettes des NOUVELLES ventes font le fondu.
+        const preLoaded = (silent && !isNew(s)) ? ' is-loaded' : '';
+        return '<a class="sb-row' + (isNew(s) ? ' sb-new' : '') + '" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
+          + '<span class="sb-thumb-wrap' + preLoaded + '"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
           + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
           + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div></a>';
       };
       const partyKey = (s) => s.seller + '→' + s.buyer;
       let order = 0;   // délai d'entrée échelonné (animation premium)
       const stagger = () => ' style="animation-delay:' + (Math.min(order++, 14) * 0.035).toFixed(3) + 's"';
+      // Cascade d'entrée seulement hors auto-refresh ; sinon seules les nouvelles ventes flashent.
+      feed.classList.toggle('sb-cascade', !silent);
       feed.innerHTML = groups.map(g => {
         const head = '<div class="sb-group-head"' + stagger() + '>'
           + (g.colImg ? '<img class="sb-group-logo" src="' + escHtml(g.colImg) + '" alt="" loading="lazy" decoding="async">' : '')
@@ -3967,6 +3990,8 @@ body::after {
           }
         }, 12000);
       });
+      // Mémorise l'ensemble courant → la prochaine fois, seules les vraies nouveautés flasheront.
+      SB_SEEN = new Set(all.map(sbSaleKey));
     }
     // Bascule de filtre (Tout / Mints / Ventes) → re-rendu instantané du flux déjà chargé.
     function setSalesFilter(f) {
@@ -4027,10 +4052,12 @@ body::after {
         await appendExternalSales(sales);
         sales.sort((a, b) => b.ts - a.ts);
         SB_TOP = sales.slice(0, 50);
-        renderSalesFeed();
+        // Auto-refresh : si AUCUNE nouvelle vente, on ne re-rend pas (zéro clignotement).
+        const newCount = SB_SEEN ? SB_TOP.filter(s => !SB_SEEN.has(sbSaleKey(s))).length : SB_TOP.length;
+        if (silent && !newCount) return;
+        renderSalesFeed(silent);
       } catch (e) {
-        feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>';
-        if (countEl) countEl.textContent = '';
+        if (!silent) { feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>'; if (countEl) countEl.textContent = ''; }
       }
     }
 
@@ -4755,6 +4782,10 @@ body::after {
           const chip = e.target.closest('.sb-chip');
           if (chip && chip.dataset.sbfilter) setSalesFilter(chip.dataset.sbfilter);
         });
+        // Auto-refresh temps réel : seulement quand l'onglet Sales Bot est visible (économise les appels).
+        if (!SB_AUTO) SB_AUTO = setInterval(() => {
+          if (document.body.dataset.view === 'salesbot' && !document.hidden) loadSales(true);
+        }, 45000);
         // Vidéo de fond du hero retirée pour l'instant (sera retravaillée plus tard) :
         // seul le poster statique (assets/nebula-poster.jpg) reste affiché.
         window.addEventListener('hashchange', handleRoute);
