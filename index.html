@@ -83,10 +83,9 @@ input, textarea, [contenteditable] {
 
 /* Police d'affichage réservée aux titres et aux données (contraste éditorial) */
 h1, h2, h3,
-.hero-title, .section-title, .navbar .brand,
-.btn, .stat-number, .stat-chip .v, .cm-stat .v,
-.rank, .count-number, .lb-count .n,
-.collection-body h2, .cm-title {
+.hero-title, .section-title,
+.btn, .stat-number, .stat-chip .v,
+.rank, .count-number, .lb-count .n {
   font-family: var(--font-display);
 }
 
@@ -147,13 +146,6 @@ body::after {
       padding: 24px clamp(18px, 4vw, 72px);
     }
 
-    .footer-image {
-      display: block;
-      margin: 20px auto 0;
-      width: 100%;
-      max-width: 500px;
-      height: auto;
-    }
 
     h1 {
       color: var(--text-dark);
@@ -499,9 +491,6 @@ body::after {
     /* « Built by … » descendu d'un cheveu pour s'aligner optiquement sur le centre du logo. */
     .footer-left p { margin: 0; transform: translateY(2px); }
 
-    .footer-right {
-      text-align: right;
-    }
     /* Liens sociaux en pied de page : sortis de la navbar, affichés en bas à gauche
        (juste après le bloc « Built by »), sur desktop comme sur mobile. */
     .footer-social { display: flex; align-items: center; gap: 16px; }
@@ -718,7 +707,7 @@ body::after {
         align-items: center;
         gap: 10px;
       }
-      .footer-left, .footer-right {
+      .footer-left {
         text-align: center;
       }
       footer img {
@@ -1639,12 +1628,6 @@ body::after {
       box-shadow: 0 0 26px rgba(255, 106, 26, 0.4);
     }
     .btn-primary:hover { box-shadow: 0 0 38px rgba(255, 106, 26, 0.65); }
-    .btn-ghost {
-      border: 1px solid rgba(255, 106, 26, 0.4);
-      background: rgba(255, 106, 26, 0.06);
-      color: #ecdfc7;
-    }
-    .btn-ghost:hover { background: rgba(255, 106, 26, 0.16); }
 
     .hero-visual {
       position: relative;
@@ -2384,35 +2367,6 @@ body::after {
     }
     /* ════════ PAGE DÉTAILLÉE D'UNE COLLECTION ════════ */
     /* Vues séparées : on n'affiche qu'une section à la fois (pilotée par data-view) */
-    /* ── Sélecteur de classement (pills) du Leaderboard ── */
-    .lb-pills {
-      display: flex; gap: 8px; overflow-x: auto;
-      padding: 2px 2px 16px; margin: 0 auto 4px; max-width: 760px;
-      scrollbar-width: none; -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x proximity;
-    }
-    .lb-pills::-webkit-scrollbar { display: none; }
-    .lb-pill {
-      flex: 0 0 auto; scroll-snap-align: start;
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 9px 15px; border-radius: 999px;
-      border: 1px solid rgba(255, 106, 26, 0.22);
-      background: rgba(255, 255, 255, 0.03);
-      color: rgba(236, 228, 212, 0.72);
-      font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 0.02em;
-      text-transform: uppercase; white-space: nowrap; cursor: pointer;
-      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
-    }
-    .lb-pill:hover { color: #fff; border-color: rgba(255, 106, 26, 0.5); }
-    .lb-pill.is-active {
-      background: var(--primary-color); border-color: var(--primary-color);
-      color: #1a0f08; font-weight: 600;
-    }
-    .lb-pill-n {
-      font-size: 0.7rem; padding: 1px 7px; border-radius: 999px;
-      background: rgba(0, 0, 0, 0.18); opacity: 0.85;
-    }
-    .lb-pill.is-active .lb-pill-n { background: rgba(0, 0, 0, 0.2); }
 
     .hidden-view { display: none !important; }
 
@@ -2973,7 +2927,6 @@ body::after {
     }
     .sb-wrap { max-width: 1280px; margin: 0 auto; }   /* même largeur que l'onglet Artiste */
     .sb-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; gap: 12px; }
-    .sb-count { font-size: 0.74rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(236, 228, 212, 0.55); }
     .sb-refresh {
       display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
       font-family: var(--font-body); font-size: 0.74rem; letter-spacing: 0.1em; text-transform: uppercase;
@@ -3023,8 +2976,6 @@ body::after {
     .sb-group-count, .sb-batch-count { flex: none; display: inline-flex; align-items: center; justify-content: center; line-height: 1;
       font-family: var(--font-body); font-size: 0.62rem; color: var(--muted);
       background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 3px 8px; }
-    /* Badge de type (Mint/Sale) porté par l'en-tête quand tout le groupe est du même type. */
-    .sb-group-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
     /* ── Cadre de TRANSFERT (acheteur) : regroupe les NFT d'un même acheteur consécutif ── */
     .sb-batch {
       position: relative; overflow: hidden; border-radius: 15px;
@@ -3045,14 +2996,9 @@ body::after {
     .sb-batch-from { flex: 0 1 auto; font-family: var(--font-display); font-size: 0.95rem; color: #ff6b6b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-batch-arrow { color: rgba(236, 228, 212, 0.45); flex: none; }
     .sb-batch-buyer { flex: 0 1 auto; font-family: var(--font-display); font-size: 0.95rem; color: #4ade80; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-    /* Récap à droite : prix consolidé (qté × prix) + temps. */
-    .sb-batch-meta { flex: none; margin-left: auto; display: flex; align-items: baseline; gap: 9px; padding-left: 6px; }
-    .sb-batch-sum { font-family: var(--font-display); font-size: 0.8rem; color: #ff8a4c; white-space: nowrap; }
-    .sb-batch-qty { color: rgba(236, 228, 212, 0.5); font-family: var(--font-body); font-size: 0.82em; }
     .sb-batch-time { flex: none; margin-left: auto; font-size: 0.62rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(236, 228, 212, 0.42); white-space: nowrap; }
     /* Lignes NFT À L'INTÉRIEUR du cadre : plus de bordure/fond propre, juste un séparateur. */
     .sb-batch .sb-row { border: 0; background: transparent; border-radius: 0; padding: 8px 16px; }
-    .sb-batch .sb-row--noprice { grid-template-columns: 60px 1fr; }
     .sb-batch .sb-row::before { display: none; }
     .sb-batch .sb-row:hover { transform: none; background: rgba(255, 255, 255, 0.03); border-color: transparent; }
     .sb-batch .sb-row + .sb-row { border-top: 1px solid rgba(255, 255, 255, 0.05); }
@@ -3084,12 +3030,8 @@ body::after {
     .sb-tag { flex: none; font-family: var(--font-body); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; }
     .sb-tag-sale { background: rgba(255, 106, 26, 0.14); color: #ff8a4c; border: 1px solid rgba(255, 106, 26, 0.36); }
     .sb-tag-mint { background: rgba(232, 192, 105, 0.14); color: var(--gold); border: 1px solid rgba(232, 192, 105, 0.36); }
-    .sb-col { display: block; flex: 0 0 auto; font-size: 0.76rem; color: var(--gold); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sb-parties { display: block; flex: 0 0 auto; font-size: 0.76rem; color: rgba(236, 228, 212, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .sb-arrow { color: rgba(255, 106, 26, 0.8); margin: 0 1px; }
     /* PC : prix et temps l'un À CÔTÉ de l'autre. */
     .sb-right { display: flex; flex-direction: row; align-items: baseline; justify-content: flex-end; gap: 10px; text-align: right; }
-    .sb-tag--corner { display: none; }   /* badge type en coin : mobile uniquement */
     /* Prix : montant en BLANC (sans glow, un cran sous le nom du NFT), devise discrète. */
     .sb-price { font-family: var(--font-display); font-size: 0.95rem; white-space: nowrap; color: #f5f1ea; }
     .sb-price .sb-amt { color: #f5f1ea; }
@@ -3113,9 +3055,7 @@ body::after {
       .sb-main { flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; min-width: 0; }
       .sb-line1 { width: 100%; flex: none; }
       .sb-name { font-size: 0.88rem; color: #f7f1e6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-      .sb-col { font-size: 0.66rem; color: rgba(232, 192, 105, 0.85); letter-spacing: 0.01em; max-width: 100%; flex: none; }
-      .sb-parties { font-size: 0.58rem; color: rgba(236, 228, 212, 0.38); max-width: 100%; flex: none; }
-      /* Zone droite : prix prioritaire, badge type au-dessus, temps en dessous — compact. */
+      /* Zone droite : prix prioritaire, temps en dessous — compact. */
       .sb-right { flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; min-width: 50px; }
       .sb-price { font-size: 0.92rem; line-height: 1; }
       .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
@@ -3124,15 +3064,11 @@ body::after {
       .sb-group-head { font-size: 0.92rem; gap: 8px; margin-top: 8px; padding: 1px 2px; }
       .sb-group-logo { width: 21px; height: 21px; border-radius: 6px; }
       .sb-group-count, .sb-batch-count { font-size: 0.56rem; padding: 2px 7px; }
-      .sb-group-tag { font-size: 0.46rem; padding: 1px 6px; }
       /* Cadre de transfert : en-tête acheteur compact en mobile. */
       .sb-batch-head { padding: 7px 12px 6px; gap: 6px; }
       .sb-batch-buyer { font-size: 0.86rem; }
       .sb-batch-tag { font-size: 0.52rem; padding: 2px 7px; }
       .sb-batch-from { font-size: 0.86rem; }
-      .sb-batch-meta { gap: 7px; padding-left: 5px; }
-      .sb-batch-sum { font-size: 0.72rem; }
-      .sb-batch .sb-row--noprice { grid-template-columns: 46px 1fr; }
       .sb-batch-time { font-size: 0.52rem; }
       .sb-batch .sb-row { padding: 7px 12px; }
     }
