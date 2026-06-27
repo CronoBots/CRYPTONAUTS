@@ -3014,10 +3014,10 @@ body::after {
     }
     .sb-feed { display: grid; grid-template-columns: 1fr; gap: 9px; }   /* une seule colonne (avant : multi-colonnes sur PC) */
     /* En-tête de collection coiffant une suite de ventes consécutives de cette collection. */
-    .sb-group-head { display: flex; align-items: center; gap: 9px; padding: 2px 4px; margin-top: 7px;
-      font-family: var(--font-display); font-size: 0.82rem; color: var(--gold); letter-spacing: 0.01em; min-width: 0; }
+    .sb-group-head { display: flex; align-items: center; gap: 10px; padding: 2px 4px; margin-top: 9px;
+      font-family: var(--font-display); font-size: 1.02rem; color: var(--gold); letter-spacing: 0.01em; min-width: 0; }
     .sb-feed > .sb-group-head:first-child { margin-top: 0; }
-    .sb-group-logo { width: 22px; height: 22px; border-radius: 6px; object-fit: cover; flex: none; background: rgba(255, 255, 255, 0.04); }
+    .sb-group-logo { width: 25px; height: 25px; border-radius: 7px; object-fit: cover; flex: none; background: rgba(255, 255, 255, 0.04); }
     .sb-group-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-group-count { flex: none; font-family: var(--font-body); font-size: 0.62rem; color: var(--muted);
       background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 8px; }
@@ -3034,7 +3034,10 @@ body::after {
     /* En-tête du cadre : TYPE à gauche + ACHETEUR mis en avant. Fond distinct (≠ lignes NFT). */
     .sb-batch-head { display: flex; align-items: center; gap: 7px; padding: 9px 16px 8px; min-width: 0;
       background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
-    .sb-batch-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
+    /* Badge type bien visible : fond PLEIN + texte foncé + plus grand. */
+    .sb-batch-tag { flex: none; font-size: 0.58rem; font-weight: 800; padding: 3px 9px; border: 0; }
+    .sb-batch-tag.sb-tag-mint { background: var(--gold); color: #1a0f08; }
+    .sb-batch-tag.sb-tag-sale { background: var(--primary-color); color: #1a0f08; }
     /* Vendeur en ROUGE (part), acheteur en VERT (reçoit), MÊME police/taille ; flèche neutre. */
     .sb-batch-from { flex: 0 1 auto; font-family: var(--font-display); font-size: 0.95rem; color: #ff6b6b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-batch-arrow { color: rgba(236, 228, 212, 0.45); flex: none; }
@@ -3112,14 +3115,14 @@ body::after {
       .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
       .sb-skel { height: 62px; border-radius: 12px; }
       /* En-tête de groupe : compact en mobile. */
-      .sb-group-head { font-size: 0.74rem; gap: 7px; margin-top: 6px; padding: 1px 2px; }
-      .sb-group-logo { width: 18px; height: 18px; border-radius: 5px; }
+      .sb-group-head { font-size: 0.92rem; gap: 8px; margin-top: 8px; padding: 1px 2px; }
+      .sb-group-logo { width: 21px; height: 21px; border-radius: 6px; }
       .sb-group-count { font-size: 0.56rem; padding: 0 6px; }
       .sb-group-tag { font-size: 0.46rem; padding: 1px 6px; }
       /* Cadre de transfert : en-tête acheteur compact en mobile. */
       .sb-batch-head { padding: 7px 12px 6px; gap: 6px; }
       .sb-batch-buyer { font-size: 0.86rem; }
-      .sb-batch-tag { font-size: 0.44rem; padding: 1px 6px; }
+      .sb-batch-tag { font-size: 0.52rem; padding: 2px 7px; }
       .sb-batch-from { font-size: 0.86rem; }
       .sb-batch-meta { gap: 7px; padding-left: 5px; }
       .sb-batch-sum { font-size: 0.72rem; }
