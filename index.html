@@ -3019,8 +3019,10 @@ body::after {
     .sb-feed > .sb-group-head:first-child { margin-top: 0; }
     .sb-group-logo { width: 25px; height: 25px; border-radius: 7px; object-fit: cover; flex: none; background: rgba(255, 255, 255, 0.04); }
     .sb-group-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-    .sb-group-count { flex: none; font-family: var(--font-body); font-size: 0.62rem; color: var(--muted);
-      background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 1px 8px; }
+    /* Compteur (collection ET acheteur) : MÊME style, centré H+V. */
+    .sb-group-count, .sb-batch-count { flex: none; display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+      font-family: var(--font-body); font-size: 0.62rem; color: var(--muted);
+      background: rgba(255, 255, 255, 0.06); border: 1px solid var(--hairline); border-radius: 999px; padding: 3px 8px; }
     /* Badge de type (Mint/Sale) porté par l'en-tête quand tout le groupe est du même type. */
     .sb-group-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
     /* ── Cadre de TRANSFERT (acheteur) : regroupe les NFT d'un même acheteur consécutif ── */
@@ -3034,8 +3036,9 @@ body::after {
     /* En-tête du cadre : TYPE à gauche + ACHETEUR mis en avant. Fond distinct (≠ lignes NFT). */
     .sb-batch-head { display: flex; align-items: center; gap: 7px; padding: 9px 16px 8px; min-width: 0;
       background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
-    /* Badge type : pastille CONTOUR (bordure + texte colorés, fond transparent). */
-    .sb-batch-tag { flex: none; font-size: 0.58rem; font-weight: 700; padding: 2px 9px; background: transparent; }
+    /* Badge type : pastille CONTOUR, texte centré H+V (inline-flex + text-indent qui compense l'interlettrage). */
+    .sb-batch-tag { flex: none; display: inline-flex; align-items: center; justify-content: center; line-height: 1;
+      font-size: 0.58rem; font-weight: 700; padding: 4px 9px; background: transparent; letter-spacing: 0.1em; text-indent: 0.1em; }
     .sb-batch-tag.sb-tag-mint { background: transparent; border: 1px solid rgba(232, 192, 105, 0.65); color: var(--gold); }
     .sb-batch-tag.sb-tag-sale { background: transparent; border: 1px solid rgba(255, 106, 26, 0.7); color: #ff8a4c; }
     /* Vendeur en ROUGE (part), acheteur en VERT (reçoit), MÊME police/taille ; flèche neutre. */
@@ -3117,7 +3120,7 @@ body::after {
       /* En-tête de groupe : compact en mobile. */
       .sb-group-head { font-size: 0.92rem; gap: 8px; margin-top: 8px; padding: 1px 2px; }
       .sb-group-logo { width: 21px; height: 21px; border-radius: 6px; }
-      .sb-group-count { font-size: 0.56rem; padding: 0 6px; }
+      .sb-group-count, .sb-batch-count { font-size: 0.56rem; padding: 2px 7px; }
       .sb-group-tag { font-size: 0.46rem; padding: 1px 6px; }
       /* Cadre de transfert : en-tête acheteur compact en mobile. */
       .sb-batch-head { padding: 7px 12px 6px; gap: 6px; }
@@ -3127,7 +3130,6 @@ body::after {
       .sb-batch-meta { gap: 7px; padding-left: 5px; }
       .sb-batch-sum { font-size: 0.72rem; }
       .sb-batch .sb-row--noprice { grid-template-columns: 46px 1fr; }
-      .sb-batch-count { font-size: 0.54rem; padding: 0 6px; }
       .sb-batch-time { font-size: 0.52rem; }
       .sb-batch .sb-row { padding: 7px 12px; }
     }
