@@ -3090,7 +3090,10 @@ body::after {
     /* PC : prix et temps l'un À CÔTÉ de l'autre. */
     .sb-right { display: flex; flex-direction: row; align-items: baseline; justify-content: flex-end; gap: 10px; text-align: right; }
     .sb-tag--corner { display: none; }   /* badge type en coin : mobile uniquement */
-    .sb-price { font-family: var(--font-display); font-size: 1.02rem; color: #ff6a1a; text-shadow: 0 0 14px rgba(255, 106, 26, 0.3); white-space: nowrap; }
+    /* Prix : montant en teinte chaude DOUCE (sans glow, un cran sous le nom du NFT), devise discrète. */
+    .sb-price { font-family: var(--font-display); font-size: 0.95rem; white-space: nowrap; color: #ffb27a; }
+    .sb-price .sb-amt { color: #ffb27a; }
+    .sb-price .sb-cur { color: rgba(236, 228, 212, 0.42); font-size: 0.78em; margin-left: 1px; }
     .sb-time { font-size: 0.68rem; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(236, 228, 212, 0.4); white-space: nowrap; }
     .sb-empty { text-align: center; color: rgba(236, 228, 212, 0.55); padding: 40px 0; }
     .sb-skel { height: 76px; border-radius: 15px; background: linear-gradient(100deg, rgba(255, 255, 255, 0.03) 30%, rgba(255, 255, 255, 0.07) 50%, rgba(255, 255, 255, 0.03) 70%); background-size: 200% 100%; animation: shimmer 1.3s linear infinite; border: none; }
@@ -3114,7 +3117,7 @@ body::after {
       .sb-parties { font-size: 0.58rem; color: rgba(236, 228, 212, 0.38); max-width: 100%; flex: none; }
       /* Zone droite : prix prioritaire, badge type au-dessus, temps en dessous — compact. */
       .sb-right { flex-direction: column; align-items: flex-end; justify-content: center; gap: 2px; min-width: 50px; }
-      .sb-price { font-size: 1.04rem; line-height: 1; }
+      .sb-price { font-size: 0.92rem; line-height: 1; }
       .sb-time { font-size: 0.52rem; letter-spacing: 0.06em; color: rgba(236, 228, 212, 0.42); }
       .sb-skel { height: 62px; border-radius: 12px; }
       /* En-tête de groupe : compact en mobile. */
@@ -3870,6 +3873,14 @@ body::after {
       const v = Number.isInteger(n) ? n.toLocaleString('en-US') : n.toFixed(2);
       return (cur && cur !== 'USD') ? (v + ' ' + cur) : ('$' + v);
     }
+    // Sépare montant et devise pour les styler différemment (montant chaud, devise discrète).
+    function sbPriceHTML(p) {
+      const m = /^(\$)?([\d,.]+)\s*([A-Za-z]+)?$/.exec(p || '');
+      if (!m) return escHtml(p || '');
+      return (m[1] ? '<span class="sb-cur">' + m[1] + '</span>' : '')
+        + '<span class="sb-amt">' + escHtml(m[2]) + '</span>'
+        + (m[3] ? ' <span class="sb-cur">' + escHtml(m[3]) + '</span>' : '');
+    }
     function sbUser(u) {
       const name = u && (u.displayName || u.username);
       return name ? String(name).trim() : '—';
@@ -3952,7 +3963,7 @@ body::after {
         return '<a class="sb-row' + (isNew(s) ? ' sb-new' : '') + '" href="' + escHtml(link) + '" target="_blank" rel="noopener">'
           + '<span class="sb-thumb-wrap' + preLoaded + '"><img class="sb-thumb" src="' + escHtml(thumb) + '"' + (s.ipfs ? ' data-ipfs="' + escHtml(s.ipfs) + '" data-size="120" data-gw="0" data-tries="0" data-fallback="assets/v3-logo.jpg?v=2"' : '') + (s.directFb ? ' data-sb-fallback="' + escHtml(s.directFb) + '"' : '') + ' alt="" loading="lazy" decoding="async"></span>'
           + '<div class="sb-main"><div class="sb-line1"><span class="sb-name">' + escHtml(s.asset || s.col) + '</span>' + tagInline + '</div></div>'
-          + '<div class="sb-right"><span class="sb-price">' + escHtml(s.price) + '</span></div></a>';
+          + '<div class="sb-right"><span class="sb-price">' + sbPriceHTML(s.price) + '</span></div></a>';
       };
       const partyKey = (s) => s.seller + '→' + s.buyer;
       let order = 0;   // délai d'entrée échelonné (animation premium)
