@@ -4019,13 +4019,11 @@ body::after {
 
     async function loadSales(silent) {
       const feed = document.getElementById('salesFeed');
-      const countEl = document.getElementById('sbCount');
       if (!feed) return;
       // En mode silencieux (auto-refresh), on ne vide pas le flux : on remplace juste
       // le contenu une fois les nouvelles ventes prêtes (pas de clignotement de skeletons).
       if (!silent) {
         feed.innerHTML = '<div class="sb-row sb-skel"></div>'.repeat(8);
-        if (countEl) countEl.textContent = 'Loading…';
       }
       // Liste des collections depuis COLLECTION_META (statique) — indépendante du
       // chargement async de collectionsData (data.json). Sinon, à la 1re ouverture,
@@ -4074,7 +4072,7 @@ body::after {
         if (silent && !newCount) return;
         renderSalesFeed(silent);
       } catch (e) {
-        if (!silent) { feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>'; if (countEl) countEl.textContent = ''; }
+        if (!silent) { feed.innerHTML = '<p class="sb-empty">Sales feed unavailable right now.</p>'; }
       }
     }
 
@@ -4475,7 +4473,6 @@ body::after {
     function wireLeaderboardControls() {
       const listEl = document.getElementById('global-owners');
       const subEl = document.getElementById('lbSub');
-      const pills = document.getElementById('lbPills');
       const showMoreBtn = document.getElementById('show-more-owners');
       const searchInput = document.getElementById('searchInput');
       if (!listEl || !LB_BOARDS.length) return;
@@ -4502,21 +4499,7 @@ body::after {
         if (searchInput) searchInput.value = '';
         expanded = false;
         applyCollapse();
-        if (pills) pills.querySelectorAll('.lb-pill').forEach(p => {
-          const on = p.dataset.lb === String(idx);
-          p.classList.toggle('is-active', on);
-          p.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
       };
-
-      if (pills) {
-        pills.addEventListener('click', (e) => {
-          const btn = e.target.closest('.lb-pill');
-          if (!btn) return;
-          selectBoard(parseInt(btn.dataset.lb, 10));
-          btn.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
-        });
-      }
 
       if (showMoreBtn) {
         showMoreBtn.setAttribute('role', 'button');

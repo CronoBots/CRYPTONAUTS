@@ -6,3 +6,6 @@ node_modules/
 
 # PID de la session Remote Control (local à chaque PC)
 .remote-control.pid
+
+# Logs runtime du remote-control (local)
+remote-control-loop.log
