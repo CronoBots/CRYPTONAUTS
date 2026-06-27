@@ -85,7 +85,7 @@ input, textarea, [contenteditable] {
 h1, h2, h3,
 .hero-title, .section-title,
 .btn, .stat-number, .stat-chip .v,
-.rank, .count-number, .lb-count .n {
+.rank, .count-number {
   font-family: var(--font-display);
 }
 
@@ -188,7 +188,7 @@ body::after {
       text-decoration: underline;
     }
 
-    .collection-list, .leaderboard-section {
+    .leaderboard-section {
       margin-bottom: 15px;
     }
 
@@ -891,7 +891,6 @@ body::after {
       max-width: none;
     }
 
-    .collection-list > h1,
     .leaderboard-section h1 {
       letter-spacing: 0.06em;
     }
@@ -1082,8 +1081,6 @@ body::after {
     }
 
     /* ════════════ GALERIE DE COLLECTIONS ════════════ */
-    .collection-list > h1 { text-align: center; }
-
     #collections-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
@@ -1260,115 +1257,6 @@ body::after {
     @keyframes cmIn {
       from { opacity: 0; transform: translateY(20px) scale(0.97); }
       to { opacity: 1; transform: none; }
-    }
-    .cm-header {
-      position: relative;
-      padding: 26px 20px 18px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255, 106, 26, 0.15);
-      background: radial-gradient(ellipse at 50% 0%, rgba(255, 106, 26, 0.12), transparent 70%);
-      flex-shrink: 0;
-    }
-    .cm-header .cm-cover {
-      width: 96px;
-      height: 96px;
-      border-radius: 18px;
-      object-fit: cover;
-      border: 1px solid rgba(255, 106, 26, 0.3);
-      box-shadow: 0 0 24px rgba(255, 106, 26, 0.25);
-    }
-    .cm-header .cm-title {
-      font-size: 1.25rem;
-      margin: 12px 0 14px;
-    }
-    .cm-stats {
-      display: flex;
-      justify-content: center;
-      gap: 14px;
-    }
-    .cm-stat {
-      min-width: 92px;
-      padding: 8px 14px;
-      border-radius: 12px;
-      background: rgba(255, 106, 26, 0.08);
-      border: 1px solid rgba(255, 106, 26, 0.18);
-    }
-    .cm-stat .v { display: block; font-size: 1.5rem; line-height: 1; color: var(--primary-color); }
-    .cm-stat .l { display: block; margin-top: 4px; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255, 255, 255, 0.65); }
-
-    .cm-list {
-      list-style: none;
-      margin: 0;
-      padding: 14px 16px 18px;
-      overflow: visible;
-    }
-    .cm-list li {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 11px 12px;
-      margin-bottom: 9px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 106, 26, 0.10);
-      border-left: 3px solid rgba(255, 106, 26, 0.35);
-      text-transform: uppercase;
-      font-weight: bold;
-      font-size: 0.95rem;
-    }
-    .cm-list li .lb-left {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      min-width: 0;
-      flex: 1 1 auto;
-    }
-    .cm-list li .lb-name {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      color: var(--primary-color);
-    }
-    .cm-list li .rank {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 2rem;
-      height: 2rem;
-      padding: 0 0.4rem;
-      border-radius: 999px;
-      background: rgba(255, 106, 26, 0.14);
-      border: 1px solid rgba(255, 106, 26, 0.30);
-      color: #ecdfc7;
-      font-size: 0.95rem;
-      line-height: 1;
-      flex-shrink: 0;
-    }
-    .cm-list li .lb-count {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex: 0 0 auto;
-      padding: 6px 12px;
-      border-radius: 999px;
-      background: rgba(255, 106, 26, 0.12);
-      border: 1px solid rgba(255, 106, 26, 0.22);
-    }
-    .cm-list li .lb-count .n { font-size: 1.05rem; }
-    .cm-list li .lb-count .t { font-size: 0.55rem; opacity: 0.6; letter-spacing: 0.04em; }
-
-    .cm-list li.rank-1 { border-left-color: #ffd700; background: linear-gradient(90deg, rgba(255, 215, 0, 0.16), rgba(255, 255, 255, 0.03)); }
-    .cm-list li.rank-2 { border-left-color: #c0c0c0; background: linear-gradient(90deg, rgba(210, 210, 210, 0.16), rgba(255, 255, 255, 0.03)); }
-    .cm-list li.rank-3 { border-left-color: #cd7f32; background: linear-gradient(90deg, rgba(205, 127, 50, 0.16), rgba(255, 255, 255, 0.03)); }
-    .cm-list li.rank-1 .rank { background: linear-gradient(135deg, #ffe680, #d4a017); border-color: rgba(255, 215, 0, 0.7); color: #2a1d00; }
-    .cm-list li.rank-2 .rank { background: linear-gradient(135deg, #f5f5f5, #b9b9b9); border-color: rgba(220, 220, 220, 0.7); color: #1d1d1d; }
-    .cm-list li.rank-3 .rank { background: linear-gradient(135deg, #f0b27a, #cd7f32); border-color: rgba(205, 127, 50, 0.7); color: #2a1400; }
-
-    @media (prefers-reduced-motion: reduce) {
-      .collection { animation: none; opacity: 1; transform: none; translate: none; }
-      #collectionModal .modal-box { animation: none; }
     }
 
     @media screen and (max-width: 600px) {
@@ -1911,11 +1799,9 @@ body::after {
     /* Titre Spotlight légèrement réduit (il tient sur deux phrases). */
     .spot-section .section-title { font-size: clamp(1.7rem, 4.2vw, 2.9rem); }
     .section-sub { color: var(--muted); }
-    .collection-body h2 { text-shadow: none; }
-    .cm-title { text-shadow: none; }
 
     /* Champs & libellés en police de corps */
-    .stat-chip .l, .cm-stat .l, .count-text, .lb-count .t { font-family: var(--font-body); font-weight: 500; }
+    .stat-chip .l, .count-text { font-family: var(--font-body); font-weight: 500; }
 
     /* Footer affiné */
     footer {
@@ -1988,32 +1874,6 @@ body::after {
       color: #fff;
     }
 
-    .cm-desc {
-      margin: 18px 0 0;
-      font-size: 0.9rem;
-      line-height: 1.62;
-      color: var(--muted);
-      text-transform: none;
-      text-align: left;
-    }
-    .cm-desc[hidden] { display: none; }
-    .cm-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      margin-top: 16px;
-      padding: 9px 16px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 106, 26, 0.4);
-      background: rgba(255, 106, 26, 0.08);
-      color: #ecdfc7;
-      font-family: var(--font-body);
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.03em;
-    }
-    .cm-link[hidden] { display: none; }
-    .cm-link:hover { background: rgba(255, 106, 26, 0.18); text-decoration: none; }
 
     .artist-links {
       display: grid;
@@ -2050,45 +1910,12 @@ body::after {
     .lc-head svg { color: var(--primary-color); flex-shrink: 0; }
     .lc-sub { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.02em; }
 
-    /* Citation de l'artiste */
-    .artist-quote {
-      max-width: 760px;
-      margin: 0 auto 32px;
-      padding: 0 20px;
-      text-align: center;
-    }
-    .artist-quote p {
-      font-family: var(--font-display);
-      font-size: clamp(1.15rem, 2.6vw, 1.7rem);
-      line-height: 1.36;
-      color: #f6f1e6;
-      margin: 0 0 14px;
-    }
-    .artist-quote cite {
-      font-style: normal;
-      font-size: 0.72rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    /* Stats marché de la modale */
-    .cm-stats { flex-wrap: wrap; }
     @media screen and (max-width: 600px) {
       .tab-bar { gap: 6px; }
       .tab-btn { padding: 9px 13px; font-size: 0.72rem; letter-spacing: 0.04em; }
     }
 
-    /* ── Aperçu des NFT dans la modale ── */
-    .cm-sec {
-      margin: 0;
-      padding: 18px 16px 0;
-      font-family: var(--font-display);
-      font-size: 0.74rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
+    /* ── Aperçu des NFT (grille du détail de collection) ── */
     .cm-nfts {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
