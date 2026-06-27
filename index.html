@@ -3003,10 +3003,11 @@ body::after {
     /* Nouvelle vente arrivée en live : flash vert qui s'estompe. */
     @keyframes sbNew { 0%, 18% { background: rgba(52, 226, 154, 0.22); } 100% { background: transparent; } }
     .sb-row.sb-new { animation: sbNew 1.7s ease-out; }
-    /* Indicateur LIVE (point vert pulsant dans l'eyebrow du Sales Bot). */
-    #salesbot .eyebrow { display: inline-flex; align-items: center; }
-    .sb-live-dot { width: 7px; height: 7px; margin-right: 8px; border-radius: 50%; background: #34e29a;
+    /* Bouton LIVE (remplace « Refresh ») : point vert pulsant + clic = refresh manuel immédiat. */
+    .sb-live-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: #34e29a;
       box-shadow: 0 0 8px rgba(52, 226, 154, 0.95); animation: livePulse 1.5s ease-in-out infinite; }
+    .sb-refresh.sb-live-btn { border-color: rgba(52, 226, 154, 0.38); background: rgba(52, 226, 154, 0.08); color: #bdf5db; }
+    .sb-refresh.sb-live-btn:hover { background: rgba(52, 226, 154, 0.16); border-color: rgba(52, 226, 154, 0.6); color: #fff; }
     @media (prefers-reduced-motion: reduce) {
       .sb-feed.sb-cascade > .sb-batch, .sb-feed.sb-cascade > .sb-group-head { animation: none; }
       .sb-row.sb-new { animation: none; } .sb-live-dot { animation: none; }
@@ -3034,8 +3035,8 @@ body::after {
     .sb-batch-head { display: flex; align-items: center; gap: 7px; padding: 9px 16px 8px; min-width: 0;
       background: rgba(255, 255, 255, 0.05); border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
     .sb-batch-tag { flex: none; font-size: 0.5rem; padding: 2px 7px; }
-    /* Vendeur en ROUGE (part), acheteur en VERT (reçoit) ; flèche neutre pour les laisser ressortir. */
-    .sb-batch-from { font-size: 0.78rem; color: #ff6b6b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 0 1 auto; min-width: 0; }
+    /* Vendeur en ROUGE (part), acheteur en VERT (reçoit), MÊME police/taille ; flèche neutre. */
+    .sb-batch-from { flex: 0 1 auto; font-family: var(--font-display); font-size: 0.95rem; color: #ff6b6b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     .sb-batch-arrow { color: rgba(236, 228, 212, 0.45); flex: none; }
     .sb-batch-buyer { flex: 0 1 auto; font-family: var(--font-display); font-size: 0.95rem; color: #4ade80; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
     /* Récap à droite : prix consolidé (qté × prix) + temps. */
@@ -3094,8 +3095,7 @@ body::after {
       .sb-filters { gap: 2px; padding: 3px; flex: 1 1 auto; }
       .sb-chip { padding: 6px 8px; font-size: 0.62rem; gap: 4px; flex: 1 1 0; justify-content: center; letter-spacing: 0.03em; }
       .sb-chip-n { font-size: 0.62rem; }
-      .sb-refresh { padding: 8px 11px; flex: none; }
-      .sb-refresh-tx { display: none; }   /* icône seule sur mobile */
+      .sb-refresh { padding: 8px 12px; flex: none; gap: 6px; }
       .sb-row { grid-template-columns: 46px 1fr auto; gap: 11px; padding: 8px 12px; align-items: center; border-radius: 12px; }
       .sb-thumb-wrap { width: 46px; height: 46px; }
       .sb-thumb { width: 46px; height: 46px; border-radius: 10px; }
@@ -3120,7 +3120,7 @@ body::after {
       .sb-batch-head { padding: 7px 12px 6px; gap: 6px; }
       .sb-batch-buyer { font-size: 0.86rem; }
       .sb-batch-tag { font-size: 0.44rem; padding: 1px 6px; }
-      .sb-batch-from { font-size: 0.62rem; }
+      .sb-batch-from { font-size: 0.86rem; }
       .sb-batch-meta { gap: 7px; padding-left: 5px; }
       .sb-batch-sum { font-size: 0.72rem; }
       .sb-batch .sb-row--noprice { grid-template-columns: 46px 1fr; }
@@ -3324,7 +3324,7 @@ body::after {
 
     <section class="section reveal hidden-view" id="salesbot" data-view="salesbot">
       <div class="section-head">
-        <span class="eyebrow"><span class="sb-live-dot" aria-hidden="true"></span>Live feed</span>
+        <span class="eyebrow">Live feed</span>
         <h2 class="section-title">Sales Bot</h2>
         <p class="section-sub">The latest sales and mints across every Cryptonauts collection.</p>
       </div>
@@ -3335,9 +3335,9 @@ body::after {
             <button class="sb-chip" type="button" data-sbfilter="mint">Mints<span class="sb-chip-n" id="sbnMint">—</span></button>
             <button class="sb-chip" type="button" data-sbfilter="sale">Sales<span class="sb-chip-n" id="sbnSale">—</span></button>
           </div>
-          <button class="sb-refresh" id="sbRefresh" type="button" aria-label="Refresh sales">
-            <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.64-6.36"/><path d="M21 3v6h-6"/></svg>
-            <span class="sb-refresh-tx">Refresh</span>
+          <button class="sb-refresh sb-live-btn" id="sbRefresh" type="button" aria-label="Live feed — tap to refresh now" title="Tap to refresh">
+            <span class="sb-live-dot" aria-hidden="true"></span>
+            <span class="sb-refresh-tx">Live</span>
           </button>
         </div>
         <div id="salesFeed" class="sb-feed"></div>
