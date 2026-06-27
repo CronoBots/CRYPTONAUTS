@@ -248,14 +248,12 @@ body::after {
       text-shadow: none;
     }
 
-    #global-owners, #additional-owners {
+    #global-owners{
       padding: 0;
       columns: 1;          /* une seule colonne (avant : columns:460px → multi-colonnes sur PC) */
     }
 
-    #global-owners li,
-    #additional-owners li,
-    .collection ul li {
+    #global-owners li{
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -278,71 +276,49 @@ body::after {
 
     /* Plus de calque blanc lourd : le fond subtil de la ligne suffit (comme .cv-lb-list).
        Les médailles (rank-1/2/3) gardent leur dégradé via ::before plus bas. */
-    #global-owners li::before,
-    #additional-owners li::before,
-    .collection ul li::before {
+    #global-owners li::before{
       content: none;
     }
 
-    #global-owners li:hover,
-    #additional-owners li:hover,
-    .collection ul li:hover {
+    #global-owners li:hover{
       transform: scale(1.02);
     }
 
     /* PC : lignes du leaderboard plus compactes (mobile garde sa hauteur tactile). */
     @media (min-width: 601px) {
-      #global-owners li, #additional-owners li {
+      #global-owners li{
         padding: 11px 14px; margin-bottom: 8px; font-size: 1rem;
       }
     }
 
     #global-owners li.rank-1,
-    #additional-owners li.rank-1,
-    .collection ul li.collection-rank-1,
     #global-owners li.rank-2,
-    #additional-owners li.rank-2,
-    .collection ul li.collection-rank-2,
-    #global-owners li.rank-3,
-    #additional-owners li.rank-3,
-    .collection ul li.collection-rank-3 {
+    #global-owners li.rank-3{
       opacity: 1 !important;
       color: #fff;
     }
     #global-owners li.rank-1 a:not(.twitter-link),
-    #additional-owners li.rank-1 a:not(.twitter-link),
-    .collection ul li.collection-rank-1 a:not(.twitter-link),
     #global-owners li.rank-2 a:not(.twitter-link),
-    #additional-owners li.rank-2 a:not(.twitter-link),
-    .collection ul li.collection-rank-2 a:not(.twitter-link),
-    #global-owners li.rank-3 a:not(.twitter-link),
-    #additional-owners li.rank-3 a:not(.twitter-link),
-    .collection ul li.collection-rank-3 a:not(.twitter-link) {
+    #global-owners li.rank-3 a:not(.twitter-link){
       color: #fff;
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
     }
 
     /* Top-3 : tint subtil dégradé (au lieu d'une bande pleine saturée). Pas de filet : la bordure
        de la ligne + le badge de rang suffisent (évite l'effet double bordure à gauche). */
-    #global-owners li.rank-1::before,
-    #additional-owners li.rank-1::before,
-    .collection ul li.collection-rank-1::before {
+    #global-owners li.rank-1::before{
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(255, 215, 0, 0.16), rgba(255, 215, 0, 0.02) 62%);
       border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
-    #global-owners li.rank-2::before,
-    #additional-owners li.rank-2::before,
-    .collection ul li.collection-rank-2::before {
+    #global-owners li.rank-2::before{
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(214, 214, 222, 0.14), rgba(214, 214, 222, 0.02) 62%);
       border-radius: 8px; z-index: -1; transform: translateZ(0);
     }
-    #global-owners li.rank-3::before,
-    #additional-owners li.rank-3::before,
-    .collection ul li.collection-rank-3::before {
+    #global-owners li.rank-3::before{
       content: '';
       position: absolute; inset: 0;
       background: linear-gradient(90deg, rgba(205, 127, 50, 0.16), rgba(205, 127, 50, 0.02) 62%);
@@ -364,38 +340,30 @@ body::after {
     }
     .twitter-link svg { display: block; width: 15px; height: 15px; }
     /* Logo X : même taille (19px) et même réglage vertical dans le leaderboard général ET de collection. */
-    #global-owners li .twitter-link svg, #additional-owners li .twitter-link svg, .cv-lb-list .twitter-link svg { width: 19px; height: 19px; }
-    #global-owners li .twitter-link, #additional-owners li .twitter-link, .cv-lb-list .twitter-link { top: -2px; }
+    #global-owners li .twitter-link svg, .cv-lb-list .twitter-link svg { width: 19px; height: 19px; }
+    #global-owners li .twitter-link, .cv-lb-list .twitter-link { top: -2px; }
     .twitter-link:hover {
       color: #fff !important;
       transform: translateY(-1px);
       text-decoration: none;
     }
 
-    #global-owners li .rank,
-    #additional-owners li .rank,
-    .collection ul li .rank {
+    #global-owners li .rank{
       font-size: 1.05rem; color: var(--muted); min-width: 1.7em; text-align: center; flex: none;
     }
     /* Médailles : numéro de rang coloré (or / argent / bronze) — taille uniforme. */
-    #global-owners li.rank-1 .rank, #additional-owners li.rank-1 .rank { color: #ffd700; }
-    #global-owners li.rank-2 .rank, #additional-owners li.rank-2 .rank { color: #d6d6de; }
-    #global-owners li.rank-3 .rank, #additional-owners li.rank-3 .rank { color: #cd7f32; }
+    #global-owners li.rank-1 .rank{ color: #ffd700; }
+    #global-owners li.rank-2 .rank{ color: #d6d6de; }
+    #global-owners li.rank-3 .rank{ color: #cd7f32; }
 
-    #global-owners li .count-number,
-    #additional-owners li .count-number,
-    .collection ul li .count-number {
+    #global-owners li .count-number{
       font-size: 1.05rem; color: var(--primary-color);
     }
-    #global-owners li .count-text,
-    #additional-owners li .count-text,
-    .collection ul li .count-text {
+    #global-owners li .count-text{
       font-size: 0.62rem; margin-left: 0.45rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted);
     }
 
-    #global-owners li .left-container,
-    #additional-owners li .left-container,
-    .collection ul li .left-container {
+    #global-owners li .left-container{
       display: flex;
       align-items: center;
       gap: 8px;
@@ -406,18 +374,14 @@ body::after {
     /* Le nom prend l'espace dispo et tronque proprement. */
     #global-owners li .left-container > a:not(.twitter-link) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-    #global-owners li .count-container,
-    #additional-owners li .count-container,
-    .collection ul li .count-container {
+    #global-owners li .count-container{
       display: flex;
       align-items: center;
       position: relative;
       z-index: 2;
     }
 
-    #global-owners li a,
-    #additional-owners li a,
-    .collection ul li a {
+    #global-owners li a{
       color: inherit;
       font-weight: bold;
     }
@@ -494,19 +458,13 @@ body::after {
     h2 {
       text-shadow: 0 0 14px rgba(255, 106, 26, 0.35);
     }
-    #global-owners li.rank-1,
-    #additional-owners li.rank-1,
-    .collection ul li.collection-rank-1 {
+    #global-owners li.rank-1{
       box-shadow: 0 0 22px rgba(255, 215, 0, 0.30);
     }
-    #global-owners li.rank-2,
-    #additional-owners li.rank-2,
-    .collection ul li.collection-rank-2 {
+    #global-owners li.rank-2{
       box-shadow: 0 0 22px rgba(192, 192, 192, 0.26);
     }
-    #global-owners li.rank-3,
-    #additional-owners li.rank-3,
-    .collection ul li.collection-rank-3 {
+    #global-owners li.rank-3{
       box-shadow: 0 0 22px rgba(205, 127, 50, 0.26);
     }
 
@@ -598,61 +556,35 @@ body::after {
       .leaderboard-section h1 {
         font-size: 2rem;
       }
-      #global-owners li,
-      #additional-owners li,
-      .collection ul li {
+      #global-owners li{
         font-size: 0.9rem;
         padding: 8px 8px;
       }
       #global-owners li.rank-1,
-      #additional-owners li.rank-1,
-      .collection ul li.collection-rank-1,
       #global-owners li.rank-2,
-      #additional-owners li.rank-2,
-      .collection ul li.collection-rank-2,
-      #global-owners li.rank-3,
-      #additional-owners li.rank-3,
-      .collection ul li.collection-rank-3 {
+      #global-owners li.rank-3{
         font-size: 1rem;
         color: #fff;
         text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
       }
       #global-owners li.rank-1 a:not(.twitter-link),
-      #additional-owners li.rank-1 a:not(.twitter-link),
-      .collection ul li.collection-rank-1 a:not(.twitter-link),
       #global-owners li.rank-2 a:not(.twitter-link),
-      #additional-owners li.rank-2 a:not(.twitter-link),
-      .collection ul li.collection-rank-2 a:not(.twitter-link),
-      #global-owners li.rank-3 a:not(.twitter-link),
-      #additional-owners li.rank-3 a:not(.twitter-link),
-      .collection ul li.collection-rank-3 a:not(.twitter-link) {
+      #global-owners li.rank-3 a:not(.twitter-link){
         color: #fff;
         text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
       }
-      #global-owners li .rank,
-      #additional-owners li .rank,
-      .collection ul li .rank {
+      #global-owners li .rank{
         font-size: 0.9rem;
       }
       #global-owners li.rank-1 .rank,
-      #additional-owners li.rank-1 .rank,
       #global-owners li.rank-2 .rank,
-      #additional-owners li.rank-2 .rank,
-      #global-owners li.rank-3 .rank,
-      #additional-owners li.rank-3 .rank,
-      .collection ul li.collection-rank-1 .rank,
-      .collection ul li.collection-rank-2 .rank,
-      .collection ul li.collection-rank-3 .rank {
+      #global-owners li.rank-3 .rank{
         font-size: 0.9rem;
       }
-      #global-owners li .count-number,
-      #additional-owners li .count-number,
-      .collection ul li .count-number {
+      #global-owners li .count-number{
         font-size: 0.9rem;
       }
-      #global-owners li .count-text,
-      #additional-owners li .count-text,
-      .collection ul li .count-text {
+      #global-owners li .count-text{
         font-size: 0.55rem;
         margin-left: 0.1rem;
       }
@@ -853,24 +785,18 @@ body::after {
     }
 
     /* ── Lignes de classement : base raffinée ── */
-    #global-owners li,
-    #additional-owners li,
-    .collection ul li {
+    #global-owners li{
       gap: 12px;
       border: 1px solid rgba(255, 106, 26, 0.10);
       border-left: 3px solid rgba(255, 106, 26, 0.35);
     }
-    #global-owners li::before,
-    #additional-owners li::before,
-    .collection ul li::before {
+    #global-owners li::before{
       background: linear-gradient(90deg, rgba(255, 106, 26, 0.10), rgba(255, 106, 26, 0.02));
       opacity: 1;
     }
 
     /* Rang : numéro simple (comme dans les leaderboards de collection), sans pastille. */
-    #global-owners li .rank,
-    #additional-owners li .rank,
-    .collection ul li .rank {
+    #global-owners li .rank{
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -890,63 +816,38 @@ body::after {
     }
 
     /* Top 3 : numéro coloré (or / argent / bronze), sans badge. */
-    #global-owners li.rank-1 .rank,
-    #additional-owners li.rank-1 .rank,
-    .collection ul li.collection-rank-1 .rank { color: #ffd700; }
-    #global-owners li.rank-2 .rank,
-    #additional-owners li.rank-2 .rank,
-    .collection ul li.collection-rank-2 .rank { color: #d6d6de; }
-    #global-owners li.rank-3 .rank,
-    #additional-owners li.rank-3 .rank,
-    .collection ul li.collection-rank-3 .rank { color: #cd7f32; }
+    #global-owners li.rank-1 .rank{ color: #ffd700; }
+    #global-owners li.rank-2 .rank{ color: #d6d6de; }
+    #global-owners li.rank-3 .rank{ color: #cd7f32; }
 
     /* Top 3 : fonds dégradés + bord d'accent coloré */
-    #global-owners li.rank-1::before,
-    #additional-owners li.rank-1::before,
-    .collection ul li.collection-rank-1::before {
+    #global-owners li.rank-1::before{
       background: linear-gradient(90deg, rgba(255, 215, 0, 0.24), rgba(255, 215, 0, 0.05));
       opacity: 1;
     }
-    #global-owners li.rank-2::before,
-    #additional-owners li.rank-2::before,
-    .collection ul li.collection-rank-2::before {
+    #global-owners li.rank-2::before{
       background: linear-gradient(90deg, rgba(210, 210, 210, 0.24), rgba(210, 210, 210, 0.05));
       opacity: 1;
     }
-    #global-owners li.rank-3::before,
-    #additional-owners li.rank-3::before,
-    .collection ul li.collection-rank-3::before {
+    #global-owners li.rank-3::before{
       background: linear-gradient(90deg, rgba(205, 127, 50, 0.24), rgba(205, 127, 50, 0.05));
       opacity: 1;
     }
     /* Top-3 : bordure colorée sur toute la ligne (identique au leaderboard de collection .cv-lb-list). */
-    #global-owners li.rank-1,
-    #additional-owners li.rank-1,
-    .collection ul li.collection-rank-1 { border-color: rgba(255, 215, 0, 0.5); }
-    #global-owners li.rank-2,
-    #additional-owners li.rank-2,
-    .collection ul li.collection-rank-2 { border-color: rgba(214, 214, 222, 0.45); }
-    #global-owners li.rank-3,
-    #additional-owners li.rank-3,
-    .collection ul li.collection-rank-3 { border-color: rgba(205, 127, 50, 0.5); }
+    #global-owners li.rank-1{ border-color: rgba(255, 215, 0, 0.5); }
+    #global-owners li.rank-2{ border-color: rgba(214, 214, 222, 0.45); }
+    #global-owners li.rank-3{ border-color: rgba(205, 127, 50, 0.5); }
 
     /* Fond identique au leaderboard de collection (.cv-lb-list) : un vrai background sur la ligne
        (couvre jusqu'au bord, sous la bordure) au lieu du ::before qui laissait un trou sombre à gauche. */
-    #global-owners li::before,
-    #additional-owners li::before { display: none; }
-    #global-owners li,
-    #additional-owners li { background: rgba(255, 255, 255, 0.03); }
-    #global-owners li.rank-1,
-    #additional-owners li.rank-1 { background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02) 62%); }
-    #global-owners li.rank-2,
-    #additional-owners li.rank-2 { background: linear-gradient(90deg, rgba(214, 214, 222, 0.13), rgba(214, 214, 222, 0.02) 62%); }
-    #global-owners li.rank-3,
-    #additional-owners li.rank-3 { background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); }
+    #global-owners li::before{ display: none; }
+    #global-owners li{ background: rgba(255, 255, 255, 0.03); }
+    #global-owners li.rank-1{ background: linear-gradient(90deg, rgba(255, 215, 0, 0.15), rgba(255, 215, 0, 0.02) 62%); }
+    #global-owners li.rank-2{ background: linear-gradient(90deg, rgba(214, 214, 222, 0.13), rgba(214, 214, 222, 0.02) 62%); }
+    #global-owners li.rank-3{ background: linear-gradient(90deg, rgba(205, 127, 50, 0.15), rgba(205, 127, 50, 0.02) 62%); }
 
     /* Compteur : chiffre orange + « CRYPTONAUTS » (comme le leaderboard de collection). */
-    #global-owners li .count-container,
-    #additional-owners li .count-container,
-    .collection ul li .count-container {
+    #global-owners li .count-container{
       gap: 6px;
       flex-shrink: 0;
     }
@@ -993,22 +894,16 @@ body::after {
 
     /* Ajustements mobile (priment car déclarés en dernier) */
     @media screen and (max-width: 600px) {
-      #global-owners li .rank,
-      #additional-owners li .rank,
-      .collection ul li .rank {
+      #global-owners li .rank{
         min-width: 1.7rem;
         height: 1.7rem;
         font-size: 0.8rem;
       }
       .medal { font-size: 1.05rem; }
-      #global-owners li .count-container,
-      #additional-owners li .count-container,
-      .collection ul li .count-container {
+      #global-owners li .count-container{
         padding: 4px 9px;
       }
-      #global-owners li .count-text,
-      #additional-owners li .count-text,
-      .collection ul li .count-text {
+      #global-owners li .count-text{
         font-size: 0.5rem;
       }
       .holders-badge { font-size: 0.8rem; padding: 5px 12px; }
@@ -1028,20 +923,17 @@ body::after {
 
 
     /* Lignes du leaderboard global : anti-débordement */
-    #global-owners li .left-container,
-    #additional-owners li .left-container {
+    #global-owners li .left-container{
       min-width: 0;
       flex: 1 1 auto;
     }
-    #global-owners li .left-container > a:first-of-type,
-    #additional-owners li .left-container > a:first-of-type {
+    #global-owners li .left-container > a:first-of-type{
       min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    #global-owners li .count-container,
-    #additional-owners li .count-container { flex: 0 0 auto; }
+    #global-owners li .count-container{ flex: 0 0 auto; }
 
     /* ════════════ MODALE DÉTAIL COLLECTION ════════════ */
     #collectionModal .modal-box {
