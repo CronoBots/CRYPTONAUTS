@@ -951,23 +951,40 @@ async function processCollection(collectionUrl, usePagination, globalOwnerNFTs, 
   }
 }
 
+// Scrape TOUTES les collections crypto.com en repartant d'un état VIDE (anti double-comptage :
+// globalOwnerNFTs/collectionsData sont remis à zéro avant chaque passage). Renvoie la liste des URLs en échec.
+async function scrapeAllCollections(globalOwnerNFTs, collectionsData, ownersData) {
+  for (const k in globalOwnerNFTs) delete globalOwnerNFTs[k];
+  collectionsData.length = 0;
+  const failed = [];
+  for (const { url, usePagination } of collectionUrls) {
+    console.log(`\n=== Processing collection: ${url} ===`);
+    const r = await processCollection(url, usePagination, globalOwnerNFTs, collectionsData, ownersData);
+    if (!r.ok) failed.push(url);
+    await delay(3000); // courte pause entre collections (le batching réduit déjà fortement le débit)
+  }
+  return failed;
+}
+
 async function main() {
   try {
     const ownersData = loadOwnersJson();
     const globalOwnerNFTs = {};
     const collectionsData = [];
 
-    const failedCollections = [];
-    for (const { url, usePagination } of collectionUrls) {
-      console.log(`\n=== Processing collection: ${url} ===`);
-      const r = await processCollection(url, usePagination, globalOwnerNFTs, collectionsData, ownersData);
-      if (!r.ok) failedCollections.push(url);
-      await delay(3000); // courte pause entre collections (le batching réduit déjà fortement le débit)
+    // 1er passage. Les 429 de crypto.com arrivent en RAFALES : si une collection échoue,
+    // une pause de 90s laisse le rate-limit retomber, puis on refait un passage COMPLET
+    // (état réinitialisé → aucun double-comptage). Évite les runs « rouges » sur un 429 ponctuel.
+    let failedCollections = await scrapeAllCollections(globalOwnerNFTs, collectionsData, ownersData);
+    if (failedCollections.length > 0) {
+      console.warn(`\n⏳ ${failedCollections.length}/${collectionUrls.length} collection(s) en échec (429 ?). Pause 90s puis nouveau passage complet…`);
+      await delay(90000);
+      failedCollections = await scrapeAllCollections(globalOwnerNFTs, collectionsData, ownersData);
     }
 
-    // ── GARDE-FOU n°1 : échec d'au moins une collection ──
+    // ── GARDE-FOU n°1 : échec PERSISTANT (même après reprise) ──
     if (failedCollections.length > 0) {
-      console.error(`\n❌ ${failedCollections.length}/${collectionUrls.length} collection(s) en échec (API bloquée / 429 ?). data.json NON modifié pour ne pas publier des données partielles :`);
+      console.error(`\n❌ ${failedCollections.length}/${collectionUrls.length} collection(s) toujours en échec après reprise (API bloquée / 429 ?). data.json NON modifié pour ne pas publier des données partielles :`);
       failedCollections.forEach(u => console.error(`   - ${u}`));
       process.exitCode = 1;
       return;
