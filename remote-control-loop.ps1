@@ -1,4 +1,4 @@
-﻿# remote-control-loop.ps1
+# remote-control-loop.ps1
 # Maintient Claude Remote Control actif en permanence POUR CE PROJET.
 # Lance par le dossier Demarrage (voir installer-remote-control.ps1).
 # Si la session s'arrete (timeout reseau, veille, crash...), elle est relancee.
@@ -35,7 +35,7 @@ Set-Content -Path $pidFile -Value $PID -Encoding ASCII
 # Cas vecu le 2026-06-24 : au boot, claude peut rester bloque AVANT d'ouvrir la
 # connexion remote (onboarding/race reseau). Resultat : invisible sur mobile, et
 # la boucle ci-dessous ne le relance PAS car il ne se TERMINE pas (il reste fige).
-# Le watchdog le tue apres ~90 s sans connexion etablie vers Anthropic -> la
+# Le watchdog le tue apres ~40 s sans connexion etablie vers Anthropic -> la
 # boucle le relance alors frais. Tourne dans un job separe, parametre par $SessionName.
 $logFile = Join-Path $PSScriptRoot "remote-control-loop.log"
 Get-Job -Name "wd-$SessionName" -ErrorAction SilentlyContinue | Remove-Job -Force -ErrorAction SilentlyContinue
@@ -43,7 +43,7 @@ Start-Job -Name "wd-$SessionName" -ArgumentList $SessionName, $logFile -ScriptBl
     param($session, $log)
     $strikes = 0
     while ($true) {
-        Start-Sleep -Seconds 30
+        Start-Sleep -Seconds 20
         $p = Get-CimInstance Win32_Process -Filter "Name='claude.exe'" |
              Where-Object { $_.CommandLine -match "remote-control $session" } |
              Select-Object -First 1
@@ -52,8 +52,8 @@ Start-Job -Name "wd-$SessionName" -ArgumentList $SessionName, $logFile -ScriptBl
                    Where-Object { $_.RemoteAddress -notin '127.0.0.1','::1' })
         if ($conns.Count -gt 0) { $strikes = 0; continue }
         $strikes++
-        if ($strikes -ge 3) {
-            "$(Get-Date -Format s) WATCHDOG: claude $session fige (0 connexion ~90s, PID $($p.ProcessId)) -> kill" | Out-File -FilePath $log -Append -Encoding utf8
+        if ($strikes -ge 9) {
+            "$(Get-Date -Format s) WATCHDOG: claude $session fige (0 connexion ~180s, PID $($p.ProcessId)) -> kill" | Out-File -FilePath $log -Append -Encoding utf8
             Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
             $strikes = 0
         }
@@ -70,6 +70,6 @@ while ($true) {
     } catch {
         # crash/timeout reseau : on relance apres une courte pause
     }
-    Start-Sleep -Seconds 10
+    Start-Sleep -Seconds 3
 }
 
