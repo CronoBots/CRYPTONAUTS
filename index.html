@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>CronoBots | Cryptonauts Leaderboards</title>
   <link rel="preload" href="fonts/Geomanist-Bold.woff2" as="font" type="font/woff2" crossorigin="anonymous">
   <link rel="icon" type="image/png" href="assets/icon.png">
@@ -55,6 +55,13 @@
 /* Reset global box-sizing (sûr). PAS d'overflow-x:clip/hidden sur html/body :
    ça bloque le scroll vertical sur iOS Safari. Les largeurs sont déjà plafonnées par section. */
 *, *::before, *::after { box-sizing: border-box; }
+
+/* ── Sensation « application native » (surtout en mode standalone/écran d'accueil) ──
+   • pas de flash bleu au tap (highlight navigateur)   • pas de menu tactile prolongé
+   • empêche le sur-défilement/rebond (pull-to-refresh) qui trahit un navigateur       */
+html { -webkit-tap-highlight-color: transparent; }
+html, body { overscroll-behavior-y: none; }
+a, button, .nav-links a, .btn, .cv-tab, .tab-btn { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
 
 body {
   font-family: var(--font-body);
@@ -539,7 +546,7 @@ body::after {
     }
 
     @media screen and (max-width: 600px) {
-      #scrollTopBtn { width: 46px; height: 46px; bottom: 16px; right: 16px; font-size: 1.3rem; }
+      #scrollTopBtn { width: 46px; height: 46px; bottom: calc(74px + env(safe-area-inset-bottom, 0px)); right: 16px; font-size: 1.3rem; }
     }
 
     @media screen and (max-width: 600px) {
@@ -1306,16 +1313,40 @@ body::after {
       .hero-metrics .stats-band { margin: 0 auto; }
     }
     @media screen and (max-width: 600px) {
-      /* Nav mobile : menu d'icônes de section uniquement, réparties sur la largeur.
-         Les liens sociaux passent en pied de page (.footer-social) pour dégager le menu. */
-      .navbar { flex-direction: row; align-items: center; justify-content: center; gap: 4px; padding: 9px 12px; }
+      /* ── Barre d'onglets native (bottom tab bar) ──
+         Sur mobile la navigation quitte le haut et se fixe EN BAS de l'écran, comme
+         dans une application : icône + petit libellé, onglet actif surligné, marge
+         basse respectant l'indicateur d'accueil iPhone (safe-area-inset-bottom).      */
+      .navbar {
+        position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+        flex-direction: row; align-items: stretch; justify-content: center; gap: 0;
+        padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px));
+        border-bottom: none;
+        border-top: 1px solid rgba(255, 106, 26, 0.16);
+        background: rgba(6, 7, 15, 0.9);
+        -webkit-backdrop-filter: blur(20px) saturate(1.4);
+        backdrop-filter: blur(20px) saturate(1.4);
+        box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.45);
+      }
+      /* En bas, pas de changement de padding au défilement (garde une barre stable). */
+      .navbar.scrolled { background: rgba(6, 7, 15, 0.95); padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); }
       .nav-links { flex: 1; min-width: 0; gap: 2px; justify-content: space-around; }
-      .nav-links a { padding: 7px 7px; color: rgba(236, 228, 212, 0.58); text-shadow: none; border-radius: 9px; }
+      .nav-links a {
+        flex: 1 1 0; flex-direction: column; gap: 4px;
+        padding: 6px 4px 4px; border-radius: 12px;
+        color: rgba(236, 228, 212, 0.55); text-shadow: none;
+        letter-spacing: 0.03em; font-size: 0.56rem; text-transform: uppercase;
+        transition: color 0.18s ease, background 0.18s ease, transform 0.12s ease;
+      }
       .nav-links a::after { display: none; }
-      .nav-links a.is-active { color: var(--primary-color); background: rgba(255, 106, 26, 0.12); }
-      .nav-ico { display: block; }
-      .nav-txt { display: none; }
+      .nav-links a:active { transform: scale(0.9); }
+      .nav-links a.is-active { color: var(--primary-color); background: rgba(255, 106, 26, 0.10); }
+      .nav-links a.is-active .nav-ico { filter: drop-shadow(0 0 7px rgba(255, 106, 26, 0.6)); }
+      .nav-ico { display: block; width: 22px; height: 22px; }
+      .nav-txt { display: block; line-height: 1; }
       .nav-social { display: none; }
+      /* Le contenu ne doit pas passer sous la barre d'onglets fixe : réserve la place. */
+      body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
       .hero { min-height: auto; padding: 30px 16px 44px; }
       .hero-astronaut { width: min(280px, 72%); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
@@ -1531,7 +1562,7 @@ body::after {
     #installBtn .install-label { display: none; }   /* icône seule, comme le bouton scroll */
     #installBtn.install-btn[hidden] { display: none; }   /* l'id ne doit pas réafficher le bouton masqué (mode standalone) */
     @media screen and (max-width: 600px) {
-      #installBtn.install-btn { width: 46px; height: 46px; bottom: 16px; left: 16px; }
+      #installBtn.install-btn { width: 46px; height: 46px; bottom: calc(74px + env(safe-area-inset-bottom, 0px)); left: 16px; }
     }
 
     @media screen and (max-width: 600px) {
@@ -4345,9 +4376,12 @@ body::after {
         // n'atterrissait pas au bon endroit sur mobile. Recalculé au load + resize.
         const syncScrollPad = () => {
           if (!navbar) return;
-          document.documentElement.style.scrollPaddingTop = (navbar.offsetHeight + 10) + 'px';
-          // Hauteur réelle de la navbar → offset du sticky des onglets de collection (.cv-tabs).
-          document.documentElement.style.setProperty('--nav-h', navbar.offsetHeight + 'px');
+          // Sur mobile la navbar est une barre d'onglets EN BAS : plus rien ne masque le
+          // haut, donc pas de décalage d'ancre et onglets collants au vrai sommet (--nav-h:0).
+          const bottomNav = window.matchMedia && window.matchMedia('(max-width: 600px)').matches;
+          const topOffset = bottomNav ? 10 : (navbar.offsetHeight + 10);
+          document.documentElement.style.scrollPaddingTop = topOffset + 'px';
+          document.documentElement.style.setProperty('--nav-h', (bottomNav ? 0 : navbar.offsetHeight) + 'px');
         };
         syncScrollPad();
         window.addEventListener('resize', syncScrollPad);
