@@ -26,7 +26,18 @@ $pidFile = Join-Path $PSScriptRoot ".remote-control.pid"
 # IMPORTANT : --continue reprend une ancienne conversation LOCALE et n'etablit
 # PAS la session distante visible sur claude.ai/code. C'est pour ca que les
 # projets lances avec --continue ne montraient aucune session. On l'enleve.
-$argsFresh = @("--remote-control", $SessionName, "--dangerously-skip-permissions")
+#
+# --- UUID FIXE : evite l'empilement de sessions fantomes sur mobile ----------
+# Sans --session-id, claude genere un UUID NEUF a chaque relance -> chaque
+# relance cree une NOUVELLE entree "CRYPTONAUTS" sur le mobile (fantomes qui
+# s'empilent = "tout en double"). En epinglant un UUID STABLE, chaque relance
+# reutilise LE MEME slot => une seule entree recyclee cote mobile.
+# On reste en "session fraiche" : juste avant chaque lancement on efface
+# l'historique persistant de CET UUID (voir la boucle), donc pas de reprise de
+# vieille conversation (ce qui rendait la session invisible avec --continue).
+$RemoteSessionId = "981f964e-2cb0-4ca3-b931-f55d7edf5134"
+$projectStore    = Join-Path $env:USERPROFILE ".claude\projects\C--Users-vince-CRYPTONAUTS"
+$argsFresh = @("--remote-control", $SessionName, "--session-id", $RemoteSessionId, "--dangerously-skip-permissions")
 
 # PID de la boucle (le desinstallateur cible aussi par le mot "Cryptonauts")
 Set-Content -Path $pidFile -Value $PID -Encoding ASCII
@@ -99,6 +110,14 @@ Start-Job -Name "wd-$SessionName" -ArgumentList $SessionName, $logFile, $PID -Sc
 
 while ($true) {
     try {
+        # "Repart a neuf" : on efface l'historique persistant de CET UUID avant
+        # chaque lancement. Meme session-id (mobile recycle une seule entree)
+        # MAIS conversation fraiche (pas de reprise, pas de gonflement de
+        # contexte, pas de risque type --continue). Si le fichier n'existe pas
+        # encore, le -ErrorAction SilentlyContinue rend l'operation inoffensive.
+        Get-ChildItem -Path $projectStore -Filter "$RemoteSessionId*" -ErrorAction SilentlyContinue |
+            Remove-Item -Force -ErrorAction SilentlyContinue
+
         # On appelle claude DIRECTEMENT (operateur &), pas via Start-Process
         # -WindowStyle Hidden. claude a besoin d'heriter de la console (cachee)
         # de ce PowerShell pour le mode remote-control. Avec
