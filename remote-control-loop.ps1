@@ -53,6 +53,7 @@ Get-Job -Name "wd-$SessionName" -ErrorAction SilentlyContinue | Remove-Job -Forc
 Start-Job -Name "wd-$SessionName" -ArgumentList $SessionName, $logFile, $PID -ScriptBlock {
     param($session, $log, $myLoopPid)
     $strikes = 0
+    $connectedPid = 0   # PID d'un claude ayant connecte AU MOINS une fois
     while ($true) {
         Start-Sleep -Seconds 20
 
@@ -96,11 +97,19 @@ Start-Job -Name "wd-$SessionName" -ArgumentList $SessionName, $logFile, $PID -Sc
         # c'est son etat NORMAL, pas une panne. La tuer relancait une session
         # toutes les ~5 min (fantomes empiles sur mobile) sans jamais remonter
         # le relais -- il se monte quand tu OUVRES la session sur mobile. On ne
-        # garde que le kill du process REELLEMENT fige (0 connexion ~180s).
-        if ($conns.Count -gt 0) { $strikes = 0; continue }
+        # tue QUE le claude qui n'a JAMAIS connecte depuis son lancement.
+        # Une connexion etablie => la session a REUSSI a s'ouvrir : on marque ce
+        # PID comme deja-connecte et on la considere saine.
+        if ($conns.Count -gt 0) { $connectedPid = $p.ProcessId; $strikes = 0; continue }
+        # 0 connexion mais ce PID a DEJA connecte => session simplement EN VEILLE
+        # / non regardee sur mobile (le relais ne monte qu'a l'ouverture mobile,
+        # le long-poll API se met en idle). Etat NORMAL : NE PAS tuer, sinon
+        # churn/relaunch en boucle (fantomes mobile, "ne demarre jamais"). On ne
+        # tue que le claude fige a l'onboarding (jamais connecte).
+        if ($p.ProcessId -eq $connectedPid) { $strikes = 0; continue }
         $strikes++
         if ($strikes -ge 9) {
-            "$(Get-Date -Format s) WATCHDOG: claude $session fige (0 connexion ~180s, PID $($p.ProcessId)) -> kill" | Out-File -FilePath $log -Append -Encoding utf8
+            "$(Get-Date -Format s) WATCHDOG: claude $session fige (jamais connecte ~180s, PID $($p.ProcessId)) -> kill" | Out-File -FilePath $log -Append -Encoding utf8
             Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
             $strikes = 0
         }
@@ -115,7 +124,7 @@ while ($true) {
         # contexte, pas de risque type --continue). Si le fichier n'existe pas
         # encore, le -ErrorAction SilentlyContinue rend l'operation inoffensive.
         Get-ChildItem -Path $projectStore -Filter "$RemoteSessionId*" -ErrorAction SilentlyContinue |
-            Remove-Item -Force -ErrorAction SilentlyContinue
+            Remove-Item -Recurse -Force -ErrorAction SilentlyContinue
 
         # On appelle claude DIRECTEMENT (operateur &), pas via Start-Process
         # -WindowStyle Hidden. claude a besoin d'heriter de la console (cachee)
