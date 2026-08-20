@@ -457,25 +457,12 @@ body::after {
       vertical-align: middle;
     }
 
-    /* Crédit agence — visible en mode navigateur ET en mode application (PWA). */
-    .footer-credit {
-      margin-left: auto;
-      font-size: 0.72rem;
-      letter-spacing: 0.04em;
-      color: rgba(236, 228, 212, 0.5);
-      white-space: nowrap;
-    }
-    .footer-credit a { color: rgba(236, 228, 212, 0.58); text-decoration: none; transition: color 0.2s ease; }
-    .footer-credit a:hover { color: #fff; text-decoration: none; }
-    .footer-credit strong { font-weight: 600; letter-spacing: 0.09em; }
-
     /* ── Mode application installée (PWA standalone) : footer épuré « app, pas page web » ──
-       On ne garde que le nécessaire : le contact (réseaux) + le crédit agence.
+       On ne garde que le nécessaire : le contact (réseaux).
        Logo, « Built by » et bouton d'installation (inutile une fois installé) sont masqués. */
     html.pwa-standalone .footer-left,
     html.pwa-standalone #installBtn.install-btn { display: none !important; }
     html.pwa-standalone footer { justify-content: center; gap: 14px; }
-    html.pwa-standalone .footer-credit { margin-left: 0; }
 
     /* ── Accents thème astronaute : glow des titres + halos lumineux du podium ── */
     h1,
@@ -639,7 +626,6 @@ body::after {
       .footer-social a { display: inline-flex; color: rgba(236, 228, 212, 0.72); transition: color 0.2s ease, transform 0.2s ease; }
       .footer-social a:active { transform: scale(0.9); }
       .footer-social a:hover { color: #fff; }
-      .footer-credit { margin-left: 0; text-align: center; white-space: normal; }
     }
 
     @media screen and (min-width: 601px) {
@@ -2908,9 +2894,6 @@ body::after {
       <a href="https://linktr.ee/cryptonautscdc" target="_blank" rel="noopener" aria-label="Linktree">
         <svg viewBox="0 0 24 24" width="19" height="19" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 15l6-6M10 7h5v5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9"/></svg>
       </a>
-    </div>
-    <div class="footer-credit">
-      <a href="https://www.digitalconcept.be" target="_blank" rel="noopener">Réalisation&nbsp;: <strong>DIGITAL&nbsp;CONCEPT</strong> · digitalconcept.be</a>
     </div>
   </footer>
 
