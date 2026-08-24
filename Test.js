@@ -10,6 +10,7 @@
 // retry/backoff, comme le fait le snapshot dans le navigateur (IP résidentielle).
 const axios = require('axios');
 const fs = require('fs');
+const { keccak256 } = require('js-sha3'); // namehash ENS (résolution inverse .cro)
 
 // Liste des identifiants de collections avec option process, usePagination, noms et images
 const collections = [
@@ -384,6 +385,12 @@ async function walkOwnersAndDates(collectionId) {
 const V3_CONTRACT = '0x840d5e2df597ab3dcfed4e5fc883c8d87606748d';
 const V3_CREATION_BLOCK = 77606321; // bloc de déploiement (fixe) — évite la recherche
 const V3_TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
+// Cronos ID (service de noms .cro, fork ENS) — registry pour la résolution inverse adresse→nom.
+// Docs : https://docs.cronosid.xyz/fundamentals/smart-contracts
+const CROID_REGISTRY = '0x7F4C61116729d5b27E5f180062Fdfbf32E9283E5';
+// Marketplace Crovia : event Sale émis à chaque vente secondaire (topic0 ci-dessous).
+// data = [nftContract, tokenId, price, fee, royalty, royaltyRecipient] ; topics = [sig, saleId, seller, buyer].
+const CROVIA_SALE_TOPIC = '0x1261f893ba16d5623de55d479f6f662eb565a4f6130f271f6777940c312c356d';
 // RPC publics Cronos qui acceptent eth_getLogs sur des fenêtres de ~2000 blocs (archive).
 // NB (vérifié 2026-06) : publicnode exige désormais un "personal token" pour l'archive et
 // 1rpc.io plafonne getLogs à 50 blocs → tous deux inutilisables ici (faisaient échouer la
@@ -397,19 +404,11 @@ const RPC_LOG_STEP = 1999; // < limite de 2000 blocs/getLogs des RPC publics
 const CRONOS_EXPLORER_API = 'https://explorer-api.cronos.org/mainnet/api/v1';
 const CRONOS_EXPLORER_KEY = process.env.CRONOS_EXPLORER_API_KEY || '';
 
-// Adresse (minuscule) → pseudo affiché. Les holders absents de cette table
-// s'affichent en adresse tronquée. À compléter quand de nouveaux pseudos sont connus.
-const V3_NAMES = {
-  '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b': 'SANDIMAN',
-  '0x2b8b37dd17fa67833b01e30229502169d1a8ae40': 'MTCH',
-  '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee': 'JERAAAMY',
-  '0x740cd1001bf468e03a2cef898c4ce880f228da0d': 'CLOUDY',
-  '0x183379144e7c8581f24b02b7eedd4e9995bb1048': 'PAULO24',
-  '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed': 'WARNEREVERCHANGE',
-  '0x7886acebc8401bd6b1cf397d84b85d01416e4c06': 'PAYSAGISTE00',
-  '0xedce0151656e82150a0835e9b9cbd1ec53a17eae': 'SNAKE APE',
-  '0x64c15f07ea231789bf5d6f9ecc8089caae46b5c2': 'JAMUS0',
-};
+// Noms des détenteurs V3 : résolus ON-CHAIN via Cronos ID (nom .cro inverse), exactement
+// comme Crovia. Un holder sans nom .cro s'affiche en adresse tronquée. Cette table ne sert
+// plus que d'OVERRIDE manuel optionnel (adresse minuscule → nom forcé) ; laissée vide car
+// la résolution on-chain fait foi (l'ancienne table contenait un mapping erroné, ex. JAMUS0).
+const V3_NAMES = {};
 
 // Repli si la lecture on-chain échoue (snapshot du 2026-06-26) → data.json garde un V3 cohérent.
 const V3_FALLBACK = [
@@ -481,6 +480,7 @@ async function fetchV3Holders() {
     const ZERO = '0x0000000000000000000000000000000000000000';
     const ownerOf = {};
     const mintsRaw = []; // mints = transferts depuis 0x0 : { t, b, bn }
+    const salesRaw = []; // ventes secondaires (from≠0, to≠0) : { t, from, to, bn, tx }
     for (const l of logs) {
       if (!l.topics || l.topics.length !== 4) continue; // ERC-721 (tokenId indexé)
       const to = '0x' + l.topics[2].slice(26).toLowerCase();
@@ -488,14 +488,18 @@ async function fetchV3Holders() {
       const tokenId = BigInt(l.topics[3]).toString();
       ownerOf[tokenId] = to;
       if (from === ZERO) mintsRaw.push({ t: Number(tokenId), b: to, bn: parseInt(l.blockNumber, 16) });
+      else if (to !== ZERO) salesRaw.push({ t: Number(tokenId), from, to, bn: parseInt(l.blockNumber, 16), tx: l.transactionHash });
     }
     const counts = {};
     for (const t in ownerOf) { const o = ownerOf[t]; if (o === ZERO) continue; counts[o] = (counts[o] || 0) + 1; }
     const ranking = Object.entries(counts).map(([addr, count]) => ({ addr, count })).sort((a, b) => b.count - a.count);
     if (ranking.length === 0) throw new Error('0 holder résolu');
 
-    // Date des mints (= ventes V3 dans le Sales Bot) : timestamp du bloc de chaque mint.
-    const uniqBlocks = [...new Set(mintsRaw.map(m => m.bn))];
+    // Ventes secondaires : prix réel lu dans l'event Sale du marketplace Crovia (receipt du tx).
+    const secSales = await fetchV3SecondarySales(salesRaw);
+
+    // Date des mints ET des ventes (= flux Sales Bot) : timestamp du bloc.
+    const uniqBlocks = [...new Set([...mintsRaw.map(m => m.bn), ...secSales.map(s => s.bn)])];
     const blockTs = {};
     await mapPool(uniqBlocks, 3, async (bn) => {
       try {
@@ -509,13 +513,46 @@ async function fetchV3Holders() {
       .filter(m => m.ts > 0)
       .sort((a, b) => b.ts - a.ts)
       .slice(0, 40);
+    // Ventes secondaires : prix vendeur réel (CRO), vendeur (s) + acheteur (b), datées.
+    const sales = secSales
+      .map(s => ({ t: s.t, b: s.to, s: s.from, cro: s.cro, ts: blockTs[s.bn] || 0 }))
+      .filter(s => s.ts > 0)
+      .sort((a, b) => b.ts - a.ts);
 
-    console.log(`✅ V3 on-chain : ${ranking.length} détenteurs · ${ranking.reduce((s, r) => s + r.count, 0)} NFT · ${mints.length} mints récents.`);
-    return { ranking, mints };
+    console.log(`✅ V3 on-chain : ${ranking.length} détenteurs · ${ranking.reduce((s, r) => s + r.count, 0)} NFT · ${mints.length} mints · ${sales.length} ventes secondaires.`);
+    return { ranking, mints, sales };
   } catch (e) {
     console.warn(`⚠ Lecture on-chain V3 échouée (${e.message}) → repli sur le snapshot intégré.`);
     return null;
   }
+}
+
+// Ventes secondaires V3 : pour chaque tx de transfert secondaire, lit l'event Sale du marketplace
+// Crovia dans le receipt → prix vendeur (CRO), vendeur, acheteur, tokenId. Les transferts sans event
+// Sale (cadeaux / transferts simples) sont naturellement ignorés. Renvoie [{t, from, to, cro, bn}].
+async function fetchV3SecondarySales(salesRaw) {
+  const txs = [...new Set((salesRaw || []).map(s => s.tx))];
+  if (!txs.length) return [];
+  const out = [];
+  await mapPool(txs, 4, async (tx) => {
+    try {
+      const rc = await cronosRpc('eth_getTransactionReceipt', [tx]);
+      if (!rc || !rc.logs) return;
+      for (const l of rc.logs) {
+        if (!l.topics || l.topics.length < 4 || (l.topics[0] || '').toLowerCase() !== CROVIA_SALE_TOPIC) continue;
+        const d = (l.data || '0x').slice(2);
+        if (d.length < 192) continue;
+        const nft = '0x' + d.slice(24, 64);                      // dataword0 = contrat NFT vendu
+        if (nft.toLowerCase() !== V3_CONTRACT) continue;         // autres collections Crovia ignorées
+        const t = Number(BigInt('0x' + d.slice(64, 128)));       // dataword1 = tokenId
+        const cro = Number(BigInt('0x' + d.slice(128, 192))) / 1e18; // dataword2 = prix vendeur (= prix Crovia)
+        const from = '0x' + l.topics[2].slice(26).toLowerCase(); // vendeur
+        const to = '0x' + l.topics[3].slice(26).toLowerCase();   // acheteur
+        out.push({ t, from, to, cro, bn: parseInt(l.blockNumber, 16) });
+      }
+    } catch (e) { /* tx ignoré */ }
+  });
+  return out;
 }
 
 // Mints V3 récents via l'API Explorer Cronos (clé). Renvoie [{t,b,cro,ts}] trié du + récent,
@@ -553,10 +590,11 @@ async function fetchV3MintsExplorer(limit = 40) {
 }
 
 // Construit l'objet collection V3 (format data.json) depuis un classement [{addr,count}].
-function buildV3Collection(ranking) {
+// names = map {adresse(min): nom .cro} résolue on-chain (override manuel V3_NAMES prioritaire).
+function buildV3Collection(ranking, names = {}) {
   const trunc = a => a.slice(0, 6) + '…' + a.slice(-4);
   const owners = ranking.map(({ addr, count }) => ({
-    name: V3_NAMES[addr.toLowerCase()] || trunc(addr),
+    name: V3_NAMES[addr.toLowerCase()] || names[addr.toLowerCase()] || trunc(addr),
     count,
     url: 'https://cronoscan.com/address/' + addr
   }));
@@ -584,6 +622,43 @@ function decodeAbiString(hex) {
   const off = parseInt(h.slice(0, 64), 16) * 2;
   const len = parseInt(h.slice(off, off + 64), 16) * 2;
   return Buffer.from(h.slice(off + 64, off + 64 + len), 'hex').toString('utf8');
+}
+
+// ── Résolution inverse .cro (Cronos ID / fork ENS) : adresse → nom, comme Crovia ──────
+// namehash ENS : node = keccak256( node ‖ keccak256(label) ), en partant de 32 octets nuls.
+function namehash(name) {
+  let node = '00'.repeat(32);
+  if (name) {
+    const labels = name.split('.');
+    for (let i = labels.length - 1; i >= 0; i--) {
+      const labelHash = keccak256(Buffer.from(labels[i], 'utf8'));
+      node = keccak256(Buffer.from(node + labelHash, 'hex'));
+    }
+  }
+  return '0x' + node;
+}
+// Nœud inverse d'une adresse : namehash("<addr sans 0x, minuscule>.addr.reverse").
+function reverseNode(addr) { return namehash(addr.toLowerCase().replace(/^0x/, '') + '.addr.reverse'); }
+
+// Résout le nom .cro primaire d'une adresse (ou null). registry.resolver(node) → resolver.name(node).
+async function resolveCroName(addr) {
+  try {
+    const node = reverseNode(addr);
+    const resolverRaw = await cronosRpc('eth_call', [{ to: CROID_REGISTRY, data: '0x0178b8bf' + node.slice(2) }, 'latest']); // resolver(bytes32)
+    if (!resolverRaw || /^0x0*$/.test(resolverRaw)) return null;
+    const resolver = '0x' + resolverRaw.slice(-40);
+    const name = decodeAbiString(await cronosRpc('eth_call', [{ to: resolver, data: '0x691f3431' + node.slice(2) }, 'latest'])); // name(bytes32)
+    return name && name.length ? name : null;
+  } catch (e) { return null; }
+}
+
+// Résout en parallèle (concurrence bornée) les noms .cro d'une liste d'adresses → map {addr(min): nom}.
+async function resolveCroNames(addrs) {
+  const uniq = [...new Set(addrs.map(a => a.toLowerCase()))];
+  const map = {};
+  await mapPool(uniq, 4, async (a) => { const n = await resolveCroName(a); if (n) map[a] = n; });
+  console.log(`✅ Noms .cro résolus on-chain : ${Object.keys(map).length}/${uniq.length} détenteurs.`);
+  return map;
 }
 
 // tokenURI(tokenId) du contrat V3 (ERC-721) via eth_call on-chain → ipfs://FOLDER/N.json.
@@ -1006,19 +1081,25 @@ async function main() {
 
     saveOwnersJson(ownersData);
 
-    // Collection externe V3 (Crovia/Cronos) : détenteurs ET mints lus on-chain (repli sur snapshot si échec).
+    // Collection externe V3 (Crovia/Cronos) : détenteurs, mints ET ventes secondaires lus on-chain
+    // (repli sur snapshot si échec).
     const v3 = await fetchV3Holders();
     const v3Ranking = (v3 && v3.ranking) || V3_FALLBACK;
+    // Noms des détenteurs : résolus on-chain via Cronos ID (nom .cro inverse), comme Crovia.
+    const v3Names = await resolveCroNames(v3Ranking.map(r => r.addr));
     // Mints (Sales Bot) : API Explorer en priorité (indexée, fiable), repli sur les mints RPC.
     const explorerMints = await fetchV3MintsExplorer();
     const v3Mints = explorerMints || (v3 && v3.mints) || [];
-    const v3Collection = buildV3Collection(v3Ranking);
+    const v3SecSales = (v3 && v3.sales) || []; // ventes secondaires marketplace Crovia (prix réel)
+    const v3Collection = buildV3Collection(v3Ranking, v3Names);
 
-    // Résout l'image + le nom de chaque NFT minté (tokenURI on-chain → métadonnée IPFS)
+    // Flux Sales Bot = ventes secondaires (prix réel) + mints, triés par date (récent d'abord), max 40.
+    const v3Sales = [...v3SecSales, ...v3Mints].sort((a, b) => b.ts - a.ts).slice(0, 40);
+    // Résout l'image + le nom de chaque NFT (tokenURI on-chain → métadonnée IPFS)
     // pour que le Sales Bot affiche le bon visuel au lieu du logo de collection.
-    await enrichV3MintImages(v3Mints);
+    await enrichV3MintImages(v3Sales);
 
-    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Mints);
+    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Sales);
 
   } catch (error) {
     console.error('Main execution failed:', error.message);
@@ -1026,8 +1107,13 @@ async function main() {
   }
 }
 
-// Exécuter le script
-main().catch(error => {
-  console.error('Main execution failed:', error.message);
-  process.exitCode = 1;
-});
+// Exécuter le script (uniquement en lancement direct `node Test.js` ; pas si require() pour tests).
+if (require.main === module) {
+  main().catch(error => {
+    console.error('Main execution failed:', error.message);
+    process.exitCode = 1;
+  });
+}
+
+// Exposé pour tests ciblés (résolution de noms .cro, ventes secondaires) sans lancer main().
+module.exports = { resolveCroName, resolveCroNames, fetchV3SecondarySales, buildV3Collection, namehash, reverseNode };

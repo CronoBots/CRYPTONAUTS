@@ -3355,10 +3355,10 @@ body::after {
     // Adresse de portefeuille abrégée : 0x1234…abcd
     function sbShort(a) { return a ? (a.slice(0, 6) + '…' + a.slice(-4)) : '—'; }
 
-    // Mints on-chain d'une collection Crovia/Cronos (Quantum Cryptonauts V3),
-    // comptés comme des ventes (primary sales). Prix natif en CRO converti en USD
-    // (taux live CoinGecko), repli en CRO si le taux est indisponible.
-    // Ventes V3 (mints Crovia/Cronos) — alimentées depuis data.json (v3Sales), calculées on-chain par Test.js.
+    // Activité on-chain d'une collection Crovia/Cronos (Quantum Cryptonauts V3) pour le Sales Bot :
+    // MINTS (vente primaire, vendeur = « Mint ») ET VENTES SECONDAIRES du marketplace Crovia
+    // (vendeur → acheteur, prix vendeur réel lu dans l'event Sale). Alimenté depuis data.json
+    // (v3Sales), calculé on-chain par Test.js. Une entrée avec m.s = vente secondaire, sinon mint.
     let V3_SALES = [];
 
     async function appendExternalSales(sales) {
@@ -3377,7 +3377,8 @@ body::after {
           link: meta.croviaUrl || 'https://crovia.app',
           asset: m.n || ('#' + m.t),
           price: sbPrice(m.cro, 'CRO'),
-          seller: 'Mint', buyer: sbShort(m.b),
+          // m.s présent = vente secondaire (vendeur → acheteur) ; sinon = mint (vente primaire).
+          seller: m.s ? sbShort(m.s) : 'Mint', buyer: sbShort(m.b),
           t: new Date(m.ts * 1000).toISOString(), ts: m.ts * 1000
         });
       });

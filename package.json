@@ -8,6 +8,7 @@
     "refresh-data": "node Test.js"
   },
   "dependencies": {
-    "axios": "^1.17.0"
+    "axios": "^1.17.0",
+    "js-sha3": "^0.13.0"
   }
 }
