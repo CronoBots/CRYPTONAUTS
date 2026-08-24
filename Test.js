@@ -603,6 +603,42 @@ async function fetchV3MintsExplorer(limit = 40) {
   }
 }
 
+// Mints RÉCENTS d'une collection (vente primaire) : scan on-chain BORNÉ des Transfer depuis 0x0
+// sur les derniers `spanBlocks` blocs (~2-3 jours). Rapide, sans clé, et LIVE — capte
+// automatiquement les mints d'une collection EN COURS de mint (nouveau drop de l'artiste). Renvoie
+// [] si aucun mint récent (collection sold-out, cas actuel du V3). [{t,b,cro,ts}] trié récent, max 40.
+async function fetchRecentMints(contract, spanBlocks = 400000, mintPriceCro = 300) {
+  try {
+    const latest = parseInt(await cronosRpc('eth_blockNumber', []), 16);
+    const from0 = Math.max(0, latest - spanBlocks);
+    const windows = [];
+    for (let f = from0; f <= latest; f += RPC_LOG_STEP + 1) windows.push([f, Math.min(f + RPC_LOG_STEP, latest)]);
+    const logs = [];
+    await mapPool(windows, 5, async ([f, t]) => {
+      const res = await cronosRpc('eth_getLogs', [{
+        address: contract, topics: [V3_TRANSFER_TOPIC, '0x' + '0'.repeat(64)], // from = 0x0 (mint)
+        fromBlock: '0x' + f.toString(16), toBlock: '0x' + t.toString(16)
+      }]);
+      (res || []).forEach(l => logs.push(l));
+    });
+    const raw = logs.filter(l => l.topics && l.topics.length === 4)
+      .map(l => ({ t: Number(BigInt(l.topics[3])), b: '0x' + l.topics[2].slice(26).toLowerCase(), bn: parseInt(l.blockNumber, 16) }));
+    if (!raw.length) { console.log(`ℹ Aucun mint récent (${windows.length} fenêtres) — collection sold-out/inactive.`); return []; }
+    const uniqBlocks = [...new Set(raw.map(m => m.bn))];
+    const blockTs = {};
+    await mapPool(uniqBlocks, 5, async (bn) => {
+      try { const blk = await cronosRpc('eth_getBlockByNumber', ['0x' + bn.toString(16), false]); if (blk && blk.timestamp) blockTs[bn] = parseInt(blk.timestamp, 16); } catch (e) { /* bloc ignoré */ }
+    });
+    const mints = raw.map(m => ({ t: m.t, b: m.b, cro: mintPriceCro, ts: blockTs[m.bn] || 0 }))
+      .filter(m => m.ts > 0).sort((a, b) => b.ts - a.ts).slice(0, 40);
+    console.log(`✅ Mints récents : ${mints.length} (scan borné ${windows.length} fenêtres).`);
+    return mints;
+  } catch (e) {
+    console.warn(`⚠ Scan mints récents échoué (${e.message}).`);
+    return [];
+  }
+}
+
 // Détenteurs, ventes (cross-marketplace), floor et volume V3 via l'API PUBLIQUE Crovia.
 // Renvoie { owners:[{addr,count}], sales:[{t,b,s,cro,ts}], salesCount, volume, floor } ou null si échec.
 async function fetchCroviaCollection(contract) {
@@ -1131,23 +1167,23 @@ async function main() {
     // SOURCE PRIMAIRE : API publique Crovia (détenteurs, ventes cross-marketplace, floor, volume) —
     // exacte et rapide. REPLI : scan on-chain complet (fetchV3Holders) si l'API est indisponible.
     const crovia = await fetchCroviaCollection(V3_CONTRACT);
-    let v3Ranking, v3SecSales, v3Stats, v3OnchainMints = [];
+    let v3Ranking, v3SecSales, v3Stats, v3Mints;
     if (crovia) {
       v3Ranking = crovia.owners;
       v3SecSales = crovia.sales;                                   // 9/9 ventes, prix exacts (CRO)
       v3Stats = { floor: crovia.floor, volume: crovia.volume, salesCount: crovia.salesCount };
+      // Mints LIVE : scan on-chain borné (récent). 0 aujourd'hui (sold-out) mais capte
+      // AUTOMATIQUEMENT un futur drop de l'artiste dès que le mint reprend. Sans clé, rapide.
+      v3Mints = await fetchRecentMints(V3_CONTRACT);
     } else {
       const v3 = await fetchV3Holders();                          // repli : scan on-chain complet
       v3Ranking = (v3 && v3.ranking) || V3_FALLBACK;
       v3SecSales = (v3 && v3.sales) || [];                        // ventes marketplace natif Crovia
-      v3OnchainMints = (v3 && v3.mints) || [];
+      v3Mints = (v3 && v3.mints) || [];                           // le scan complet a déjà les mints
       v3Stats = {};                                               // floor/volume inconnus hors API
     }
     // Noms des détenteurs : résolus on-chain via Cronos ID (nom .cro inverse) — l'API owners ne les donne pas.
     const v3Names = await resolveCroNames(v3Ranking.map(r => r.addr));
-    // Mints (Sales Bot) : API Explorer Cronos en priorité (indexée), repli mints on-chain.
-    const explorerMints = await fetchV3MintsExplorer();
-    const v3Mints = explorerMints || v3OnchainMints;
     const v3Collection = buildV3Collection(v3Ranking, v3Names, v3Stats);
 
     // Flux Sales Bot = ventes (cross-marketplace) + mints, triés par date (récent d'abord), max 40.
@@ -1173,4 +1209,4 @@ if (require.main === module) {
 }
 
 // Exposé pour tests ciblés (résolution de noms .cro, ventes secondaires) sans lancer main().
-module.exports = { resolveCroName, resolveCroNames, fetchV3SecondarySales, fetchCroviaCollection, buildV3Collection, namehash, reverseNode };
+module.exports = { resolveCroName, resolveCroNames, fetchV3SecondarySales, fetchCroviaCollection, fetchRecentMints, buildV3Collection, namehash, reverseNode };
