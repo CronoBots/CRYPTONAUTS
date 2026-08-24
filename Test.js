@@ -404,11 +404,21 @@ const RPC_LOG_STEP = 1999; // < limite de 2000 blocs/getLogs des RPC publics
 const CRONOS_EXPLORER_API = 'https://explorer-api.cronos.org/mainnet/api/v1';
 const CRONOS_EXPLORER_KEY = process.env.CRONOS_EXPLORER_API_KEY || '';
 
-// Noms des détenteurs V3 : résolus ON-CHAIN via Cronos ID (nom .cro inverse), exactement
-// comme Crovia. Un holder sans nom .cro s'affiche en adresse tronquée. Cette table ne sert
-// plus que d'OVERRIDE manuel optionnel (adresse minuscule → nom forcé) ; laissée vide car
-// la résolution on-chain fait foi (l'ancienne table contenait un mapping erroné, ex. JAMUS0).
-const V3_NAMES = {};
+// Noms des détenteurs V3. Priorité : (1) OVERRIDE manuel ci-dessous, (2) nom .cro résolu
+// ON-CHAIN via Cronos ID (comme Crovia), (3) adresse tronquée. Les pseudos manuels ci-dessous
+// sont des détenteurs connus SANS nom .cro public (Crovia les affiche en adresse) — on garde
+// notre libellé plus lisible ; leurs comptes correspondent exactement à Crovia.
+// ⚠ NE PAS remettre les mappings ERRONÉS repérés on-chain : 0x64c15…='JAMUS0' est en fait
+// zenoob.cro, et 0xedce…='SNAKE APE' est en fait mikeb.cro → laissés à la résolution .cro.
+const V3_NAMES = {
+  '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b': 'SANDIMAN',
+  '0x2b8b37dd17fa67833b01e30229502169d1a8ae40': 'MTCH',
+  '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee': 'JERAAAMY',
+  '0x740cd1001bf468e03a2cef898c4ce880f228da0d': 'CLOUDY',
+  '0x183379144e7c8581f24b02b7eedd4e9995bb1048': 'PAULO24',
+  '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed': 'WARNEREVERCHANGE',
+  '0x7886acebc8401bd6b1cf397d84b85d01416e4c06': 'PAYSAGISTE00',
+};
 
 // Repli si la lecture on-chain échoue (snapshot du 2026-06-26) → data.json garde un V3 cohérent.
 const V3_FALLBACK = [
