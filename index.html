@@ -2995,6 +2995,11 @@ body::after {
       if (n >= 1000) return '$' + (n / 1000).toFixed(1) + 'K';
       return '$' + n;
     }
+    // Collections externes (Crovia) : floor/volume libellés en CRO (≠ USD des collections crypto.com).
+    function fmtCro(n) {
+      if (n == null || n === 0) return '—';
+      return Math.round(n).toLocaleString('en-US') + ' CRO';
+    }
 
     // Carte de collection (galerie). Le détail des propriétaires s'ouvre dans une modale.
     // Ligne-bannière d'une collection : fond = bannière (chargée en direct), logo à gauche,
@@ -3044,8 +3049,8 @@ body::after {
             <div class="col-stats">
               <div class="col-stat"><span class="cv">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
               <div class="col-stat"><span class="cv">${(items || 0).toLocaleString('fr-FR')}</span><span class="cl">Items</span></div>
-              <div class="col-stat"><span class="cv">${fmtMoney(st.floor)}</span><span class="cl">Floor</span></div>
-              <div class="col-stat"><span class="cv">${fmtMoney(st.vol)}</span><span class="cl">Volume</span></div>
+              <div class="col-stat"><span class="cv">${collection.external ? fmtCro(st.floor) : fmtMoney(st.floor)}</span><span class="cl">Floor</span></div>
+              <div class="col-stat"><span class="cv">${collection.external ? fmtCro(st.vol) : fmtMoney(st.vol)}</span><span class="cl">Volume</span></div>
               <div class="col-stat"><span class="cv">${st.sales != null ? st.sales.toLocaleString('fr-FR') : '—'}</span><span class="cl">Sales</span></div>
             </div>${mint}
           </div>
@@ -3695,9 +3700,9 @@ body::after {
       const setStat = (k, v) => { const e = view.querySelector('.cv-' + k); if (e) e.textContent = v; };
       setStat('holders', (collection.ownersCount || 0).toLocaleString('fr-FR'));
       setStat('items', (st.supply || 0).toLocaleString('fr-FR'));
-      setStat('floor', fmtMoney(st.floor));
-      setStat('vol', fmtMoney(st.vol));
-      setStat('sales', isExternal ? '—' : (st.sales || 0).toLocaleString('fr-FR'));
+      setStat('floor', isExternal ? fmtCro(st.floor) : fmtMoney(st.floor));
+      setStat('vol', isExternal ? fmtCro(st.vol) : fmtMoney(st.vol));
+      setStat('sales', st.sales != null ? (st.sales).toLocaleString('fr-FR') : '—');
       view.querySelector('.cv-items-count').textContent = st.supply ? '(' + st.supply.toLocaleString('fr-FR') + ')' : '';
       // (Liste des détenteurs déplacée dans l'onglet Leaderboard.)
 
@@ -4105,8 +4110,9 @@ body::after {
       if (hasLiveStats) {
         let vol = 0, sales = 0, items = 0;
         collectionsData.forEach(c => {
-          vol += Number(c.volume) || 0;
-          sales += Number(c.sales) || 0;
+          // Volume/ventes de la saga = crypto.com (en USD). On EXCLUT les collections externes
+          // (Crovia/V3, libellées en CRO) pour ne pas mélanger les devises dans le total.
+          if (!c.external) { vol += Number(c.volume) || 0; sales += Number(c.sales) || 0; }
           items += Number.isFinite(c.minted) ? Number(c.minted) : (Number(c.supply) || 0);  // V3 = minted, autres = supply
         });
         SAGA_STATS.volume = vol;
