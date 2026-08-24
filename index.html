@@ -2416,7 +2416,7 @@ body::after {
     .col-stats { display: flex; align-items: stretch; gap: 0; margin-top: 16px; }
     .col-stat { flex: 1; text-align: center; }
     .col-stat + .col-stat { border-left: 1px solid var(--hairline); }
-    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(255, 106, 26, 0.35); }
+    .col-stat .cv { display: block; font-family: var(--font-display); font-size: 1.5rem; line-height: 1; color: var(--primary-color); text-shadow: 0 0 14px rgba(255, 106, 26, 0.35); white-space: nowrap; }
     .col-stat .cl { display: block; margin-top: 7px; font-size: 0.62rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
     @media (prefers-reduced-motion: reduce) { .col-item { animation: none; opacity: 1; translate: none; } }
     @media screen and (max-width: 600px) {
@@ -2996,9 +2996,12 @@ body::after {
       return '$' + n;
     }
     // Collections externes (Crovia) : floor/volume libellés en CRO (≠ USD des collections crypto.com).
+    // Milliers abrégés en « K » (comme le $…K de fmtMoney) → tient sur une ligne, même sur mobile.
     function fmtCro(n) {
       if (n == null || n === 0) return '—';
-      return Math.round(n).toLocaleString('en-US') + ' CRO';
+      if (n >= 100000) return Math.round(n / 1000) + 'K CRO';
+      if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K CRO';
+      return Math.round(n) + ' CRO';
     }
 
     // Carte de collection (galerie). Le détail des propriétaires s'ouvre dans une modale.
