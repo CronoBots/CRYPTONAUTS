@@ -1942,7 +1942,7 @@ body::after {
     .col-panel .cv-banner, .col-panel .cv-logo, .col-panel .cv-title, .col-panel .cv-release, .col-panel .cv-stats { display: none; }
     /* Badge mint/sold masqué tant que le détail vit dans la carte (= toujours), pas seulement
        quand is-open : sinon il réapparaît sous la bannière pendant l'animation de repli. */
-    .col-panel .cv-sold, .col-panel .cv-sold.is-live { display: none; }
+    .col-panel .cv-sold, .col-panel .cv-sold.is-live, .col-panel .cv-sold.is-soon { display: none; }
     .col-panel .cv-inner { padding: 0 clamp(16px, 3vw, 34px) 8px; }
     .col-panel .cv-meta { padding: 0; }
     /* Description : pleine largeur du cadre dans le panneau (pas la limite de lecture 680px). */
@@ -2022,6 +2022,8 @@ body::after {
     .cv-sold[hidden] { display: none; }
     .cv-sold.is-live { display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 106, 26, 0.16); border-color: rgba(255, 106, 26, 0.6); color: #ffcfa6; letter-spacing: 0.08em; }
     .cv-sold.is-live .dot { width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; box-shadow: 0 0 8px rgba(255, 106, 26, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
+    .cv-sold.is-soon { display: inline-flex; align-items: center; gap: 7px; background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.55); color: #bae6fd; letter-spacing: 0.08em; }
+    .cv-sold.is-soon .dot { width: 7px; height: 7px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
     .cv-desc { color: var(--muted); line-height: 1.68; max-width: 680px; margin: 12px 0 20px; font-size: 0.95rem; }
     .cv-link[hidden] { display: none; }
 
@@ -2307,6 +2309,12 @@ body::after {
     .tl-node.tl-minting .tl-stem { background: #22c55e; }
     .tl-node.tl-minting .tl-dot { background: #22c55e; border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.7); }
     .tl-node.tl-minting .tl-date { color: #22c55e; }
+    /* Prochaine collection annoncée (statut « soon ») : accent bleu sur le nœud timeline. */
+    .tl-node.tl-comingsoon .tl-thumb { border-color: #38bdf8; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(56, 189, 248, 0.5); }
+    .tl-node.tl-comingsoon .tl-num { background: linear-gradient(135deg, #7dd3fc, #2563eb); color: #082f49; }
+    .tl-node.tl-comingsoon .tl-stem { background: #38bdf8; }
+    .tl-node.tl-comingsoon .tl-dot { background: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.7); }
+    .tl-node.tl-comingsoon .tl-date { color: #38bdf8; }
     /* Repère « To be continued » (à droite de la dernière collection) : ghost pointillé pour les
        sorties futures. Non cliquable, rail/tige/pastille en pointillés. */
     .tl-soon { cursor: default; }
@@ -2374,6 +2382,9 @@ body::after {
     /* Variante « minting » (Crovia) : ruban vert clignotant (état live). */
     .col-ribbon-mint { background: linear-gradient(135deg, #4ade80, #16a34a); animation: ribbonMintPulse 1.7s ease-in-out infinite; }
     @keyframes ribbonMintPulse { 0%, 100% { box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45); } 50% { box-shadow: 0 6px 18px rgba(34, 197, 94, 0.6); } }
+    /* Variante « coming soon » (Crovia) : ruban bleu (collection à venir, pas encore lancée). */
+    .col-ribbon-soon { background: linear-gradient(135deg, #38bdf8, #2563eb); }
+    .col-soon .col-mint-row .num b { color: #38bdf8; }
     /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
     .col-badge.col-date-badge { left: 10px; right: auto; }
     .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
@@ -2916,6 +2927,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
+      "Cryptonauts Civilizations": { id: "", external: "crovia", contract: "", status: "soon", launchDate: "2026-09-10", launchLabel: "10 Sep 2026", launchUrl: "https://crovia.app/launches/21", croviaUrl: "https://crovia.app/launches/21", mintTotal: 359, minted: 0, items: 359, presalePriceCro: 0, wlPriceCro: 399, publicPriceCro: 499, mintPriceCro: 499, royaltyPct: 5, desc: "Across the multiverse, a call goes out. They come from different planets, different civilizations, and different moments in history. Some are warriors from ancient Earth. Others are explorers from distant galaxies or soldiers from future timelines. Each one is a one-of-a-kind NFT on the blockchain — permanently recorded, fully owned, and impossible to fake. These Cryptonauts are brought together by a powerful smart contract. Their mission is simple: fight, conquer, and claim new space-time territories across the metaverse. In this world, every battle and every victory is verified on-chain. Ownership is real. Power is decentralized. The strong expand the empire. The weak get left behind. Claim your avatar. The blockchain is watching. The multiverse is waiting." },
       "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", status: "soldout", minted: 299, mintTotal: 299, mintPriceCro: 400, items: 299, soldOut: true, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
@@ -2953,6 +2965,7 @@ body::after {
 
     // Date de sortie sur crypto.com (mint du 1er NFT) — pour l'ordre chronologique.
     const COLLECTION_RELEASE = {
+      "Cryptonauts Civilizations": "Sep 2026",
       "Quantum Cryptonauts V3": "Jun 2026",
       "Legendary Cryptonauts V2": "Mar 2026",
       "OG Cryptonauts": "Jan 2026",
@@ -2970,6 +2983,18 @@ body::after {
     // Utilitaires d'une collection (affichés sous l'onglet « Utilities » de la vue détail).
     // Une ligne par avantage (la coche est ajoutée par le CSS, pas d'emoji dans le texte).
     const COLLECTION_UTILITIES = {
+      "Cryptonauts Civilizations": [
+        "359 1/1 NFTs",
+        "Presale 0 CRO (allowlist) · Whitelist 399 CRO · Public 499 CRO",
+        "Sold-out CRO reward pool — 10,000 CRO shared between 5 winners (snapshot 15 days after sellout)",
+        "Exclusive NFT airdrops — top 3 holders (1/1s), multiple buys (10+, 20+), and 4 random holders within 7 days post-sellout (1 NFT = 1 entry)",
+        "Civilizations 2 whitelist — reduced price for all Civilizations 1 holders (primary and secondary count)",
+        "Exclusive official merch — top 3 holders + giveaway for random holders",
+        "Civilizations 2 priority weighting — buy more in Drop 1 = earlier mint window in Phase 2",
+        "Ethereum art airdrop — exclusive art for the top 10 holders",
+        "Full intellectual property rights",
+        "Hidden utility — unlocked after sellout"
+      ],
       "Quantum Cryptonauts V3": [
         "299 1/1 NFTs",
         "207 Avatars (47 World Cup national teams) / 92 Worlds",
@@ -3025,7 +3050,12 @@ body::after {
         const bgUrl = collection.external ? (collection.banner || collection.image) : '';
         const bgStyle = bgUrl ? ` style="background-image:url('${bgUrl}')"` : '';
         const minting = meta.status === 'minting';
-        const badge = minting
+        const soon = meta.status === 'soon';
+        // Jours restants avant le lancement (sans heure → arrondi au jour).
+        const daysLeft = (soon && meta.launchDate) ? Math.max(0, Math.ceil((new Date(meta.launchDate + 'T00:00:00Z').getTime() - Date.now()) / 86400000)) : 0;
+        const badge = soon
+          ? '<span class="col-ribbon col-ribbon-soon">Coming soon</span>'
+          : minting
           ? '<span class="col-ribbon col-ribbon-mint">Minting</span>'
           : (meta.soldOut ? '<span class="col-ribbon">Sold out</span>' : '');
         const dateBadge = rel ? `<span class="col-badge col-date-badge">${escHtml(rel)}</span>` : '';
@@ -3036,6 +3066,12 @@ body::after {
               <div class="col-mint-row"><span class="lbl">Mint progress</span><span class="num"><b class="col-mint-pct">${mintPct}%</b> · ${(meta.minted || 0).toLocaleString('fr-FR')} / ${meta.mintTotal.toLocaleString('fr-FR')}</span></div>
               <div class="col-mint-bar"><div class="col-mint-fill" style="width:${mintPct}%"></div></div>
               ${priceRow}
+            </div>` : '';
+        // Bloc « à venir » : compte à rebours (jours) + prix des phases.
+        const soonBlock = soon ? `
+            <div class="col-mint col-soon">
+              <div class="col-mint-row"><span class="lbl">Launch</span><span class="num">${daysLeft > 0 ? '<b>in ' + daysLeft + ' day' + (daysLeft > 1 ? 's' : '') + '</b>' : '<b>very soon</b>'}${meta.launchLabel ? ' · ' + escHtml(meta.launchLabel) : ''}</span></div>
+              <div class="col-mint-row" style="margin:7px 0 0"><span class="lbl">Mint price</span><span class="num">WL <b>${(meta.wlPriceCro || 0).toLocaleString('fr-FR')}</b> · Public <b>${(meta.publicPriceCro || 0).toLocaleString('fr-FR')}</b> CRO</span></div>
             </div>` : '';
         a.innerHTML = `
           <div class="col-banner">
@@ -3050,12 +3086,12 @@ body::after {
               <h3 class="col-title">${escHtml(collection.title)}</h3>
             </div>
             <div class="col-stats">
-              <div class="col-stat"><span class="cv">${(collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
+              <div class="col-stat"><span class="cv">${soon ? '—' : (collection.ownersCount || 0).toLocaleString('fr-FR')}</span><span class="cl">Holders</span></div>
               <div class="col-stat"><span class="cv">${(items || 0).toLocaleString('fr-FR')}</span><span class="cl">Items</span></div>
               <div class="col-stat"><span class="cv">${collection.external ? fmtCro(st.floor) : fmtMoney(st.floor)}</span><span class="cl">Floor</span></div>
               <div class="col-stat"><span class="cv">${collection.external ? fmtCro(st.vol) : fmtMoney(st.vol)}</span><span class="cl">Volume</span></div>
               <div class="col-stat"><span class="cv">${st.sales != null ? st.sales.toLocaleString('fr-FR') : '—'}</span><span class="cl">Sales</span></div>
-            </div>${mint}
+            </div>${mint}${soonBlock}
           </div>
           <svg class="col-arrow" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
         `;
@@ -3265,14 +3301,16 @@ body::after {
         .sort((a, b) => a.rank - b.rank);
       entries.forEach((e, i) => {
         const rel = COLLECTION_RELEASE[e.title] || '';
-        const minting = (COLLECTION_META[e.title] || {}).status === 'minting';
+        const status = (COLLECTION_META[e.title] || {}).status;
+        const minting = status === 'minting';
+        const isSoon = status === 'soon';
         const node = document.createElement('button');
         node.type = 'button';
-        node.className = 'tl-node' + (minting ? ' tl-minting' : '');
+        node.className = 'tl-node' + (minting ? ' tl-minting' : '') + (isSoon ? ' tl-comingsoon' : '');
         node.dataset.target = e.idx;
         node.setAttribute('role', 'listitem');
-        node.setAttribute('aria-label', 'Chapter ' + (i + 1) + ': ' + e.title + (rel ? ' (' + rel + ')' : '') + (minting ? ' — minting now' : ''));
-        node.title = '#' + (i + 1) + ' · ' + e.title + (rel ? ' · ' + rel : '') + (minting ? ' · Minting now' : '');
+        node.setAttribute('aria-label', 'Chapter ' + (i + 1) + ': ' + e.title + (rel ? ' (' + rel + ')' : '') + (minting ? ' — minting now' : isSoon ? ' — coming soon' : ''));
+        node.title = '#' + (i + 1) + ' · ' + e.title + (rel ? ' · ' + rel : '') + (minting ? ' · Minting now' : isSoon ? ' · Coming soon' : '');
         node.innerHTML =
           '<span class="tl-thumb-wrap">' +
             '<img class="tl-thumb" src="' + e.image + '" alt="' + escHtml(e.title) + '" loading="lazy" decoding="async">' +
@@ -3280,7 +3318,7 @@ body::after {
           '</span>' +
           '<span class="tl-stem"></span>' +
           '<span class="tl-dot"></span>' +
-          '<span class="tl-date">' + (minting ? 'Minting' : escHtml(rel || '—')) + '</span>';
+          '<span class="tl-date">' + (minting ? 'Minting' : isSoon ? 'Soon' : escHtml(rel || '—')) + '</span>';
         tl.appendChild(node);
       });
       // Repère final « To be continued » (à droite de la dernière collection) : sorties futures.
@@ -3685,23 +3723,27 @@ body::after {
         link.hidden = false;
       } else if (meta.launchUrl || collection.croviaUrl || meta.croviaUrl) {
         link.href = meta.launchUrl || collection.croviaUrl || meta.croviaUrl;
-        if (linkLabel) linkLabel.textContent = meta.status === 'minting' ? 'Mint on Crovia' : 'Trade on Crovia';
+        if (linkLabel) linkLabel.textContent = meta.status === 'minting' ? 'Mint on Crovia' : (meta.status === 'soon' ? 'View on Crovia' : 'Trade on Crovia');
         link.hidden = false;
       } else { link.hidden = true; }
       const sold = view.querySelector('.cv-sold');
       if (sold) {
-        if (meta.status === 'minting' && meta.mintTotal) {
+        sold.classList.remove('is-live', 'is-soon');
+        if (meta.status === 'soon') {
+          sold.classList.add('is-soon');
+          sold.innerHTML = '<span class="dot"></span>Coming soon' + (meta.launchLabel ? ' · ' + escHtml(meta.launchLabel) : '') + ((meta.wlPriceCro || meta.publicPriceCro) ? ' · WL ' + (meta.wlPriceCro || 0).toLocaleString('fr-FR') + ' / Public ' + (meta.publicPriceCro || 0).toLocaleString('fr-FR') + ' CRO' : '');
+          sold.hidden = false;
+        } else if (meta.status === 'minting' && meta.mintTotal) {
           sold.classList.add('is-live');
           sold.innerHTML = '<span class="dot"></span>Minting now on Crovia · ' + (meta.minted || 0) + ' / ' + meta.mintTotal + (meta.mintPriceCro ? ' · ' + meta.mintPriceCro.toLocaleString('fr-FR') + ' CRO' : '');
           sold.hidden = false;
         } else {
-          sold.classList.remove('is-live');
           sold.textContent = 'Sold out';
           sold.hidden = !meta.soldOut;
         }
       }
       const setStat = (k, v) => { const e = view.querySelector('.cv-' + k); if (e) e.textContent = v; };
-      setStat('holders', (collection.ownersCount || 0).toLocaleString('fr-FR'));
+      setStat('holders', meta.status === 'soon' ? '—' : (collection.ownersCount || 0).toLocaleString('fr-FR'));
       setStat('items', (st.supply || 0).toLocaleString('fr-FR'));
       setStat('floor', isExternal ? fmtCro(st.floor) : fmtMoney(st.floor));
       setStat('vol', isExternal ? fmtCro(st.vol) : fmtMoney(st.vol));
@@ -3753,7 +3795,12 @@ body::after {
       } else if (isExternal) {
         const extBanner = collection.banner || collection.image;
         if (extBanner) { bannerImg.src = extBanner; view.classList.add('has-banner'); }
-        renderExternalAssets(collection, grid);
+        if (meta.status === 'soon') {
+          grid.innerHTML = '<p class="cm-empty">Not minted yet — launch ' + escHtml(meta.launchLabel || 'soon') + '. Check the mint on Crovia.</p>';
+          document.getElementById('cvMore').hidden = true;
+        } else {
+          renderExternalAssets(collection, grid);
+        }
       } else {
         grid.innerHTML = '<p class="cm-empty">No items available.</p>';
       }
@@ -4069,6 +4116,20 @@ body::after {
         collectionsData = Array.isArray(data.collectionsData) ? data.collectionsData : [];
         globalOwnersData = Array.isArray(data.globalOwnersData) ? data.globalOwnersData : [];
         V3_SALES = Array.isArray(data.v3Sales) ? data.v3Sales : []; // mints V3 récents (on-chain) pour le Sales Bot
+
+        // Collection À VENIR (Crovia, pas encore lancée → aucune donnée on-chain/API). Carte statique
+        // « Coming soon » injectée en tête. Au lancement, il suffira de renseigner son `contract` et de
+        // la basculer dans Test.js (fetchCroviaCollection + fetchRecentMints la rendront live).
+        if (!collectionsData.some(c => c.title === 'Cryptonauts Civilizations')) {
+          collectionsData.unshift({
+            id: 'collection-civilizations', title: 'Cryptonauts Civilizations',
+            image: 'assets/civilizations-logo.jpg', banner: 'assets/civilizations-banner.jpg',
+            alt: 'Cryptonauts Civilizations collection icon', external: 'crovia', contract: '',
+            croviaUrl: 'https://crovia.app/launches/21',
+            ownersCount: 0, minted: 0, mintTotal: 359, supply: 359,
+            sales: 0, volume: 0, floor: 0, owners: []
+          });
+        }
       } catch (e) {
         console.error('Échec du chargement de data.json :', e);
         return;
