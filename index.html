@@ -2022,8 +2022,8 @@ body::after {
     .cv-sold[hidden] { display: none; }
     .cv-sold.is-live { display: inline-flex; align-items: center; gap: 7px; background: rgba(255, 106, 26, 0.16); border-color: rgba(255, 106, 26, 0.6); color: #ffcfa6; letter-spacing: 0.08em; }
     .cv-sold.is-live .dot { width: 7px; height: 7px; border-radius: 50%; background: #ff6a1a; box-shadow: 0 0 8px rgba(255, 106, 26, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
-    .cv-sold.is-soon { display: inline-flex; align-items: center; gap: 7px; background: rgba(56, 189, 248, 0.14); border-color: rgba(56, 189, 248, 0.55); color: #bae6fd; letter-spacing: 0.08em; }
-    .cv-sold.is-soon .dot { width: 7px; height: 7px; border-radius: 50%; background: #38bdf8; box-shadow: 0 0 8px rgba(56, 189, 248, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
+    .cv-sold.is-soon { display: inline-flex; align-items: center; gap: 7px; background: rgba(232, 184, 75, 0.14); border-color: rgba(232, 184, 75, 0.55); color: #f0d79a; letter-spacing: 0.08em; }
+    .cv-sold.is-soon .dot { width: 7px; height: 7px; border-radius: 50%; background: #e8b84b; box-shadow: 0 0 8px rgba(232, 184, 75, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
     .cv-desc { color: var(--muted); line-height: 1.68; max-width: 680px; margin: 12px 0 20px; font-size: 0.95rem; }
     .cv-link[hidden] { display: none; }
 
@@ -2309,12 +2309,12 @@ body::after {
     .tl-node.tl-minting .tl-stem { background: #22c55e; }
     .tl-node.tl-minting .tl-dot { background: #22c55e; border-color: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.7); }
     .tl-node.tl-minting .tl-date { color: #22c55e; }
-    /* Prochaine collection annoncée (statut « soon ») : accent bleu sur le nœud timeline. */
-    .tl-node.tl-comingsoon .tl-thumb { border-color: #38bdf8; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(56, 189, 248, 0.5); }
-    .tl-node.tl-comingsoon .tl-num { background: linear-gradient(135deg, #7dd3fc, #2563eb); color: #082f49; }
-    .tl-node.tl-comingsoon .tl-stem { background: #38bdf8; }
-    .tl-node.tl-comingsoon .tl-dot { background: #38bdf8; border-color: #38bdf8; box-shadow: 0 0 10px rgba(56, 189, 248, 0.7); }
-    .tl-node.tl-comingsoon .tl-date { color: #38bdf8; }
+    /* Prochaine collection annoncée (statut « soon ») : accent OR sur le nœud timeline. */
+    .tl-node.tl-comingsoon .tl-thumb { border-color: #e8b84b; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4), 0 0 0 1.5px rgba(232, 184, 75, 0.5); }
+    .tl-node.tl-comingsoon .tl-num { background: linear-gradient(135deg, #f7dd94, #c8981f); color: #3a2600; }
+    .tl-node.tl-comingsoon .tl-stem { background: #e8b84b; }
+    .tl-node.tl-comingsoon .tl-dot { background: #e8b84b; border-color: #e8b84b; box-shadow: 0 0 10px rgba(232, 184, 75, 0.7); }
+    .tl-node.tl-comingsoon .tl-date { color: #e8b84b; }
     /* Repère « To be continued » (à droite de la dernière collection) : ghost pointillé pour les
        sorties futures. Non cliquable, rail/tige/pastille en pointillés. */
     .tl-soon { cursor: default; }
@@ -2382,9 +2382,10 @@ body::after {
     /* Variante « minting » (Crovia) : ruban vert clignotant (état live). */
     .col-ribbon-mint { background: linear-gradient(135deg, #4ade80, #16a34a); animation: ribbonMintPulse 1.7s ease-in-out infinite; }
     @keyframes ribbonMintPulse { 0%, 100% { box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45); } 50% { box-shadow: 0 6px 18px rgba(34, 197, 94, 0.6); } }
-    /* Variante « coming soon » (Crovia) : ruban bleu (collection à venir, pas encore lancée). */
-    .col-ribbon-soon { background: linear-gradient(135deg, #38bdf8, #2563eb); }
-    .col-soon .col-mint-row .num b { color: #38bdf8; }
+    /* Variante « coming soon » (collection à venir) : ruban OR — premium, dans le thème du site
+       (accents dorés), distinct du orange « Sold out » et du vert « Minting ». */
+    .col-ribbon-soon { background: linear-gradient(135deg, #f7dd94, #d9a83f); color: #3a2600; text-shadow: none; }
+    .col-soon .col-mint-row .num b { color: #e8b84b; }
     /* Badge date : coin supérieur GAUCHE, même taille/style que le badge sold out. */
     .col-badge.col-date-badge { left: 10px; right: auto; }
     .col-badge .dot { width: 7px; height: 7px; border-radius: 50%; background: #fff; box-shadow: 0 0 8px rgba(255, 255, 255, 0.8); animation: livePulse 1.5s ease-in-out infinite; }
