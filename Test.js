@@ -395,6 +395,20 @@ const CROVIA_SALE_TOPIC = '0x1261f893ba16d5623de55d479f6f662eb565a4f6130f271f677
 // floor et volume — exacte et rapide, passe Cloudflare depuis une IP résidentielle (runner). Repli
 // on-chain (fetchV3Holders) si l'API échoue. Doc : https://crovia.app/developers
 const CROVIA_API = 'https://crovia.app/api/v1';
+
+// ── Collections externes Crovia à publier (fiche + Sales Bot : holders, ventes, floor, volume, mints) ──
+// Pour AJOUTER un nouveau drop de l'artiste : renseigner son `contract` (déployé au lancement) — le
+// reste (données live + ventes/mints dans le bot) devient automatique. `contract` vide = ignorée.
+// Ordre = ordre d'affichage (la plus récente en premier).
+const CROVIA_COLLECTIONS = [
+  // Prochaine collection — ACTIVER au lancement (≈ 10 sept. 2026) en renseignant `contract` :
+  { id: 'collection-civilizations', title: 'Cryptonauts Civilizations', contract: '',
+    image: 'assets/civilizations-logo.jpg', banner: 'assets/civilizations-banner.jpg',
+    alt: 'Cryptonauts Civilizations collection icon', mintTotal: 359, mintPriceCro: 499 },
+  { id: 'collection-v3', title: 'Quantum Cryptonauts V3', contract: '0x840d5e2df597ab3dcfed4e5fc883c8d87606748d',
+    image: 'assets/v3-logo.jpg?v=2', banner: 'assets/v3-banner.jpg?v=2',
+    alt: 'Quantum Cryptonauts V3 COLLECTION ICON', mintTotal: 299, mintPriceCro: 400 },
+];
 // RPC publics Cronos qui acceptent eth_getLogs sur des fenêtres de ~2000 blocs (archive).
 // NB (vérifié 2026-06) : publicnode exige désormais un "personal token" pour l'archive et
 // 1rpc.io plafonne getLogs à 50 blocs → tous deux inutilisables ici (faisaient échouer la
@@ -672,10 +686,10 @@ async function fetchCroviaCollection(contract) {
   }
 }
 
-// Construit l'objet collection V3 (format data.json) depuis un classement [{addr,count}].
+// Construit l'objet collection Crovia (format data.json) depuis sa config + un classement [{addr,count}].
 // names = map {adresse(min): nom .cro} résolue on-chain (override manuel V3_NAMES prioritaire).
 // stats = { floor, volume, salesCount } (API Crovia) ; 0 si indisponibles (repli on-chain).
-function buildV3Collection(ranking, names = {}, stats = {}) {
+function buildCroviaCollection(cfg, ranking, names = {}, stats = {}) {
   const trunc = a => a.slice(0, 6) + '…' + a.slice(-4);
   const owners = ranking.map(({ addr, count }) => ({
     name: V3_NAMES[addr.toLowerCase()] || names[addr.toLowerCase()] || trunc(addr),
@@ -685,12 +699,11 @@ function buildV3Collection(ranking, names = {}, stats = {}) {
   // Total minté (= NFT détenus) : somme des holdings → l'index l'affiche dans « Mint progress ».
   const minted = ranking.reduce((s, r) => s + r.count, 0);
   return {
-    id: 'collection-v3', title: 'Quantum Cryptonauts V3',
-    image: 'assets/v3-logo.jpg?v=2', banner: 'assets/v3-banner.jpg?v=2',
-    alt: 'Quantum Cryptonauts V3 COLLECTION ICON',
-    ownersCount: owners.length, external: 'crovia', contract: V3_CONTRACT,
-    croviaUrl: 'https://crovia.app/collections/' + V3_CONTRACT,
-    minted, mintTotal: 299,
+    id: cfg.id, title: cfg.title,
+    image: cfg.image, banner: cfg.banner, alt: cfg.alt,
+    ownersCount: owners.length, external: 'crovia', contract: cfg.contract,
+    croviaUrl: 'https://crovia.app/collections/' + cfg.contract,
+    minted, mintTotal: cfg.mintTotal,
     // floor / volume / sales (en CRO) fournis par l'API Crovia. supply = NFT mintés (agrégat home).
     supply: minted, sales: stats.salesCount || 0, volume: stats.volume || 0, floor: stats.floor || 0,
     owners
@@ -743,10 +756,10 @@ async function resolveCroNames(addrs) {
   return map;
 }
 
-// tokenURI(tokenId) du contrat V3 (ERC-721) via eth_call on-chain → ipfs://FOLDER/N.json.
-async function v3TokenURI(tokenId) {
+// tokenURI(tokenId) d'un contrat ERC-721 via eth_call on-chain → ipfs://FOLDER/N.json.
+async function croviaTokenURI(contract, tokenId) {
   const data = '0xc87b56dd' + BigInt(tokenId).toString(16).padStart(64, '0'); // selector tokenURI(uint256)
-  return decodeAbiString(await cronosRpc('eth_call', [{ to: V3_CONTRACT, data }, 'latest']));
+  return decodeAbiString(await cronosRpc('eth_call', [{ to: contract, data }, 'latest']));
 }
 
 // Métadonnée JSON sur IPFS, avec repli multi-gateway (les passerelles publiques timeout souvent).
@@ -761,15 +774,16 @@ async function fetchIpfsJson(pathNoScheme) {
   return null;
 }
 
-// Enrichit chaque mint affiché dans le Sales Bot avec le VRAI NFT minté : nom (n) + image (c, CID IPFS),
-// résolus via tokenURI(id) on-chain → métadonnée IPFS. Best-effort : sans ça, le Sales Bot retombe
-// sur le logo de collection (l'ancienne table EXTERNAL_ASSETS n'était PAS indexable par token id).
-async function enrichV3MintImages(mints) {
-  if (!mints || !mints.length) return;
+// Enrichit chaque vente/mint du Sales Bot avec le VRAI NFT : nom (n) + image (c, CID IPFS), résolus via
+// tokenURI(id) on-chain (contrat de CHAQUE entrée) → métadonnée IPFS. Best-effort : sans ça, le Sales Bot
+// retombe sur le logo de la collection. Chaque entrée doit porter son `contract`.
+async function enrichExternalImages(items) {
+  if (!items || !items.length) return;
   let ok = 0;
-  await mapPool(mints, 4, async (m) => {
+  await mapPool(items, 4, async (m) => {
     try {
-      const uri = await v3TokenURI(m.t);
+      if (!m.contract) return;
+      const uri = await croviaTokenURI(m.contract, m.t);
       if (!uri) return;
       const meta = await fetchIpfsJson(uri.replace(/^ipfs:\/\//, ''));
       if (!meta) return;
@@ -778,10 +792,10 @@ async function enrichV3MintImages(mints) {
       if (img) { m.c = img; ok++; }
     } catch (e) { /* repli logo */ }
   });
-  console.log(`✅ Images des mints V3 résolues : ${ok}/${mints.length} (tokenURI → métadonnée IPFS).`);
+  console.log(`✅ Images des ventes/mints externes résolues : ${ok}/${items.length} (tokenURI → IPFS).`);
 }
 
-function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Sales) {
+function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, externalCollections, v3Sales) {
   // Prepare collectionsData, including all collections from the collections array
   const allCollectionsData = collections.map(collection => {
     const scrapedData = collectionsData.find(data => data.collectionId === collection.id) || {
@@ -813,11 +827,10 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Co
     };
   });
 
-  // Collection externe (Crovia / Cronos) — ajoutée en tête (la plus récente). Données on-chain,
-  // owners en adresses (cronoscan) ; volontairement absente de globalOwnersData (leaderboard global).
-  // Collection externe V3 (Crovia/Cronos) — en tête, détenteurs lus on-chain (voir fetchV3Holders).
-  // Volontairement absente de globalOwnersData (exclue du leaderboard global).
-  allCollectionsData.unshift(v3Collection);
+  // Collections externes (Crovia / Cronos) — ajoutées en tête (les plus récentes), dans l'ordre de la
+  // config. Données via l'API Crovia (owners en adresses/cronoscan) ; volontairement absentes de
+  // globalOwnersData (exclues du leaderboard global basé sur les pseudos crypto.com).
+  allCollectionsData.unshift(...(externalCollections || []).filter(Boolean));
 
   // Prepare globalOwnersData (sans url ni rank : reconstruits/recalculés côté client)
   const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, count }) => {
@@ -1163,36 +1176,47 @@ async function main() {
 
     saveOwnersJson(ownersData);
 
-    // ── Collection externe V3 (Quantum Cryptonauts V3, Crovia/Cronos) ──
-    // SOURCE PRIMAIRE : API publique Crovia (détenteurs, ventes cross-marketplace, floor, volume) —
-    // exacte et rapide. REPLI : scan on-chain complet (fetchV3Holders) si l'API est indisponible.
-    const crovia = await fetchCroviaCollection(V3_CONTRACT);
-    let v3Ranking, v3SecSales, v3Stats, v3Mints;
-    if (crovia) {
-      v3Ranking = crovia.owners;
-      v3SecSales = crovia.sales;                                   // 9/9 ventes, prix exacts (CRO)
-      v3Stats = { floor: crovia.floor, volume: crovia.volume, salesCount: crovia.salesCount };
-      // Mints LIVE : scan on-chain borné (récent). 0 aujourd'hui (sold-out) mais capte
-      // AUTOMATIQUEMENT un futur drop de l'artiste dès que le mint reprend. Sans clé, rapide.
-      v3Mints = await fetchRecentMints(V3_CONTRACT);
-    } else {
-      const v3 = await fetchV3Holders();                          // repli : scan on-chain complet
-      v3Ranking = (v3 && v3.ranking) || V3_FALLBACK;
-      v3SecSales = (v3 && v3.sales) || [];                        // ventes marketplace natif Crovia
-      v3Mints = (v3 && v3.mints) || [];                           // le scan complet a déjà les mints
-      v3Stats = {};                                               // floor/volume inconnus hors API
+    // ── Collections externes Crovia/Cronos (V3, Civilizations, futurs drops) ──
+    // Pour CHAQUE collection avec un `contract` renseigné (voir CROVIA_COLLECTIONS) :
+    //  • SOURCE PRIMAIRE : API publique Crovia (détenteurs, ventes cross-marketplace, floor, volume).
+    //  • Mints LIVE : scan on-chain borné récent (capte un drop en cours ; 0 si sold-out).
+    //  • REPLI : scan on-chain complet (fetchV3Holders) si l'API tombe (V3 uniquement).
+    // Chaque vente/mint est taguée `col` (titre) + `contract` → flux Sales Bot multi-collections.
+    const externalCollections = [];
+    let externalSales = [];
+    for (const cfg of CROVIA_COLLECTIONS) {
+      if (!cfg.contract) { console.log(`ℹ ${cfg.title} : pas encore lancée (contract vide) → ignorée.`); continue; }
+      const api = await fetchCroviaCollection(cfg.contract);
+      let ranking, secSales, mints, stats;
+      if (api) {
+        ranking = api.owners;
+        secSales = api.sales;
+        stats = { floor: api.floor, volume: api.volume, salesCount: api.salesCount };
+        mints = await fetchRecentMints(cfg.contract, 400000, cfg.mintPriceCro);
+      } else if (cfg.contract.toLowerCase() === V3_CONTRACT) {
+        const v3 = await fetchV3Holders();                        // repli on-chain complet (V3 seulement)
+        ranking = (v3 && v3.ranking) || V3_FALLBACK;
+        secSales = (v3 && v3.sales) || [];
+        mints = (v3 && v3.mints) || [];
+        stats = {};
+      } else {
+        console.warn(`⚠ ${cfg.title} : API Crovia indisponible et pas de repli → ignorée ce run.`);
+        continue;
+      }
+      if (!ranking.length) { console.warn(`⚠ ${cfg.title} : aucun détenteur → ignorée.`); continue; }
+      // Noms des détenteurs : résolus on-chain via Cronos ID (.cro inverse) — l'API owners ne les donne pas.
+      const names = await resolveCroNames(ranking.map(r => r.addr));
+      externalCollections.push(buildCroviaCollection(cfg, ranking, names, stats));
+      for (const s of secSales) externalSales.push({ ...s, col: cfg.title, contract: cfg.contract });
+      for (const m of mints) externalSales.push({ ...m, col: cfg.title, contract: cfg.contract });
     }
-    // Noms des détenteurs : résolus on-chain via Cronos ID (nom .cro inverse) — l'API owners ne les donne pas.
-    const v3Names = await resolveCroNames(v3Ranking.map(r => r.addr));
-    const v3Collection = buildV3Collection(v3Ranking, v3Names, v3Stats);
 
-    // Flux Sales Bot = ventes (cross-marketplace) + mints, triés par date (récent d'abord), max 40.
-    const v3Sales = [...v3SecSales, ...v3Mints].sort((a, b) => b.ts - a.ts).slice(0, 40);
-    // Résout l'image + le nom de chaque NFT (tokenURI on-chain → métadonnée IPFS)
-    // pour que le Sales Bot affiche le bon visuel au lieu du logo de collection.
-    await enrichV3MintImages(v3Sales);
+    // Flux Sales Bot = ventes (cross-marketplace) + mints de TOUTES les collections, triés par date, max 60.
+    externalSales = externalSales.sort((a, b) => b.ts - a.ts).slice(0, 60);
+    // Résout l'image + le nom de chaque NFT (tokenURI on-chain → métadonnée IPFS) pour le bon visuel.
+    await enrichExternalImages(externalSales);
 
-    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, v3Collection, v3Sales);
+    writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, externalCollections, externalSales);
 
   } catch (error) {
     console.error('Main execution failed:', error.message);
@@ -1209,4 +1233,4 @@ if (require.main === module) {
 }
 
 // Exposé pour tests ciblés (résolution de noms .cro, ventes secondaires) sans lancer main().
-module.exports = { resolveCroName, resolveCroNames, fetchV3SecondarySales, fetchCroviaCollection, fetchRecentMints, buildV3Collection, namehash, reverseNode };
+module.exports = { resolveCroName, resolveCroNames, fetchV3SecondarySales, fetchCroviaCollection, fetchRecentMints, buildCroviaCollection, enrichExternalImages, CROVIA_COLLECTIONS, namehash, reverseNode };

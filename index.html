@@ -3401,26 +3401,31 @@ body::after {
     // Adresse de portefeuille abrégée : 0x1234…abcd
     function sbShort(a) { return a ? (a.slice(0, 6) + '…' + a.slice(-4)) : '—'; }
 
-    // Activité on-chain d'une collection Crovia/Cronos (Quantum Cryptonauts V3) pour le Sales Bot :
-    // MINTS (vente primaire, vendeur = « Mint ») ET VENTES SECONDAIRES du marketplace Crovia
-    // (vendeur → acheteur, prix vendeur réel lu dans l'event Sale). Alimenté depuis data.json
-    // (v3Sales), calculé on-chain par Test.js. Une entrée avec m.s = vente secondaire, sinon mint.
+    // Activité on-chain des collections Crovia/Cronos (V3, Civilizations, futurs drops) pour le Sales Bot :
+    // MINTS (vente primaire, vendeur = « Mint ») ET VENTES SECONDAIRES cross-marketplace (vendeur →
+    // acheteur, prix vendeur réel). Alimenté depuis data.json (v3Sales), calculé par Test.js. Chaque
+    // entrée porte `col` (titre de la collection) + `c`/`n` (image/nom du NFT) ; `m.s` = vente, sinon mint.
     let V3_SALES = [];
+    // Logo + lien Crovia d'une collection externe (depuis collectionsData, sinon COLLECTION_META).
+    function extColInfo(title) {
+      const c = (typeof collectionsData !== 'undefined' && collectionsData.find(x => x.title === title)) || {};
+      const meta = (typeof COLLECTION_META !== 'undefined' && COLLECTION_META[title]) || {};
+      return { logo: c.image || 'assets/v3-logo.jpg?v=2', link: c.croviaUrl || meta.croviaUrl || meta.launchUrl || 'https://crovia.app' };
+    }
 
     async function appendExternalSales(sales) {
       if (typeof V3_SALES === 'undefined' || !V3_SALES.length) return;
-      const meta = (typeof COLLECTION_META !== 'undefined' && COLLECTION_META['Quantum Cryptonauts V3']) || {};
-      // Image + nom du VRAI NFT minté : fournis par Test.js (tokenURI → métadonnée IPFS) dans
-      // chaque entrée v3Sales (c = CID image, n = nom). Repli sur le logo si non encore résolu.
-      V3_SALES.slice(0, 12).forEach(m => {
+      V3_SALES.slice(0, 16).forEach(m => {
+        const title = m.col || 'Quantum Cryptonauts V3';
+        const info = extColInfo(title);
         const cid = m.c || '';
         // weserv et la plupart des passerelles IPFS publiques timeout/504 sur ces CID ;
-        // seule pinata répond → on charge la vignette EN DIRECT depuis pinata (repli logo).
-        const thumb = cid ? ('https://gateway.pinata.cloud/ipfs/' + cid) : 'assets/v3-logo.jpg?v=2';
+        // seule pinata répond → on charge la vignette EN DIRECT depuis pinata (repli logo collection).
+        const thumb = cid ? ('https://gateway.pinata.cloud/ipfs/' + cid) : info.logo;
         sales.push({
-          col: 'Quantum Cryptonauts V3', colImg: 'assets/v3-logo.jpg?v=2',
-          thumb: thumb, ipfs: '', directFb: cid ? 'assets/v3-logo.jpg?v=2' : '',
-          link: meta.croviaUrl || 'https://crovia.app',
+          col: title, colImg: info.logo,
+          thumb: thumb, ipfs: '', directFb: cid ? info.logo : '',
+          link: info.link,
           asset: m.n || ('#' + m.t),
           price: sbPrice(m.cro, 'CRO'),
           // m.s présent = vente secondaire (vendeur → acheteur) ; sinon = mint (vente primaire).
