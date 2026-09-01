@@ -49,6 +49,16 @@ Set-Content -Path $pidFile -Value $PID -Encoding ASCII
 # Le watchdog le tue apres ~40 s sans connexion etablie vers Anthropic -> la
 # boucle le relance alors frais. Tourne dans un job separe, parametre par $SessionName.
 $logFile = Join-Path $PSScriptRoot "remote-control-loop.log"
+
+# --- DIAG "relance toute seule" (2026-09-01) : trace CHAQUE (re)demarrage de la
+# loop -> heure + PID + PID/nom du PARENT. Task Scheduler restart => parent
+# svchost/taskhostw ; lancement manuel => powershell/explorer. Tout l'exterieur
+# (reboot/veille/logon/batterie/watchdog/crash) ayant ete elimine le 2026-09-01,
+# seule cette ligne dira POURQUOI/QUI relance au prochain evenement.
+$__ppid  = (Get-CimInstance Win32_Process -Filter "ProcessId=$PID" -ErrorAction SilentlyContinue).ParentProcessId
+$__pname = if ($__ppid) { (Get-CimInstance Win32_Process -Filter "ProcessId=$__ppid" -ErrorAction SilentlyContinue).Name } else { '?' }
+"$(Get-Date -Format s) LOOP START: $SessionName PID $PID <- parent PID $__ppid ($__pname)" | Out-File -FilePath $logFile -Append -Encoding utf8
+
 Get-Job -Name "wd-$SessionName" -ErrorAction SilentlyContinue | Remove-Job -Force -ErrorAction SilentlyContinue
 Start-Job -Name "wd-$SessionName" -ArgumentList $SessionName, $logFile, $PID -ScriptBlock {
     param($session, $log, $myLoopPid)
