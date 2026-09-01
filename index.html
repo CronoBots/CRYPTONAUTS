@@ -2618,6 +2618,67 @@ body::after {
     @media (prefers-reduced-motion: reduce) { .sb-live { animation: none; } }
 
     @media (prefers-reduced-motion: reduce) { .hero-visual::before { animation: none; } }
+
+    /* ── Prochaine sortie (accueil) : mise en avant premium de la nouvelle collection
+       Crovia. Accent OR, dans le langage « coming soon » déjà utilisé sur la timeline. ── */
+    .drop-feature { padding-top: 40px; }
+    .drop-card {
+      display: block; position: relative; overflow: hidden;
+      border-radius: 22px;
+      border: 1px solid rgba(232, 184, 75, 0.28);
+      background: #0d0b08;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .drop-card:hover { transform: translateY(-3px); border-color: rgba(232, 184, 75, 0.5); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(232, 184, 75, 0.22); text-decoration: none; }
+    .drop-media { position: absolute; inset: 0; z-index: 0; }
+    .drop-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.34; filter: saturate(1.05); }
+    .drop-media-grad { position: absolute; inset: 0; background:
+      radial-gradient(120% 90% at 85% 0%, rgba(232, 184, 75, 0.16), transparent 55%),
+      linear-gradient(180deg, rgba(13, 11, 8, 0.35) 0%, rgba(13, 11, 8, 0.82) 58%, #0d0b08 100%); }
+    .drop-body { position: relative; z-index: 1; padding: clamp(24px, 4vw, 48px); }
+    .drop-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 7px 15px; border-radius: 999px;
+      border: 1px solid rgba(232, 184, 75, 0.5);
+      background: rgba(232, 184, 75, 0.12);
+      color: #f0d79a; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
+    }
+    .drop-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #e8b84b; box-shadow: 0 0 8px rgba(232, 184, 75, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
+    .drop-logo { width: 74px; height: 74px; border-radius: 16px; object-fit: cover; margin: 22px 0 0; border: 1px solid rgba(232, 184, 75, 0.35); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); display: block; }
+    .drop-title { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.02; margin: 14px 0 0; letter-spacing: 0.01em; }
+    .drop-tagline { max-width: 40em; color: var(--muted); font-size: 1rem; line-height: 1.6; margin: 12px 0 0; }
+    .drop-countdown { display: flex; align-items: flex-end; gap: 10px; margin: 28px 0 0; }
+    .cd-cell { display: flex; flex-direction: column; align-items: center; min-width: 64px; padding: 12px 10px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(232, 184, 75, 0.18); }
+    .cd-num { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: #f6e6bf; }
+    .cd-lbl { margin-top: 6px; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    .cd-sep { font-size: 1.6rem; color: rgba(232, 184, 75, 0.5); padding-bottom: 22px; }
+    .drop-live-now { display: inline-flex; align-items: center; gap: 9px; margin: 28px 0 0; padding: 12px 20px; border-radius: 999px; background: rgba(232, 184, 75, 0.14); border: 1px solid rgba(232, 184, 75, 0.55); color: #f6e6bf; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.06em; }
+    .drop-specs { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 0; }
+    .drop-specs .spec { display: flex; flex-direction: column; gap: 2px; padding: 10px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
+    .spec .sv { font-size: 1.05rem; font-weight: 700; color: #f2ead9; }
+    .spec .sl { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+    .drop-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 24px 0 0; max-width: 560px; }
+    .phase { padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
+    .phase.phase-public { border-color: rgba(232, 184, 75, 0.4); background: rgba(232, 184, 75, 0.07); }
+    .ph-name { display: block; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+    .ph-price { display: block; font-size: 1.15rem; font-weight: 700; color: #f6e6bf; margin: 4px 0 2px; }
+    .ph-note { display: block; font-size: 0.72rem; color: var(--muted); }
+    .drop-perks { list-style: none; padding: 0; margin: 26px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 24px; max-width: 720px; }
+    .drop-perks li { position: relative; padding-left: 26px; color: #d9cfbb; font-size: 0.9rem; line-height: 1.5; }
+    .drop-perks li::before { content: ""; position: absolute; left: 0; top: 5px; width: 16px; height: 16px; border-radius: 50%; background: rgba(232, 184, 75, 0.16); border: 1px solid rgba(232, 184, 75, 0.5); }
+    .drop-perks li::after { content: ""; position: absolute; left: 5px; top: 9px; width: 5px; height: 3px; border-left: 1.6px solid #e8b84b; border-bottom: 1.6px solid #e8b84b; transform: rotate(-45deg); }
+    .drop-cta { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 32px 0 0; }
+    .btn-gold { background: linear-gradient(120deg, #f7dd94, #d9a83f); color: #3a2600; box-shadow: 0 0 26px rgba(232, 184, 75, 0.35); font-weight: 700; }
+    .btn-gold:hover { box-shadow: 0 0 40px rgba(232, 184, 75, 0.6); }
+    .drop-cta-note { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.04em; }
+    @media (max-width: 600px) {
+      .drop-phases { grid-template-columns: 1fr; max-width: none; }
+      .drop-perks { grid-template-columns: 1fr; }
+      .cd-cell { min-width: 0; flex: 1; }
+      .drop-countdown { gap: 6px; }
+      .cd-sep { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -2650,13 +2711,63 @@ body::after {
       </div>
       <div class="hero-visual">
         <div class="hero-frame">
-          <img src="https://images.weserv.nl/?url=crypto-nauts.com/assets/icon-512.png&w=512&output=webp&q=82" onerror="this.onerror=null;this.src='assets/icon-512.png'" alt="Quantum Cryptonauts astronaut" class="hero-astronaut" decoding="async" fetchpriority="high">
+          <img src="assets/civilizations-logo.jpg" onerror="this.onerror=null;this.src='assets/icon-512.png'" alt="Cryptonauts Civilizations — the next collection" class="hero-astronaut" decoding="async" fetchpriority="high">
         </div>
       </div>
     </div>
   </header>
 
   <main>
+    <section class="section reveal drop-feature" id="nextdrop" data-view="home" aria-labelledby="dropTitle">
+      <a class="drop-card" href="https://crovia.app/launches/21" target="_blank" rel="noopener" aria-label="Cryptonauts Civilizations — view the drop on Crovia">
+        <div class="drop-media">
+          <img class="drop-bg" src="assets/civilizations-banner.jpg" alt="" loading="lazy" decoding="async">
+          <div class="drop-media-grad"></div>
+        </div>
+        <div class="drop-body">
+          <span class="drop-eyebrow"><span class="dot"></span>Next drop · Live on Crovia</span>
+          <img class="drop-logo" src="assets/civilizations-logo.jpg" alt="Cryptonauts Civilizations collection artwork" loading="lazy" decoding="async">
+          <h2 id="dropTitle" class="drop-title">Cryptonauts Civilizations</h2>
+          <p class="drop-tagline">The twelfth chapter of the saga. 359 one-of-one avatars gathered from across the multiverse — warriors, explorers and soldiers from different planets and timelines — minting soon on Crovia.</p>
+
+          <div class="drop-countdown" id="dropCountdown" data-launch="2026-09-10T00:00:00Z" role="timer" aria-label="Countdown to launch">
+            <div class="cd-cell"><span class="cd-num" data-cd="d">--</span><span class="cd-lbl">days</span></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-cell"><span class="cd-num" data-cd="h">--</span><span class="cd-lbl">hrs</span></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-cell"><span class="cd-num" data-cd="m">--</span><span class="cd-lbl">min</span></div>
+            <div class="cd-sep">:</div>
+            <div class="cd-cell"><span class="cd-num" data-cd="s">--</span><span class="cd-lbl">sec</span></div>
+          </div>
+
+          <div class="drop-specs">
+            <div class="spec"><span class="sv">359</span><span class="sl">1/1 NFTs</span></div>
+            <div class="spec"><span class="sv">10 Sep 2026</span><span class="sl">Launch</span></div>
+            <div class="spec"><span class="sv">Cronos</span><span class="sl">Chain</span></div>
+            <div class="spec"><span class="sv">5%</span><span class="sl">Royalties</span></div>
+          </div>
+
+          <div class="drop-phases">
+            <div class="phase"><span class="ph-name">Presale</span><span class="ph-price">0 CRO</span><span class="ph-note">Allowlist</span></div>
+            <div class="phase"><span class="ph-name">Whitelist</span><span class="ph-price">399 CRO</span><span class="ph-note">Priority</span></div>
+            <div class="phase phase-public"><span class="ph-name">Public</span><span class="ph-price">499 CRO</span><span class="ph-note">Open mint</span></div>
+          </div>
+
+          <ul class="drop-perks">
+            <li>10,000 CRO reward pool shared between 5 winners after sellout</li>
+            <li>Exclusive NFT airdrops for top holders &amp; random collectors</li>
+            <li>Whitelist &amp; priority mint for Civilizations 2</li>
+            <li>Full intellectual property rights on your Cryptonaut</li>
+          </ul>
+
+          <div class="drop-cta">
+            <span class="btn btn-gold">View the drop on Crovia →</span>
+            <span class="drop-cta-note">Presale · Whitelist · Public mint</span>
+          </div>
+        </div>
+      </a>
+    </section>
+
     <section class="section reveal spot-section" id="spotlight" data-view="home">
       <div class="section-head">
         <span class="eyebrow">Spotlight</span>
@@ -4601,5 +4712,37 @@ body::after {
       </ol>
     </div>
   </div>
+
+  <script>
+    // Compte à rebours de la prochaine sortie (Cryptonauts Civilizations, accueil).
+    // Bascule sur « Minting live now » une fois la date de lancement atteinte.
+    (function () {
+      var el = document.getElementById('dropCountdown');
+      if (!el) return;
+      var target = new Date(el.dataset.launch).getTime();
+      if (isNaN(target)) return;
+      var cd = {
+        d: el.querySelector('[data-cd="d"]'), h: el.querySelector('[data-cd="h"]'),
+        m: el.querySelector('[data-cd="m"]'), s: el.querySelector('[data-cd="s"]')
+      };
+      var iv;
+      var pad = function (n) { return (n < 10 ? '0' : '') + n; };
+      function tick() {
+        var diff = target - Date.now();
+        if (diff <= 0) {
+          if (iv) clearInterval(iv);
+          el.innerHTML = '<span class="drop-live-now"><span class="dot" style="width:8px;height:8px;border-radius:50%;background:#e8b84b;box-shadow:0 0 8px rgba(232,184,75,.9)"></span>Minting live now on Crovia</span>';
+          return;
+        }
+        var s = Math.floor(diff / 1000);
+        cd.d.textContent = Math.floor(s / 86400);
+        cd.h.textContent = pad(Math.floor((s % 86400) / 3600));
+        cd.m.textContent = pad(Math.floor((s % 3600) / 60));
+        cd.s.textContent = pad(s % 60);
+      }
+      tick();
+      iv = setInterval(tick, 1000);
+    })();
+  </script>
 </body>
 </html>
