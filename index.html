@@ -2619,7 +2619,7 @@ body::after {
 
     @media (prefers-reduced-motion: reduce) { .hero-visual::before { animation: none; } }
 
-    /* ── Prochaine sortie (accueil) : mise en avant premium de la nouvelle collection
+    /* ── Prochaine sortie (accueil) : affiche premium CENTRÉE de la nouvelle collection
        Crovia. Accent OR, dans le langage « coming soon » déjà utilisé sur la timeline. ── */
     .drop-feature { padding-top: 40px; }
     .drop-card {
@@ -2632,11 +2632,12 @@ body::after {
     }
     .drop-card:hover { transform: translateY(-3px); border-color: rgba(232, 184, 75, 0.5); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(232, 184, 75, 0.22); text-decoration: none; }
     .drop-media { position: absolute; inset: 0; z-index: 0; }
-    .drop-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.34; filter: saturate(1.05); }
+    .drop-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: saturate(1.05); }
     .drop-media-grad { position: absolute; inset: 0; background:
-      radial-gradient(120% 90% at 85% 0%, rgba(232, 184, 75, 0.16), transparent 55%),
-      linear-gradient(180deg, rgba(13, 11, 8, 0.35) 0%, rgba(13, 11, 8, 0.82) 58%, #0d0b08 100%); }
-    .drop-body { position: relative; z-index: 1; padding: clamp(24px, 4vw, 48px); }
+      radial-gradient(120% 80% at 50% 0%, rgba(232, 184, 75, 0.18), transparent 60%),
+      linear-gradient(180deg, rgba(13, 11, 8, 0.4) 0%, rgba(13, 11, 8, 0.84) 55%, #0d0b08 100%); }
+    /* Corps CENTRÉ : composition en affiche, cartes internes alignées à gauche pour la lecture. */
+    .drop-body { position: relative; z-index: 1; padding: clamp(28px, 4.5vw, 56px); text-align: center; }
     .drop-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
       padding: 7px 15px; border-radius: 999px;
@@ -2645,36 +2646,43 @@ body::after {
       color: #f0d79a; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
     }
     .drop-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #e8b84b; box-shadow: 0 0 8px rgba(232, 184, 75, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
-    .drop-logo { width: 74px; height: 74px; border-radius: 16px; object-fit: cover; margin: 22px 0 0; border: 1px solid rgba(232, 184, 75, 0.35); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5); display: block; }
-    .drop-title { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.02; margin: 14px 0 0; letter-spacing: 0.01em; }
-    .drop-tagline { max-width: 40em; color: var(--muted); font-size: 1rem; line-height: 1.6; margin: 12px 0 0; }
-    .drop-countdown { display: flex; align-items: flex-end; gap: 10px; margin: 28px 0 0; }
-    .cd-cell { display: flex; flex-direction: column; align-items: center; min-width: 64px; padding: 12px 10px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(232, 184, 75, 0.18); }
+    .drop-logo { width: 92px; height: 92px; border-radius: 18px; object-fit: cover; margin: 22px auto 0; border: 1px solid rgba(232, 184, 75, 0.4); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55); display: block; }
+    .drop-title { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.02; margin: 16px 0 0; letter-spacing: 0.01em; }
+    .drop-tagline { max-width: 42em; color: var(--muted); font-size: 1rem; line-height: 1.6; margin: 14px auto 0; }
+    .drop-countdown { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 30px 0 0; }
+    .cd-cell { display: flex; flex-direction: column; align-items: center; min-width: 66px; padding: 12px 10px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(232, 184, 75, 0.18); }
     .cd-num { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; color: #f6e6bf; }
     .cd-lbl { margin-top: 6px; font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
     .cd-sep { font-size: 1.6rem; color: rgba(232, 184, 75, 0.5); padding-bottom: 22px; }
-    .drop-live-now { display: inline-flex; align-items: center; gap: 9px; margin: 28px 0 0; padding: 12px 20px; border-radius: 999px; background: rgba(232, 184, 75, 0.14); border: 1px solid rgba(232, 184, 75, 0.55); color: #f6e6bf; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.06em; }
-    .drop-specs { display: flex; flex-wrap: wrap; gap: 10px; margin: 26px 0 0; }
-    .drop-specs .spec { display: flex; flex-direction: column; gap: 2px; padding: 10px 16px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
+    .drop-live-now { display: inline-flex; align-items: center; gap: 9px; margin: 30px 0 0; padding: 12px 20px; border-radius: 999px; background: rgba(232, 184, 75, 0.14); border: 1px solid rgba(232, 184, 75, 0.55); color: #f6e6bf; font-size: 0.9rem; font-weight: 700; letter-spacing: 0.06em; }
+    .drop-specs { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 28px 0 0; }
+    .drop-specs .spec { display: flex; flex-direction: column; gap: 2px; padding: 10px 18px; border-radius: 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
     .spec .sv { font-size: 1.05rem; font-weight: 700; color: #f2ead9; }
     .spec .sl { font-size: 0.66rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
-    .drop-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 24px 0 0; max-width: 560px; }
-    .phase { padding: 14px 16px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); }
+    /* Intertitres de section (Mint structure / Holder utilities). */
+    .drop-section-label { margin: 40px 0 0; font-size: 0.7rem; letter-spacing: 0.22em; text-transform: uppercase; color: #e8b84b; }
+    .drop-section-label::before, .drop-section-label::after { content: ""; display: inline-block; width: 26px; height: 1px; vertical-align: middle; margin: 0 12px; background: rgba(232, 184, 75, 0.45); }
+    .drop-phases { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 18px auto 0; max-width: 660px; }
+    .phase { padding: 16px 18px; border-radius: 14px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--hairline); text-align: left; }
     .phase.phase-public { border-color: rgba(232, 184, 75, 0.4); background: rgba(232, 184, 75, 0.07); }
     .ph-name { display: block; font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
     .ph-price { display: block; font-size: 1.15rem; font-weight: 700; color: #f6e6bf; margin: 4px 0 2px; }
-    .ph-note { display: block; font-size: 0.72rem; color: var(--muted); }
-    .drop-perks { list-style: none; padding: 0; margin: 26px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px 24px; max-width: 720px; }
-    .drop-perks li { position: relative; padding-left: 26px; color: #d9cfbb; font-size: 0.9rem; line-height: 1.5; }
-    .drop-perks li::before { content: ""; position: absolute; left: 0; top: 5px; width: 16px; height: 16px; border-radius: 50%; background: rgba(232, 184, 75, 0.16); border: 1px solid rgba(232, 184, 75, 0.5); }
-    .drop-perks li::after { content: ""; position: absolute; left: 5px; top: 9px; width: 5px; height: 3px; border-left: 1.6px solid #e8b84b; border-bottom: 1.6px solid #e8b84b; transform: rotate(-45deg); }
-    .drop-cta { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; margin: 32px 0 0; }
+    .ph-note { display: block; font-size: 0.72rem; color: var(--muted); line-height: 1.4; }
+    .drop-phase-note { margin: 12px auto 0; max-width: 560px; font-size: 0.8rem; color: var(--muted); font-style: italic; }
+    /* Grille des utilities : conteneur centré, cartes alignées à gauche. */
+    .drop-utils { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 18px auto 0; max-width: 880px; text-align: left; }
+    .util { position: relative; padding: 16px 18px 16px 44px; border-radius: 14px; background: rgba(255, 255, 255, 0.025); border: 1px solid var(--hairline); }
+    .util::before { content: ""; position: absolute; left: 16px; top: 18px; width: 16px; height: 16px; border-radius: 50%; background: rgba(232, 184, 75, 0.16); border: 1px solid rgba(232, 184, 75, 0.55); }
+    .util::after { content: ""; position: absolute; left: 21px; top: 22px; width: 5px; height: 3px; border-left: 1.6px solid #e8b84b; border-bottom: 1.6px solid #e8b84b; transform: rotate(-45deg); }
+    .util-t { display: block; font-size: 0.92rem; font-weight: 700; color: #f2ead9; letter-spacing: 0.01em; }
+    .util-d { display: block; margin-top: 4px; font-size: 0.82rem; line-height: 1.5; color: var(--muted); }
+    .drop-cta { display: flex; justify-content: center; align-items: center; gap: 18px; flex-wrap: wrap; margin: 38px 0 0; }
     .btn-gold { background: linear-gradient(120deg, #f7dd94, #d9a83f); color: #3a2600; box-shadow: 0 0 26px rgba(232, 184, 75, 0.35); font-weight: 700; }
     .btn-gold:hover { box-shadow: 0 0 40px rgba(232, 184, 75, 0.6); }
     .drop-cta-note { font-size: 0.8rem; color: var(--muted); letter-spacing: 0.04em; }
     @media (max-width: 600px) {
-      .drop-phases { grid-template-columns: 1fr; max-width: none; }
-      .drop-perks { grid-template-columns: 1fr; }
+      .drop-phases { grid-template-columns: 1fr; max-width: 340px; }
+      .drop-utils { grid-template-columns: 1fr; max-width: 480px; }
       .cd-cell { min-width: 0; flex: 1; }
       .drop-countdown { gap: 6px; }
       .cd-sep { display: none; }
@@ -2719,7 +2727,7 @@ body::after {
 
   <main>
     <section class="section reveal drop-feature" id="nextdrop" data-view="home" aria-labelledby="dropTitle">
-      <a class="drop-card" href="https://crovia.app/launches/21" target="_blank" rel="noopener" aria-label="Cryptonauts Civilizations — view the drop on Crovia">
+      <a class="drop-card" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener" aria-label="Cryptonauts Civilizations — view the drop on Crovia">
         <div class="drop-media">
           <img class="drop-bg" src="assets/civilizations-banner.jpg" alt="" loading="lazy" decoding="async">
           <div class="drop-media-grad"></div>
@@ -2728,7 +2736,7 @@ body::after {
           <span class="drop-eyebrow"><span class="dot"></span>Next drop · Live on Crovia</span>
           <img class="drop-logo" src="assets/civilizations-logo.jpg" alt="Cryptonauts Civilizations collection artwork" loading="lazy" decoding="async">
           <h2 id="dropTitle" class="drop-title">Cryptonauts Civilizations</h2>
-          <p class="drop-tagline">The twelfth chapter of the saga. 359 one-of-one avatars gathered from across the multiverse — warriors, explorers and soldiers from different planets and timelines — minting soon on Crovia.</p>
+          <p class="drop-tagline">The twelfth chapter of the saga. 359 one-of-one avatars gathered from across the multiverse — warriors, explorers and soldiers from different planets and timelines. Each is a one-of-a-kind NFT on Cronos: permanently recorded, fully owned, impossible to fake.</p>
 
           <div class="drop-countdown" id="dropCountdown" data-launch="2026-09-10T12:00:00Z" role="timer" aria-label="Countdown to launch">
             <div class="cd-cell"><span class="cd-num" data-cd="d">--</span><span class="cd-lbl">days</span></div>
@@ -2747,18 +2755,25 @@ body::after {
             <div class="spec"><span class="sv">5%</span><span class="sl">Royalties</span></div>
           </div>
 
+          <p class="drop-section-label">Mint structure</p>
           <div class="drop-phases">
-            <div class="phase"><span class="ph-name">Presale</span><span class="ph-price">399 CRO</span><span class="ph-note">Allowlist</span></div>
-            <div class="phase"><span class="ph-name">Whitelist</span><span class="ph-price">399 CRO</span><span class="ph-note">No limit</span></div>
-            <div class="phase phase-public"><span class="ph-name">Public</span><span class="ph-price">499 CRO</span><span class="ph-note">No limit</span></div>
+            <div class="phase"><span class="ph-name">1 · Presale</span><span class="ph-price">399 CRO</span><span class="ph-note">Allowlist · custom cap per wallet</span></div>
+            <div class="phase"><span class="ph-name">2 · Whitelist</span><span class="ph-price">399 CRO</span><span class="ph-note">No per-wallet limit</span></div>
+            <div class="phase phase-public"><span class="ph-name">3 · Public</span><span class="ph-price">499 CRO</span><span class="ph-note">No per-wallet limit</span></div>
           </div>
+          <p class="drop-phase-note">Presale &amp; Whitelist open first on 10 Sep, 12:00 UTC · Public mint follows ~8 hours later.</p>
 
-          <ul class="drop-perks">
-            <li>10,000 CRO reward pool shared between 5 winners after sellout</li>
-            <li>Exclusive NFT airdrops for top holders &amp; random collectors</li>
-            <li>Whitelist &amp; priority mint for Civilizations 2</li>
-            <li>Full intellectual property rights on your Cryptonaut</li>
-          </ul>
+          <p class="drop-section-label">Holder utilities</p>
+          <div class="drop-utils">
+            <div class="util"><span class="util-t">Sold-out CRO reward pool</span><span class="util-d">10,000 CRO shared between 5 winners — snapshot 15 days after sellout.</span></div>
+            <div class="util"><span class="util-t">Exclusive NFT airdrops</span><span class="util-d">Top 3 holders (exclusive 1/1s), multiple buys (10+ / 20+) and 4 random holders within 7 days post-sellout. 1 NFT bought = 1 entry.</span></div>
+            <div class="util"><span class="util-t">Civilizations 2 whitelist</span><span class="util-d">Reduced price for every Civilizations 1 holder who holds at Civ 2 launch — primary &amp; secondary buys count.</span></div>
+            <div class="util"><span class="util-t">Exclusive official merch</span><span class="util-d">For the top 3 holders, plus a giveaway for random holders.</span></div>
+            <div class="util"><span class="util-t">Civilizations 2 priority weighting</span><span class="util-d">Buy more in Drop 1 = earlier mint window in Phase 2.</span></div>
+            <div class="util"><span class="util-t">Ethereum art airdrop</span><span class="util-d">Exclusive art airdrop for the top 10 holders.</span></div>
+            <div class="util"><span class="util-t">Full IP rights</span><span class="util-d">Full intellectual property rights on your Cryptonaut.</span></div>
+            <div class="util"><span class="util-t">Hidden utility</span><span class="util-d">A secret perk — unlocked after sellout.</span></div>
+          </div>
 
           <div class="drop-cta">
             <span class="btn btn-gold">View the drop on Crovia →</span>
@@ -3039,7 +3054,7 @@ body::after {
     // Métadonnées officielles des collections (crypto.com GraphQL + Linktree) :
     // identifiant on-chain, statut, supply et récit. Clé = titre exact de la collection.
     const COLLECTION_META = {
-      "Cryptonauts Civilizations": { id: "", external: "crovia", contract: "", status: "soon", launchDate: "2026-09-10", launchLabel: "10 Sep 2026", launchUrl: "https://crovia.app/launches/21", croviaUrl: "https://crovia.app/launches/21", mintTotal: 359, minted: 0, items: 359, presalePriceCro: 399, wlPriceCro: 399, publicPriceCro: 499, mintPriceCro: 499, royaltyPct: 5, desc: "Across the multiverse, a call goes out. They come from different planets, different civilizations, and different moments in history. Some are warriors from ancient Earth. Others are explorers from distant galaxies or soldiers from future timelines. Each one is a one-of-a-kind NFT on the blockchain — permanently recorded, fully owned, and impossible to fake. These Cryptonauts are brought together by a powerful smart contract. Their mission is simple: fight, conquer, and claim new space-time territories across the metaverse. In this world, every battle and every victory is verified on-chain. Ownership is real. Power is decentralized. The strong expand the empire. The weak get left behind. Claim your avatar. The blockchain is watching. The multiverse is waiting." },
+      "Cryptonauts Civilizations": { id: "", external: "crovia", contract: "", status: "soon", launchDate: "2026-09-10", launchLabel: "10 Sep 2026", launchUrl: "https://crovia.app/launch/cryptonauts-civilizations", croviaUrl: "https://crovia.app/launch/cryptonauts-civilizations", mintTotal: 359, minted: 0, items: 359, presalePriceCro: 399, wlPriceCro: 399, publicPriceCro: 499, mintPriceCro: 499, royaltyPct: 5, desc: "Across the multiverse, a call goes out. They come from different planets, different civilizations, and different moments in history. Some are warriors from ancient Earth. Others are explorers from distant galaxies or soldiers from future timelines. Each one is a one-of-a-kind NFT on the blockchain — permanently recorded, fully owned, and impossible to fake. These Cryptonauts are brought together by a powerful smart contract. Their mission is simple: fight, conquer, and claim new space-time territories across the metaverse. In this world, every battle and every victory is verified on-chain. Ownership is real. Power is decentralized. The strong expand the empire. The weak get left behind. Claim your avatar. The blockchain is watching. The multiverse is waiting." },
       "Quantum Cryptonauts V3": { id: "", external: "crovia", contract: "0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", croviaUrl: "https://crovia.app/collections/0x840d5e2df597ab3dcfed4e5fc883c8d87606748d", status: "soldout", minted: 299, mintTotal: 299, mintPriceCro: 400, items: 299, soldOut: true, desc: "The renowned artist Fran Rodríguez returns with the twelfth collection of the successful Cryptonauts saga — and the first one on Crovia. After 11 sold-out curated drops on crypto.com and a total volume of more than $450K, the Spanish artist returns with an epic, highly awaited new collection full of psychedelia and cosmic surrealism. PFP and art in one collection. Each Cryptonaut is a unique digital artifact — a one-of-a-kind being born from quantum randomness and cosmic code — capable of jumping between dimensions, rewriting timelines and discovering hidden realities. Collect these Cryptonauts and you will be eligible for airdrops, exclusive physical art, merch and custom 1/1 NFTs. Join the crew." },
       "Legendary Cryptonauts V2": { id: "aabff17f9874020416137984b9d2b8db", items: 328, soldOut: true, desc: "The legend continues. The quantum spacetime travelers are back — over 300 new 1/1 avatars full of psychedelia and cosmic epicness. Holders get full IP rights, airdrops and rewards. Fran Rodríguez returns with the 9th collection of the sold-out Cryptonauts saga: after 13 curated drops and 400K+ dollars in total volume, his most psychedelic collection to date." },
       "OG Cryptonauts": { id: "0a9144ea31f81338454f87a1eaf101c1", items: 210, soldOut: true, desc: "An exclusive drop for holders of the Cryptonaut OG pass. The original Cryptonauts return for one last mission before becoming a true rarity in the cosmos — the original suit from the saga, created four years ago and now a legend. Rare. Scarce. Epic. Unique. Fran Rodríguez's 13th drop on Crypto.com." },
@@ -4259,7 +4274,7 @@ body::after {
             id: 'collection-civilizations', title: 'Cryptonauts Civilizations',
             image: 'assets/civilizations-logo.jpg', banner: 'assets/civilizations-banner.jpg',
             alt: 'Cryptonauts Civilizations collection icon', external: 'crovia', contract: '',
-            croviaUrl: 'https://crovia.app/launches/21',
+            croviaUrl: 'https://crovia.app/launch/cryptonauts-civilizations',
             ownersCount: 0, minted: 0, mintTotal: 359, supply: 359,
             sales: 0, volume: 0, floor: 0, owners: []
           });
