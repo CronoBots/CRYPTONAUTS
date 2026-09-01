@@ -3429,13 +3429,16 @@ body::after {
       V3_SALES.slice(0, 16).forEach(m => {
         const title = m.col || 'Quantum Cryptonauts V3';
         const info = extColInfo(title);
-        const cid = m.c || '';
-        // weserv et la plupart des passerelles IPFS publiques timeout/504 sur ces CID ;
-        // seule pinata répond → on charge la vignette EN DIRECT depuis pinata (repli logo collection).
-        const thumb = cid ? ('https://gateway.pinata.cloud/ipfs/' + cid) : info.logo;
+        // Vignette servie par le CDN Crovia (comme la galerie V3) : on retrouve le hash
+        // d'image du token via son tokenId dans EXTERNAL_ASSETS. Les passerelles IPFS
+        // publiques (dont pinata) timeout/404 sur ces CID → on ne les utilise plus.
+        const contract = m.contract || '';
+        const extArr = (contract && typeof EXTERNAL_ASSETS !== 'undefined' && EXTERNAL_ASSETS[contract]) || [];
+        const extA = extArr.find(a => Number(a.i) === Number(m.t));
+        const thumb = (extA && extA.h) ? croviaImg(contract, extA.h, 'thumb') : info.logo;
         sales.push({
           col: title, colImg: info.logo,
-          thumb: thumb, ipfs: '', directFb: cid ? info.logo : '',
+          thumb: thumb, ipfs: '', directFb: info.logo,
           link: info.link,
           asset: m.n || ('#' + m.t),
           price: sbPrice(m.cro, 'CRO'),
