@@ -1133,12 +1133,18 @@ body::after {
       width: 100%;
       max-width: 1500px;
       margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: clamp(24px, 4vw, 44px);
+    }
+    /* Sous le titre : deux colonnes à la même hauteur — copie/stats à gauche, hublot à droite. */
+    .hero-body {
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       align-items: center;
       gap: clamp(30px, 5vw, 72px);
     }
-    .hero-copy { text-align: left; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both; }
+    .hero-copy { text-align: left; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) 0.08s both; }
     .eyebrow {
       display: inline-block;
       margin-bottom: 18px;
@@ -1154,10 +1160,12 @@ body::after {
     .hero-title {
       font-size: clamp(3.2rem, 9.6vw, 7rem);
       line-height: 0.92;
-      margin: 0 0 20px;
+      margin: 0;
+      text-align: center;
       text-transform: uppercase;
       letter-spacing: -0.01em;
       text-shadow: 0 0 60px rgba(255, 106, 26, 0.45);
+      animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both;
     }
     .hero-title .tm { font-size: 0.28em; vertical-align: super; color: var(--gold); }
     .hero-sub {
@@ -1362,7 +1370,7 @@ body::after {
     }
 
     @media screen and (max-width: 860px) {
-      .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 18px; }
+      .hero-body { grid-template-columns: 1fr; text-align: center; gap: 18px; }
       .hero-copy { order: 2; text-align: center; }
       .hero-visual { order: 1; animation-delay: 0s; }
       .hero-sub { margin-left: auto; margin-right: auto; }
@@ -2759,8 +2767,9 @@ body::after {
   <header id="home" class="hero" data-view="home">
     <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
     <div class="hero-inner">
+      <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
+      <div class="hero-body">
       <div class="hero-copy">
-        <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
         <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
         <div class="hero-metrics" id="heroStats"></div>
         <div class="hero-cta">
@@ -2783,6 +2792,7 @@ body::after {
             <span class="hero-scan" aria-hidden="true"></span>
           </div>
         </div>
+      </div>
       </div>
     </div>
   </header>
