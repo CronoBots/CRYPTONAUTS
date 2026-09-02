@@ -71,6 +71,8 @@ body {
   margin: 0;
   color: var(--text-dark);
   background-color: #03040a;
+  position: relative;
+  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -99,18 +101,18 @@ h1, h2, h3,
 /* ── Décor spatial : nébuleuse + champ d'étoiles, 100% CSS (aucune requête externe) ── */
 body::before {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse at 50% -10%, rgba(196, 78, 26,0.38), transparent 55%),
+    radial-gradient(ellipse at 50% -12%, rgba(196, 78, 26,0.34), transparent 72%),
     radial-gradient(ellipse at 100% 100%, rgba(150, 62, 20,0.28), transparent 50%),
     radial-gradient(ellipse at 0% 85%, rgba(150, 48, 20,0.18), transparent 45%),
     #03040a;
 }
 body::after {
   content: '';
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: -1;
   pointer-events: none;
@@ -1127,60 +1129,45 @@ body::after {
       transition: opacity 1.2s ease;
     }
     .hero-constellation.is-live { opacity: 0.9; }
+    /* Héros centré sur le TITRE : une seule colonne, titre en pièce maîtresse 3D. */
     .hero-inner {
       position: relative;
       z-index: 5;
       width: 100%;
-      max-width: 1500px;
+      max-width: 1080px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      gap: clamp(24px, 4vw, 44px);
-    }
-    /* Sous le titre : deux colonnes à la même hauteur — copie/stats à gauche, hublot à droite. */
-    .hero-body {
-      display: grid;
-      grid-template-columns: 1.05fr 0.95fr;
       align-items: center;
-      gap: clamp(30px, 5vw, 72px);
-    }
-    /* En-tête centrée : eyebrow « The universe » (mêmes traits que les sections) + titre. */
-    .hero-head { display: flex; flex-direction: column; align-items: center; gap: 14px; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both; }
-    .hero-head .eyebrow { margin-bottom: 0; }
-    .hero-copy { text-align: left; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) 0.08s both; }
-    .eyebrow {
-      display: inline-block;
-      margin-bottom: 18px;
-      padding: 7px 15px;
-      border-radius: 999px;
-      border: 1px solid rgba(255, 106, 26, 0.3);
-      background: rgba(255, 106, 26, 0.07);
-      font-size: 0.72rem;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: #ecdfc7;
-    }
-    .hero-title {
-      font-size: clamp(3.2rem, 9.6vw, 7rem);
-      line-height: 0.92;
-      margin: 0;
       text-align: center;
-      text-transform: uppercase;
-      letter-spacing: -0.01em;
-      text-shadow: 0 0 60px rgba(255, 106, 26, 0.45);
+      perspective: 1000px;
+      animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both;
     }
-    .hero-title .tm { font-size: 0.28em; vertical-align: super; color: var(--gold); }
+    .hero-inner > .eyebrow { margin-bottom: 14px; }
+    /* Le titre est la pièce 3D : léger tilt au curseur (piloté par --rx/--ry) + halo. */
+    .hero-title {
+      font-size: clamp(3.2rem, 10vw, 7.5rem);
+      line-height: 0.9;
+      margin: 0 0 24px;
+      text-transform: uppercase;
+      letter-spacing: -0.015em;
+      text-shadow: 0 0 60px rgba(255, 106, 26, 0.45);
+      transform-style: preserve-3d;
+      transform: rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
+      will-change: transform;
+    }
+    .hero-title .tm { font-size: 0.26em; vertical-align: super; color: var(--gold); }
     .hero-sub {
-      max-width: 34em;
-      font-size: 1.04rem;
+      max-width: 40em;
+      font-size: 1.06rem;
       line-height: 1.65;
       color: rgba(255, 255, 255, 0.74);
       text-transform: none;
-      margin: 0 0 28px;
+      margin: 0 auto 30px;
     }
-    .hero-metrics { margin: 0 0 30px; }
-    .hero-metrics .stats-band { margin: 0; max-width: 520px; }
-    .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
+    .hero-metrics { margin: 0 0 32px; width: 100%; }
+    .hero-metrics .stats-band { margin: 0 auto; max-width: 720px; }
+    .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
     .btn {
       display: inline-flex;
       align-items: center;
@@ -1203,108 +1190,17 @@ body::after {
     }
     .btn-primary:hover { box-shadow: 0 14px 40px rgba(255, 106, 26, 0.5), 0 0 40px rgba(255, 106, 26, 0.55); }
     .btn-ghost {
-      background: rgba(255, 106, 26, 0.06);
+      background: rgba(255, 106, 26, 0.08);
       color: #ffd9c2;
       border: 1px solid rgba(255, 106, 26, 0.34);
-      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
     }
     .btn-ghost:hover { background: rgba(255, 106, 26, 0.14); border-color: rgba(255, 106, 26, 0.6); color: #fff; }
-
-    /* Visuel : hublot en verre + anneaux orbitaux + inclinaison 3D au curseur. */
-    .hero-visual {
-      position: relative;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      perspective: 1200px;
-      animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) 0.12s both;
-    }
-    /* Aura : le hublot est rétro-éclairé (radiance). */
-    .hero-visual::before {
-      content: ''; position: absolute; z-index: 0;
-      top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 92%; aspect-ratio: 1 / 1; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 106, 26, 0.4), rgba(232, 192, 105, 0.1) 44%, transparent 70%);
-      filter: blur(34px); pointer-events: none;
-      animation: auraPulse 6.5s ease-in-out infinite;
-    }
-    .hero-frame {
-      position: relative; z-index: 1;
-      transform-style: preserve-3d;
-      transform: rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
-      will-change: transform;
-    }
-    /* Hublot : verre dépoli translucide qui encadre l'artwork (effet réel, pas décoration). */
-    .hero-porthole {
-      position: relative;
-      width: min(440px, 82%);
-      aspect-ratio: 1 / 1;
-      margin: 0 auto;
-      border-radius: 30px;
-      padding: 12px;
-      background: linear-gradient(160deg, rgba(255, 178, 120, 0.14), rgba(3, 4, 10, 0.2));
-      border: 1px solid rgba(255, 178, 120, 0.28);
-      -webkit-backdrop-filter: blur(6px) saturate(1.2);
-      backdrop-filter: blur(6px) saturate(1.2);
-      box-shadow:
-        0 40px 90px rgba(0, 0, 0, 0.6),
-        0 0 70px rgba(255, 106, 26, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
-      overflow: hidden;
-      transform: translateZ(40px);
-      animation: floatZ 7s ease-in-out infinite;
-    }
-    .hero-astronaut {
-      display: block;
-      width: 100%; height: 100%;
-      object-fit: cover;
-      border-radius: 20px;
-    }
-    /* Reflet balayant le hublot. */
-    .hero-scan {
-      position: absolute; inset: 12px; border-radius: 20px; pointer-events: none;
-      background: linear-gradient(115deg, transparent 40%, rgba(255, 224, 194, 0.18) 50%, transparent 60%);
-      transform: translateX(-120%);
-      animation: scanSweep 6s ease-in-out infinite;
-    }
-    @keyframes scanSweep { 0%, 22% { transform: translateX(-120%); } 50%, 100% { transform: translateX(120%); } }
-    /* Anneaux orbitaux (profondeur, derrière le hublot). */
-    .hero-ring {
-      position: absolute; top: 50%; left: 50%;
-      width: 118%; aspect-ratio: 1 / 1;
-      transform: translate(-50%, -50%) rotateX(72deg);
-      border: 1px solid rgba(255, 106, 26, 0.28);
-      border-radius: 50%;
-      pointer-events: none;
-      animation: orbit 18s linear infinite;
-    }
-    .hero-ring::after {
-      content: ''; position: absolute; top: -4px; left: 50%;
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 12px 2px rgba(232, 192, 105, 0.9);
-      transform: translateX(-50%);
-    }
-    .hero-ring-2 {
-      width: 138%;
-      border-color: rgba(232, 192, 105, 0.16);
-      transform: translate(-50%, -50%) rotateX(72deg) rotateZ(60deg);
-      animation-duration: 26s; animation-direction: reverse;
-    }
-    .hero-ring-2::after { background: #ff8f4d; box-shadow: 0 0 12px 2px rgba(255, 143, 77, 0.9); }
-    @keyframes orbit { from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0); } to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); } }
-    @keyframes auraPulse {
-      0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
-      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
-    }
-    @keyframes floatZ { 0%, 100% { transform: translateZ(40px) translateY(0); } 50% { transform: translateZ(40px) translateY(-16px); } }
     @keyframes heroUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
     ::selection { background: rgba(255, 106, 26, 0.32); color: #fff; }
     /* Mouvement réduit : on fige les animations du hero et on retire la constellation. */
     @media (prefers-reduced-motion: reduce) {
-      .hero-copy, .hero-visual, .hero-porthole, .hero-ring,
-      .hero-scan, .hero-orbs .orb, .hero-visual::before { animation: none !important; }
-      .hero-frame, .hero-porthole { transform: none; }
+      .hero-inner, .hero-title { animation: none !important; }
+      .hero-title { transform: none; }
       .hero-constellation { display: none; }
     }
 
@@ -1365,19 +1261,13 @@ body::after {
     .reveal.in-view { opacity: 1; transform: none; }
     @media (prefers-reduced-motion: reduce) {
       .reveal { opacity: 1; transform: none; transition: none; }
-      .hero-copy, .hero-visual { animation: none; }
-      .hero-astronaut { animation: none; }
+      .hero-inner, .hero-title { animation: none; }
       .scroll-cue .chev, .live-dot { animation: none; }
       .marquee-track { animation: none; }
     }
 
     @media screen and (max-width: 860px) {
-      .hero-body { grid-template-columns: 1fr; text-align: center; gap: 18px; }
-      .hero-copy { order: 2; text-align: center; }
-      .hero-visual { order: 1; animation-delay: 0s; }
-      .hero-sub { margin-left: auto; margin-right: auto; }
-      .hero-cta { justify-content: center; }
-      .hero-metrics .stats-band { margin: 0 auto; }
+      .hero-inner { max-width: 640px; }
     }
     @media screen and (max-width: 600px) {
       /* ── Barre d'onglets native (bottom tab bar) ──
@@ -1415,7 +1305,7 @@ body::after {
       /* Le contenu ne doit pas passer sous la barre d'onglets fixe : réserve la place. */
       body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
       .hero { min-height: auto; padding: 30px 16px 44px; }
-      .hero-porthole { width: min(300px, 82%); }
+      .hero-title { font-size: clamp(2.9rem, 15vw, 4.6rem); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
       .marquee-track span { font-size: 0.66rem; padding: 0 16px; }
       .live-pill { display: none; }
@@ -2686,9 +2576,9 @@ body::after {
       display: block; position: relative; overflow: hidden;
       border-radius: 22px;
       border: 1px solid rgba(255, 106, 26, 0.24);
-      /* Carte translucide : le fond global du site (halo + étoiles) traverse -> cohérence inter-onglets. */
-      background: rgba(9, 8, 14, 0.42);
-      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      /* Carte translucide : le fond global du site (halo + étoiles) traverse -> cohérence inter-onglets.
+         Pas de backdrop-filter (bug iOS Safari : blanchit le fond derrière). */
+      background: rgba(9, 8, 14, 0.5);
       box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
       transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
@@ -2707,7 +2597,7 @@ body::after {
       color: #f0d79a; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
     }
     .drop-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #e8b84b; box-shadow: 0 0 8px rgba(232, 184, 75, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
-    .drop-logo { width: 92px; height: 92px; border-radius: 18px; object-fit: cover; margin: 22px auto 0; border: 1px solid rgba(232, 184, 75, 0.4); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55); display: block; }
+    .drop-logo { width: clamp(120px, 30vw, 168px); height: clamp(120px, 30vw, 168px); border-radius: 24px; object-fit: cover; margin: 22px auto 0; border: 1px solid rgba(232, 184, 75, 0.4); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); display: block; }
     .drop-title { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.02; margin: 16px 0 0; letter-spacing: 0.01em; }
     .drop-tagline { max-width: 42em; color: var(--muted); font-size: 1rem; line-height: 1.6; margin: 14px auto 0; }
     .drop-countdown { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 30px 0 0; }
@@ -2770,35 +2660,19 @@ body::after {
   <header id="home" class="hero" data-view="home">
     <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
     <div class="hero-inner">
-      <div class="hero-head">
-        <span class="eyebrow eyebrow-lines">The universe</span>
-        <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
-      </div>
-      <div class="hero-body">
-      <div class="hero-copy">
-        <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
-        <div class="hero-metrics" id="heroStats"></div>
-        <div class="hero-cta">
-          <a class="btn btn-primary" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3.5 2 5 5.5 5 9 0 2.2-1 4.2-2.4 5.6L12 21l-2.6-3.4C8 16.2 7 14.2 7 12c0-3.5 1.5-7 5-9Z"/><circle cx="12" cy="11" r="1.6"/><path d="M9 18l-2.4 2.6M15 18l2.4 2.6"/></svg>
-            View the next drop
-          </a>
-          <a class="btn btn-ghost" href="#collections">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11l4.5-2.5Z"/></svg>
-            Explore collections
-          </a>
-        </div>
-      </div>
-      <div class="hero-visual">
-        <div class="hero-frame">
-          <span class="hero-ring" aria-hidden="true"></span>
-          <span class="hero-ring hero-ring-2" aria-hidden="true"></span>
-          <div class="hero-porthole">
-            <img src="assets/civilizations-logo.jpg" onerror="this.onerror=null;this.src='assets/icon-512.png'" alt="Cryptonauts Civilizations — the next collection" class="hero-astronaut" decoding="async" fetchpriority="high">
-            <span class="hero-scan" aria-hidden="true"></span>
-          </div>
-        </div>
-      </div>
+      <span class="eyebrow eyebrow-lines">The universe</span>
+      <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
+      <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
+      <div class="hero-metrics" id="heroStats"></div>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3.5 2 5 5.5 5 9 0 2.2-1 4.2-2.4 5.6L12 21l-2.6-3.4C8 16.2 7 14.2 7 12c0-3.5 1.5-7 5-9Z"/><circle cx="12" cy="11" r="1.6"/><path d="M9 18l-2.4 2.6M15 18l2.4 2.6"/></svg>
+          View the next drop
+        </a>
+        <a class="btn btn-ghost" href="#collections">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11l4.5-2.5Z"/></svg>
+          Explore collections
+        </a>
       </div>
     </div>
   </header>
@@ -4895,7 +4769,7 @@ body::after {
         var ry = rotY + t * 0.0009, rx = rotX;
         var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
         var spread = Math.min(W, H) * 0.64;
-        var cx = W * (W > 820 ? 0.62 : 0.5), cy = H * 0.5, focal = 640;
+        var cx = W * 0.5, cy = H * 0.5, focal = 640;
         P.length = 0;
         for (var i = 0; i < nodes.length; i++) {
           var nd = nodes[i];
@@ -4963,27 +4837,26 @@ body::after {
       loop();
     })();
 
-    /* ---- Inclinaison 3D du hublot au curseur (desktop, pointeur fin) ---- */
+    /* ---- Inclinaison 3D du TITRE au curseur (desktop, pointeur fin) ---- */
     (function () {
       if (reduce || !fine) return;
-      var visual = hero.querySelector('.hero-visual');
-      var frame = hero.querySelector('.hero-frame');
-      if (!visual || !frame) return;
+      var title = hero.querySelector('.hero-title');
+      if (!title) return;
       var raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
       function run() {
         raf = 0;
-        cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
-        frame.style.setProperty('--rx', cx.toFixed(2) + 'deg');
-        frame.style.setProperty('--ry', cy.toFixed(2) + 'deg');
-        if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) raf = requestAnimationFrame(run);
+        cx += (tx - cx) * 0.1; cy += (ty - cy) * 0.1;
+        title.style.setProperty('--rx', cx.toFixed(2) + 'deg');
+        title.style.setProperty('--ry', cy.toFixed(2) + 'deg');
+        if (Math.abs(tx - cx) > 0.04 || Math.abs(ty - cy) > 0.04) raf = requestAnimationFrame(run);
       }
-      visual.addEventListener('pointermove', function (e) {
-        var r = visual.getBoundingClientRect();
-        tx = ((e.clientX - r.left) / r.width - 0.5) * 16;
-        ty = -((e.clientY - r.top) / r.height - 0.5) * 12;
+      hero.addEventListener('pointermove', function (e) {
+        var r = hero.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * 12;
+        ty = -((e.clientY - r.top) / r.height - 0.5) * 9;
         if (!raf) raf = requestAnimationFrame(run);
       }, { passive: true });
-      visual.addEventListener('pointerleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(run); });
+      hero.addEventListener('pointerleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(run); });
     })();
   })();
   </script>
