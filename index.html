@@ -1093,7 +1093,7 @@ body::after {
     }
     @keyframes livePulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.7); } }
 
-    /* ── HERO cinématique ── */
+    /* ── HERO cosmique — constellation 3D + hublot en verre ── */
     .hero {
       position: relative;
       min-height: calc(100vh - 84px);
@@ -1102,19 +1102,19 @@ body::after {
       overflow: hidden;
       padding: 40px clamp(22px, 4vw, 72px) 60px;
       box-sizing: border-box;
+      background: #03040a;
     }
-    /* Fondu du bas du hero vers le fond de la page : supprime la cassure nette
-       entre la vidéo/halo du hero et le reste de l'accueil. */
+    /* Fondu du bas du hero vers le fond de la page (au-dessus des étoiles, sous le contenu). */
     .hero::after {
       content: '';
       position: absolute;
       left: 0; right: 0; bottom: 0;
       height: 200px;
-      z-index: 2;
+      z-index: 4;
       pointer-events: none;
       background: linear-gradient(180deg, rgba(3, 4, 10, 0) 0%, #03040a 88%);
     }
-    /* Fond vidéo nébuleuse (style synthverse) */
+    /* Texture nébuleuse (poster) au plus profond, atténuée pour laisser briller les étoiles. */
     .hero-video {
       position: absolute;
       inset: 0;
@@ -1123,40 +1123,64 @@ body::after {
       height: 100%;
       object-fit: cover;
       pointer-events: none;
+      opacity: 0.5;
       background: #03040a;
     }
-    /* Voile sombre pour la lisibilité du texte (plus dense côté gauche/bas) */
-    .hero-veil {
-      position: absolute;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(3, 4, 10, 0.94) 0%, rgba(3, 4, 10, 0.72) 40%, rgba(3, 4, 10, 0.30) 100%),
-        linear-gradient(0deg, rgba(3, 4, 10, 0.86) 0%, rgba(3, 4, 10, 0) 45%);
-    }
-    .hero-bg {
+    /* Constellation interactive : étoiles orange/or reliées, parallaxe au curseur (canvas). */
+    .hero-constellation {
       position: absolute;
       inset: 0;
       z-index: 2;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    .hero-constellation.is-live { opacity: 1; }
+    /* Halos morphiques dérivants — profondeur cosmique. */
+    .hero-orbs { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+    .hero-orbs .orb { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
+    .hero-orbs .orb-1 {
+      width: 46vmax; height: 46vmax; top: -14%; right: -8%;
+      background: radial-gradient(circle, rgba(255, 106, 26, 0.34), transparent 62%);
+      animation: orbDrift1 24s ease-in-out infinite;
+    }
+    .hero-orbs .orb-2 {
+      width: 34vmax; height: 34vmax; bottom: -16%; left: -10%;
+      background: radial-gradient(circle, rgba(150, 48, 20, 0.32), transparent 60%);
+      animation: orbDrift2 30s ease-in-out infinite;
+    }
+    .hero-orbs .orb-3 {
+      width: 26vmax; height: 26vmax; top: 28%; right: 26%;
+      background: radial-gradient(circle, rgba(232, 192, 105, 0.16), transparent 64%);
+      animation: orbDrift3 20s ease-in-out infinite;
+    }
+    @keyframes orbDrift1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-4%, 5%); } }
+    @keyframes orbDrift2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(6%, -4%); } }
+    @keyframes orbDrift3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-5%, -6%) scale(1.12); } }
+    /* Voile sombre pour la lisibilité du texte (plus dense côté gauche/bas). */
+    .hero-veil {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
       pointer-events: none;
       background:
-        radial-gradient(circle at 70% 42%, rgba(255, 106, 26, 0.30), transparent 42%),
-        radial-gradient(circle at 73% 47%, rgba(232, 192, 105, 0.10), transparent 36%),
-        radial-gradient(circle at 28% 72%, rgba(150, 48, 20, 0.18), transparent 50%);
+        linear-gradient(90deg, rgba(3, 4, 10, 0.92) 0%, rgba(3, 4, 10, 0.6) 42%, rgba(3, 4, 10, 0.1) 100%),
+        linear-gradient(0deg, rgba(3, 4, 10, 0.82) 0%, rgba(3, 4, 10, 0) 46%);
     }
     .hero-inner {
       position: relative;
-      z-index: 3;
+      z-index: 5;
       width: 100%;
-      max-width: 1760px;
+      max-width: 1500px;
       margin: 0 auto;
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
       align-items: center;
-      gap: 30px;
+      gap: clamp(30px, 5vw, 72px);
     }
-    .hero-copy { animation: heroUp 0.9s ease both; }
+    .hero-copy { text-align: left; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both; }
     .eyebrow {
       display: inline-block;
       margin-bottom: 18px;
@@ -1171,29 +1195,23 @@ body::after {
     }
     .hero-title {
       font-size: clamp(3.2rem, 9.6vw, 7rem);
-      line-height: 0.94;
-      margin: 0 0 18px;
+      line-height: 0.92;
+      margin: 0 0 20px;
       text-transform: uppercase;
-      letter-spacing: 0.02em;
-      text-shadow: 0 0 50px rgba(255, 106, 26, 0.42);
+      letter-spacing: -0.01em;
+      text-shadow: 0 0 60px rgba(255, 106, 26, 0.45);
     }
-    .hero-title span {
-      background: linear-gradient(120deg, #ff6a1a, #ffb98c);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      color: transparent;
-    }
+    .hero-title .tm { font-size: 0.28em; vertical-align: super; color: var(--gold); }
     .hero-sub {
-      max-width: 30em;
-      font-size: 1.02rem;
-      line-height: 1.6;
-      color: rgba(255, 255, 255, 0.72);
+      max-width: 34em;
+      font-size: 1.04rem;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.74);
       text-transform: none;
-      margin: 0 0 26px;
+      margin: 0 0 28px;
     }
-    .hero-metrics { margin: 0 0 28px; }
-    .hero-metrics .stats-band { margin: 0; max-width: 480px; }
+    .hero-metrics { margin: 0 0 30px; }
+    .hero-metrics .stats-band { margin: 0; max-width: 520px; }
     .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; }
     .btn {
       display: inline-flex;
@@ -1205,48 +1223,122 @@ body::after {
       letter-spacing: 0.08em;
       text-transform: uppercase;
       cursor: pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     }
+    .btn svg { width: 18px; height: 18px; flex: none; }
     .btn:hover { text-decoration: none; transform: translateY(-2px); }
     .btn:active { transform: scale(0.97); }
     .btn-primary {
-      background: linear-gradient(120deg, #ff6a1a, #ff6a1a);
+      background: linear-gradient(120deg, #ff6a1a, #ff8f4d);
       color: #03040a;
-      box-shadow: 0 0 26px rgba(255, 106, 26, 0.4);
+      box-shadow: 0 10px 30px rgba(255, 106, 26, 0.35), 0 0 26px rgba(255, 106, 26, 0.3);
     }
-    .btn-primary:hover { box-shadow: 0 0 38px rgba(255, 106, 26, 0.65); }
+    .btn-primary:hover { box-shadow: 0 14px 40px rgba(255, 106, 26, 0.5), 0 0 40px rgba(255, 106, 26, 0.55); }
+    .btn-ghost {
+      background: rgba(255, 106, 26, 0.06);
+      color: #ffd9c2;
+      border: 1px solid rgba(255, 106, 26, 0.34);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    }
+    .btn-ghost:hover { background: rgba(255, 106, 26, 0.14); border-color: rgba(255, 106, 26, 0.6); color: #fff; }
 
+    /* Visuel : hublot en verre + anneaux orbitaux + inclinaison 3D au curseur. */
     .hero-visual {
       position: relative;
       display: flex;
       justify-content: center;
       align-items: center;
-      animation: heroUp 0.9s ease 0.15s both;
+      perspective: 1200px;
+      animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) 0.12s both;
     }
-    /* Aura : l'astronaute est « rétro-éclairé » (radiance / lumière & ombre) */
+    /* Aura : le hublot est rétro-éclairé (radiance). */
     .hero-visual::before {
       content: ''; position: absolute; z-index: 0;
       top: 50%; left: 50%; transform: translate(-50%, -50%);
-      width: 86%; aspect-ratio: 1 / 1; border-radius: 50%;
-      background: radial-gradient(circle, rgba(255, 106, 26, 0.38), rgba(232, 192, 105, 0.10) 42%, transparent 68%);
-      filter: blur(30px); pointer-events: none;
+      width: 92%; aspect-ratio: 1 / 1; border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 106, 26, 0.4), rgba(232, 192, 105, 0.1) 44%, transparent 70%);
+      filter: blur(34px); pointer-events: none;
       animation: auraPulse 6.5s ease-in-out infinite;
     }
-    .hero-visual .hero-frame { position: relative; z-index: 1; }
+    .hero-frame {
+      position: relative; z-index: 1;
+      transform-style: preserve-3d;
+      transform: rotateX(var(--ry, 0deg)) rotateY(var(--rx, 0deg));
+      will-change: transform;
+    }
+    /* Hublot : verre dépoli translucide qui encadre l'artwork (effet réel, pas décoration). */
+    .hero-porthole {
+      position: relative;
+      width: min(440px, 82%);
+      aspect-ratio: 1 / 1;
+      margin: 0 auto;
+      border-radius: 30px;
+      padding: 12px;
+      background: linear-gradient(160deg, rgba(255, 178, 120, 0.14), rgba(3, 4, 10, 0.2));
+      border: 1px solid rgba(255, 178, 120, 0.28);
+      -webkit-backdrop-filter: blur(6px) saturate(1.2);
+      backdrop-filter: blur(6px) saturate(1.2);
+      box-shadow:
+        0 40px 90px rgba(0, 0, 0, 0.6),
+        0 0 70px rgba(255, 106, 26, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      overflow: hidden;
+      transform: translateZ(40px);
+      animation: floatZ 7s ease-in-out infinite;
+    }
+    .hero-astronaut {
+      display: block;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      border-radius: 20px;
+    }
+    /* Reflet balayant le hublot. */
+    .hero-scan {
+      position: absolute; inset: 12px; border-radius: 20px; pointer-events: none;
+      background: linear-gradient(115deg, transparent 40%, rgba(255, 224, 194, 0.18) 50%, transparent 60%);
+      transform: translateX(-120%);
+      animation: scanSweep 6s ease-in-out infinite;
+    }
+    @keyframes scanSweep { 0%, 22% { transform: translateX(-120%); } 50%, 100% { transform: translateX(120%); } }
+    /* Anneaux orbitaux (profondeur, derrière le hublot). */
+    .hero-ring {
+      position: absolute; top: 50%; left: 50%;
+      width: 118%; aspect-ratio: 1 / 1;
+      transform: translate(-50%, -50%) rotateX(72deg);
+      border: 1px solid rgba(255, 106, 26, 0.28);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: orbit 18s linear infinite;
+    }
+    .hero-ring::after {
+      content: ''; position: absolute; top: -4px; left: 50%;
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 12px 2px rgba(232, 192, 105, 0.9);
+      transform: translateX(-50%);
+    }
+    .hero-ring-2 {
+      width: 138%;
+      border-color: rgba(232, 192, 105, 0.16);
+      transform: translate(-50%, -50%) rotateX(72deg) rotateZ(60deg);
+      animation-duration: 26s; animation-direction: reverse;
+    }
+    .hero-ring-2::after { background: #ff8f4d; box-shadow: 0 0 12px 2px rgba(255, 143, 77, 0.9); }
+    @keyframes orbit { from { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(0); } to { transform: translate(-50%, -50%) rotateX(72deg) rotateZ(360deg); } }
     @keyframes auraPulse {
       0%, 100% { opacity: 0.7; transform: translate(-50%, -50%) scale(1); }
       50% { opacity: 1; transform: translate(-50%, -50%) scale(1.07); }
     }
-    .hero-astronaut {
-      width: min(420px, 80%);
-      height: auto;
-      border-radius: 26px;
-      border: 1px solid rgba(255, 106, 26, 0.25);
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(255, 106, 26, 0.18);
-      animation: float 7s ease-in-out infinite;
-    }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+    @keyframes floatZ { 0%, 100% { transform: translateZ(40px) translateY(0); } 50% { transform: translateZ(40px) translateY(-16px); } }
     @keyframes heroUp { from { opacity: 0; transform: translateY(28px); } to { opacity: 1; transform: none; } }
+    ::selection { background: rgba(255, 106, 26, 0.32); color: #fff; }
+    /* Mouvement réduit : on fige les animations du hero et on retire la constellation. */
+    @media (prefers-reduced-motion: reduce) {
+      .hero-copy, .hero-visual, .hero-porthole, .hero-ring,
+      .hero-scan, .hero-orbs .orb, .hero-visual::before { animation: none !important; }
+      .hero-frame, .hero-porthole { transform: none; }
+      .hero-constellation { display: none; }
+    }
 
     .scroll-cue {
       position: absolute;
@@ -1313,7 +1405,7 @@ body::after {
 
     @media screen and (max-width: 860px) {
       .hero-inner { grid-template-columns: 1fr; text-align: center; gap: 18px; }
-      .hero-copy { order: 2; }
+      .hero-copy { order: 2; text-align: center; }
       .hero-visual { order: 1; animation-delay: 0s; }
       .hero-sub { margin-left: auto; margin-right: auto; }
       .hero-cta { justify-content: center; }
@@ -1355,7 +1447,7 @@ body::after {
       /* Le contenu ne doit pas passer sous la barre d'onglets fixe : réserve la place. */
       body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
       .hero { min-height: auto; padding: 30px 16px 44px; }
-      .hero-astronaut { width: min(280px, 72%); }
+      .hero-porthole { width: min(300px, 82%); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
       .marquee-track span { font-size: 0.66rem; padding: 0 16px; }
       .live-pill { display: none; }
@@ -2708,18 +2800,33 @@ body::after {
 
   <header id="home" class="hero" data-view="home">
     <video class="hero-video" muted loop playsinline preload="none" poster="assets/nebula-poster.jpg" aria-hidden="true" tabindex="-1"></video>
+    <div class="hero-orbs" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span><span class="orb orb-3"></span></div>
+    <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
     <div class="hero-veil" aria-hidden="true"></div>
-    <div class="hero-bg" aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-copy">
-        <span class="eyebrow eyebrow-lines">The universe</span>
         <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
         <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
         <div class="hero-metrics" id="heroStats"></div>
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3.5 2 5 5.5 5 9 0 2.2-1 4.2-2.4 5.6L12 21l-2.6-3.4C8 16.2 7 14.2 7 12c0-3.5 1.5-7 5-9Z"/><circle cx="12" cy="11" r="1.6"/><path d="M9 18l-2.4 2.6M15 18l2.4 2.6"/></svg>
+            View the next drop
+          </a>
+          <a class="btn btn-ghost" href="#collections">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11l4.5-2.5Z"/></svg>
+            Explore collections
+          </a>
+        </div>
       </div>
       <div class="hero-visual">
         <div class="hero-frame">
-          <img src="assets/civilizations-logo.jpg" onerror="this.onerror=null;this.src='assets/icon-512.png'" alt="Cryptonauts Civilizations — the next collection" class="hero-astronaut" decoding="async" fetchpriority="high">
+          <span class="hero-ring" aria-hidden="true"></span>
+          <span class="hero-ring hero-ring-2" aria-hidden="true"></span>
+          <div class="hero-porthole">
+            <img src="assets/civilizations-logo.jpg" onerror="this.onerror=null;this.src='assets/icon-512.png'" alt="Cryptonauts Civilizations — the next collection" class="hero-astronaut" decoding="async" fetchpriority="high">
+            <span class="hero-scan" aria-hidden="true"></span>
+          </div>
         </div>
       </div>
     </div>
@@ -4758,6 +4865,156 @@ body::after {
       tick();
       iv = setInterval(tick, 1000);
     })();
+  </script>
+
+  <script>
+  /* Hero — constellation cosmique interactive + inclinaison 3D du hublot. */
+  (function () {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var fine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+    var hero = document.getElementById('home');
+    if (!hero) return;
+
+    /* ---- Constellation (canvas, étoiles orange/or reliées, rotation 3D) ---- */
+    (function () {
+      var canvas = hero.querySelector('[data-constellation]');
+      if (!canvas || reduce) return;
+      var ctx; try { ctx = canvas.getContext('2d'); } catch (e) {}
+      if (!ctx) return;
+      var dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0;
+      function resize() {
+        W = canvas.clientWidth; H = canvas.clientHeight;
+        canvas.width = Math.max(1, Math.floor(W * dpr));
+        canvas.height = Math.max(1, Math.floor(H * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      var nodes = [];
+      function build() {
+        var n = Math.round((W * H) / 15000);
+        n = Math.max(26, Math.min(W < 640 ? 46 : 92, n));
+        nodes = [];
+        for (var i = 0; i < n; i++) {
+          nodes.push({
+            x: Math.random() * 2 - 1, y: Math.random() * 2 - 1, z: Math.random() * 2 - 1,
+            vx: (Math.random() * 2 - 1) * 0.00018, vy: (Math.random() * 2 - 1) * 0.00018, vz: (Math.random() * 2 - 1) * 0.00018
+          });
+        }
+      }
+      build();
+      var mouse = { x: 0.5, y: 0.5, active: false };
+      var rotX = 0.06, rotY = 0, tRotX = 0.06, tRotY = 0;
+      if (fine) {
+        window.addEventListener('pointermove', function (e) {
+          var r = hero.getBoundingClientRect();
+          mouse.x = (e.clientX - r.left) / r.width;
+          mouse.y = (e.clientY - r.top) / r.height;
+          mouse.active = (e.clientY - r.top) < r.height + 60 && (e.clientY - r.top) > -60;
+          tRotY = (mouse.x - 0.5) * 0.6;
+          tRotX = 0.06 + (mouse.y - 0.5) * -0.4;
+        }, { passive: true });
+        window.addEventListener('pointerleave', function () { mouse.active = false; tRotY = 0; tRotX = 0.06; });
+      }
+      var CONN = 128, running = true, visible = true, started = false, raf = 0, t = 0, P = [];
+      function frame() {
+        raf = 0;
+        if (!running || !visible) return;
+        t += 1;
+        rotY += (tRotY - rotY) * 0.05; rotX += (tRotX - rotX) * 0.05;
+        var ry = rotY + t * 0.0009, rx = rotX;
+        var cosY = Math.cos(ry), sinY = Math.sin(ry), cosX = Math.cos(rx), sinX = Math.sin(rx);
+        var spread = Math.min(W, H) * 0.64;
+        var cx = W * (W > 820 ? 0.62 : 0.5), cy = H * 0.5, focal = 640;
+        P.length = 0;
+        for (var i = 0; i < nodes.length; i++) {
+          var nd = nodes[i];
+          nd.x += nd.vx; nd.y += nd.vy; nd.z += nd.vz;
+          if (nd.x > 1 || nd.x < -1) nd.vx *= -1;
+          if (nd.y > 1 || nd.y < -1) nd.vy *= -1;
+          if (nd.z > 1 || nd.z < -1) nd.vz *= -1;
+          var x = nd.x * spread, y = nd.y * spread, z = nd.z * spread;
+          var x1 = x * cosY - z * sinY, z1 = x * sinY + z * cosY;
+          var y1 = y * cosX - z1 * sinX, z2 = y * sinX + z1 * cosX;
+          var sc = focal / (focal + z2 + spread);
+          P.push({ sx: cx + x1 * sc, sy: cy + y1 * sc, sc: sc });
+        }
+        ctx.clearRect(0, 0, W, H);
+        ctx.globalCompositeOperation = 'lighter';
+        for (var a = 0; a < P.length; a++) {
+          for (var b = a + 1; b < P.length; b++) {
+            var dx = P[a].sx - P[b].sx, dy = P[a].sy - P[b].sy, d = Math.sqrt(dx * dx + dy * dy);
+            if (d < CONN) {
+              var al = (1 - d / CONN) * 0.28 * Math.min(P[a].sc, P[b].sc);
+              if (al > 0.014) {
+                ctx.strokeStyle = 'rgba(255,122,40,' + al.toFixed(3) + ')';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.moveTo(P[a].sx, P[a].sy); ctx.lineTo(P[b].sx, P[b].sy); ctx.stroke();
+              }
+            }
+          }
+        }
+        var mx = mouse.x * W, my = mouse.y * H;
+        for (var k = 0; k < P.length; k++) {
+          var p = P[k], near = 0;
+          if (mouse.active) {
+            var ex = p.sx - mx, ey = p.sy - my, dm = Math.sqrt(ex * ex + ey * ey);
+            if (dm < 150) {
+              near = 1 - dm / 150;
+              ctx.strokeStyle = 'rgba(232,192,105,' + (near * 0.55 * p.sc).toFixed(3) + ')';
+              ctx.lineWidth = 1;
+              ctx.beginPath(); ctx.moveTo(mx, my); ctx.lineTo(p.sx, p.sy); ctx.stroke();
+            }
+          }
+          var rr = (1.0 + p.sc * 1.5) * (1 + near * 1.3);
+          ctx.fillStyle = 'rgba(255,120,44,' + (0.05 + 0.08 * p.sc + near * 0.3).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(p.sx, p.sy, rr * 3.2, 0, 6.283); ctx.fill();
+          ctx.fillStyle = 'rgba(255,150,80,' + (0.10 + 0.14 * p.sc).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(p.sx, p.sy, rr * 1.7, 0, 6.283); ctx.fill();
+          ctx.fillStyle = near > 0.15
+            ? 'rgba(255,232,208,' + (0.85 + near * 0.15).toFixed(3) + ')'
+            : 'rgba(255,178,120,' + (0.4 + p.sc * 0.5).toFixed(3) + ')';
+          ctx.beginPath(); ctx.arc(p.sx, p.sy, rr, 0, 6.283); ctx.fill();
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        if (!started) { started = true; canvas.classList.add('is-live'); }
+        raf = requestAnimationFrame(frame);
+      }
+      function loop() { if (!raf && running && visible) raf = requestAnimationFrame(frame); }
+      var rt = null;
+      window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(function () { resize(); build(); }, 180); });
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (es) {
+          es.forEach(function (en) { visible = en.isIntersecting; if (visible) loop(); });
+        }, { threshold: 0 });
+        io.observe(hero);
+      }
+      document.addEventListener('visibilitychange', function () { if (document.hidden) running = false; else { running = true; loop(); } });
+      loop();
+    })();
+
+    /* ---- Inclinaison 3D du hublot au curseur (desktop, pointeur fin) ---- */
+    (function () {
+      if (reduce || !fine) return;
+      var visual = hero.querySelector('.hero-visual');
+      var frame = hero.querySelector('.hero-frame');
+      if (!visual || !frame) return;
+      var raf = 0, tx = 0, ty = 0, cx = 0, cy = 0;
+      function run() {
+        raf = 0;
+        cx += (tx - cx) * 0.12; cy += (ty - cy) * 0.12;
+        frame.style.setProperty('--rx', cx.toFixed(2) + 'deg');
+        frame.style.setProperty('--ry', cy.toFixed(2) + 'deg');
+        if (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) raf = requestAnimationFrame(run);
+      }
+      visual.addEventListener('pointermove', function (e) {
+        var r = visual.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - 0.5) * 16;
+        ty = -((e.clientY - r.top) / r.height - 0.5) * 12;
+        if (!raf) raf = requestAnimationFrame(run);
+      }, { passive: true });
+      visual.addEventListener('pointerleave', function () { tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(run); });
+    })();
+  })();
   </script>
 </body>
 </html>
