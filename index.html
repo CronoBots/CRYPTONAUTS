@@ -1144,6 +1144,9 @@ body::after {
       align-items: center;
       gap: clamp(30px, 5vw, 72px);
     }
+    /* En-tête centrée : eyebrow « The universe » (mêmes traits que les sections) + titre. */
+    .hero-head { display: flex; flex-direction: column; align-items: center; gap: 14px; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both; }
+    .hero-head .eyebrow { margin-bottom: 0; }
     .hero-copy { text-align: left; animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) 0.08s both; }
     .eyebrow {
       display: inline-block;
@@ -1165,7 +1168,6 @@ body::after {
       text-transform: uppercase;
       letter-spacing: -0.01em;
       text-shadow: 0 0 60px rgba(255, 106, 26, 0.45);
-      animation: heroUp 1s cubic-bezier(0.16, 0.84, 0.3, 1) both;
     }
     .hero-title .tm { font-size: 0.28em; vertical-align: super; color: var(--gold); }
     .hero-sub {
@@ -2683,17 +2685,18 @@ body::after {
     .drop-card {
       display: block; position: relative; overflow: hidden;
       border-radius: 22px;
-      border: 1px solid rgba(232, 184, 75, 0.28);
-      background: #0d0b08;
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 106, 26, 0.24);
+      /* Carte translucide : le fond global du site (halo + étoiles) traverse -> cohérence inter-onglets. */
+      background: rgba(9, 8, 14, 0.42);
+      -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
       transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     }
-    .drop-card:hover { transform: translateY(-3px); border-color: rgba(232, 184, 75, 0.5); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(232, 184, 75, 0.22); text-decoration: none; }
+    .drop-card:hover { transform: translateY(-3px); border-color: rgba(255, 106, 26, 0.45); box-shadow: 0 30px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 106, 26, 0.18); text-decoration: none; }
     .drop-media { position: absolute; inset: 0; z-index: 0; }
-    .drop-bg { width: 100%; height: 100%; object-fit: cover; opacity: 0.3; filter: saturate(1.05); }
+    .drop-bg { display: none; } /* plus d'image bannière jaune/olive : on garde le thème sombre + orange */
     .drop-media-grad { position: absolute; inset: 0; background:
-      radial-gradient(120% 80% at 50% 0%, rgba(232, 184, 75, 0.18), transparent 60%),
-      linear-gradient(180deg, rgba(13, 11, 8, 0.4) 0%, rgba(13, 11, 8, 0.84) 55%, #0d0b08 100%); }
+      radial-gradient(120% 80% at 50% 0%, rgba(255, 106, 26, 0.1), transparent 62%); }
     /* Corps CENTRÉ : composition en affiche, cartes internes alignées à gauche pour la lecture. */
     .drop-body { position: relative; z-index: 1; padding: clamp(28px, 4.5vw, 56px); text-align: center; }
     .drop-eyebrow {
@@ -2767,7 +2770,10 @@ body::after {
   <header id="home" class="hero" data-view="home">
     <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
     <div class="hero-inner">
-      <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
+      <div class="hero-head">
+        <span class="eyebrow eyebrow-lines">The universe</span>
+        <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
+      </div>
       <div class="hero-body">
       <div class="hero-copy">
         <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
