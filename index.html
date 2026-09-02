@@ -105,7 +105,7 @@ body::before {
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse at 50% -12%, rgba(196, 78, 26,0.34), transparent 72%),
+    radial-gradient(ellipse 160vw 820px at 50% -40px, rgba(196, 78, 26,0.4), transparent 64%),
     radial-gradient(ellipse at 100% 100%, rgba(150, 62, 20,0.28), transparent 50%),
     radial-gradient(ellipse at 0% 85%, rgba(150, 48, 20,0.18), transparent 45%),
     #03040a;
@@ -1134,7 +1134,7 @@ body::after {
       position: relative;
       z-index: 5;
       width: 100%;
-      max-width: 1080px;
+      max-width: 1200px;
       margin: 0 auto;
       display: flex;
       flex-direction: column;
@@ -1158,15 +1158,15 @@ body::after {
     }
     .hero-title .tm { font-size: 0.26em; vertical-align: super; color: var(--gold); }
     .hero-sub {
-      max-width: 40em;
-      font-size: 1.06rem;
+      max-width: 60em;
+      font-size: 1.08rem;
       line-height: 1.65;
       color: rgba(255, 255, 255, 0.74);
       text-transform: none;
-      margin: 0 auto 30px;
+      margin: 0 auto 32px;
     }
-    .hero-metrics { margin: 0 0 32px; width: 100%; }
-    .hero-metrics .stats-band { margin: 0 auto; max-width: 720px; }
+    .hero-metrics { margin: 0 0 34px; width: 100%; }
+    .hero-metrics .stats-band { margin: 0 auto; }
     .hero-cta { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
     .btn {
       display: inline-flex;
@@ -1434,7 +1434,7 @@ body::after {
     /* Métriques du hero : toutes les stats de l'accueil en bandeau fin à filets (grille, lignes de séparation, sans cadres). */
     .hero-metrics .stats-band {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(7, 1fr);
       gap: 0;
       background: none;
       border: none;
@@ -1442,13 +1442,13 @@ body::after {
       border-radius: 0;
       border-top: 1px solid var(--hairline);
       padding: 0;
-      max-width: 560px;
+      max-width: 100%;
       overflow: visible;
     }
     .hero-metrics .stat-card {
       flex: none;
       text-align: center;
-      padding: 16px 10px;
+      padding: 18px 10px;
       background: none;
       border: none;
       border-left: 1px solid var(--hairline);
@@ -1457,8 +1457,14 @@ body::after {
     .hero-metrics .stat-number { font-size: 1.7rem; }
     .stat-number { text-shadow: 0 0 18px rgba(255, 106, 26, 0.3); }
     .stat-label { font-family: var(--font-body); font-weight: 500; }
-    @media screen and (min-width: 601px) {
-      .hero-metrics .stat-card:nth-child(4n+1) { border-left: none; }   /* 1ère colonne : pas de filet à gauche */
+    /* Desktop large : les 7 stats en UNE rangée pleine largeur. */
+    @media screen and (min-width: 981px) {
+      .hero-metrics .stat-card:first-child { border-left: none; }
+    }
+    /* Tablette : repli sur 4 colonnes. */
+    @media screen and (min-width: 601px) and (max-width: 980px) {
+      .hero-metrics .stats-band { grid-template-columns: repeat(4, 1fr); }
+      .hero-metrics .stat-card:nth-child(4n+1) { border-left: none; }
     }
     @media screen and (max-width: 600px) {
       .hero-metrics .stats-band { grid-template-columns: 1fr 1fr; max-width: 360px; }
