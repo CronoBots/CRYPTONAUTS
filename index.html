@@ -1102,7 +1102,7 @@ body::after {
       overflow: hidden;
       padding: 40px clamp(22px, 4vw, 72px) 60px;
       box-sizing: border-box;
-      background: #03040a;
+      background: transparent; /* laisse passer le fond global du site (body::before halo + body::after étoiles) */
     }
     /* Fondu du bas du hero vers le fond de la page (au-dessus des étoiles, sous le contenu). */
     .hero::after {
@@ -1114,19 +1114,8 @@ body::after {
       pointer-events: none;
       background: linear-gradient(180deg, rgba(3, 4, 10, 0) 0%, #03040a 88%);
     }
-    /* Texture nébuleuse (poster) au plus profond, atténuée pour laisser briller les étoiles. */
-    .hero-video {
-      position: absolute;
-      inset: 0;
-      z-index: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      pointer-events: none;
-      opacity: 0.5;
-      background: #03040a;
-    }
-    /* Constellation interactive : étoiles orange/or reliées, parallaxe au curseur (canvas). */
+    /* Constellation interactive : étoiles orange/or reliées, parallaxe au curseur (canvas).
+       Transparente + additive → se pose sur le fond global (halo + étoiles) partagé par tous les onglets. */
     .hero-constellation {
       position: absolute;
       inset: 0;
@@ -1137,38 +1126,7 @@ body::after {
       opacity: 0;
       transition: opacity 1.2s ease;
     }
-    .hero-constellation.is-live { opacity: 1; }
-    /* Halos morphiques dérivants — profondeur cosmique. */
-    .hero-orbs { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
-    .hero-orbs .orb { position: absolute; border-radius: 50%; filter: blur(70px); will-change: transform; }
-    .hero-orbs .orb-1 {
-      width: 46vmax; height: 46vmax; top: -14%; right: -8%;
-      background: radial-gradient(circle, rgba(255, 106, 26, 0.34), transparent 62%);
-      animation: orbDrift1 24s ease-in-out infinite;
-    }
-    .hero-orbs .orb-2 {
-      width: 34vmax; height: 34vmax; bottom: -16%; left: -10%;
-      background: radial-gradient(circle, rgba(150, 48, 20, 0.32), transparent 60%);
-      animation: orbDrift2 30s ease-in-out infinite;
-    }
-    .hero-orbs .orb-3 {
-      width: 26vmax; height: 26vmax; top: 28%; right: 26%;
-      background: radial-gradient(circle, rgba(232, 192, 105, 0.16), transparent 64%);
-      animation: orbDrift3 20s ease-in-out infinite;
-    }
-    @keyframes orbDrift1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-4%, 5%); } }
-    @keyframes orbDrift2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(6%, -4%); } }
-    @keyframes orbDrift3 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-5%, -6%) scale(1.12); } }
-    /* Voile sombre pour la lisibilité du texte (plus dense côté gauche/bas). */
-    .hero-veil {
-      position: absolute;
-      inset: 0;
-      z-index: 3;
-      pointer-events: none;
-      background:
-        linear-gradient(90deg, rgba(3, 4, 10, 0.92) 0%, rgba(3, 4, 10, 0.6) 42%, rgba(3, 4, 10, 0.1) 100%),
-        linear-gradient(0deg, rgba(3, 4, 10, 0.82) 0%, rgba(3, 4, 10, 0) 46%);
-    }
+    .hero-constellation.is-live { opacity: 0.9; }
     .hero-inner {
       position: relative;
       z-index: 5;
@@ -2799,10 +2757,7 @@ body::after {
   </nav>
 
   <header id="home" class="hero" data-view="home">
-    <video class="hero-video" muted loop playsinline preload="none" poster="assets/nebula-poster.jpg" aria-hidden="true" tabindex="-1"></video>
-    <div class="hero-orbs" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span><span class="orb orb-3"></span></div>
     <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
-    <div class="hero-veil" aria-hidden="true"></div>
     <div class="hero-inner">
       <div class="hero-copy">
         <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
