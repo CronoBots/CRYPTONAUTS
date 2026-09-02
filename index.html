@@ -60,7 +60,7 @@
    • pas de flash bleu au tap (highlight navigateur)   • pas de menu tactile prolongé
    • empêche le sur-défilement/rebond (pull-to-refresh) qui trahit un navigateur       */
 html { -webkit-tap-highlight-color: transparent; }
-html, body { overscroll-behavior-y: none; background-color: #03040a; }
+html, body { overscroll-behavior-y: none; }
 a, button, .nav-links a, .btn, .cv-tab, .tab-btn { -webkit-tap-highlight-color: transparent; -webkit-touch-callout: none; }
 
 body {
@@ -71,8 +71,6 @@ body {
   margin: 0;
   color: var(--text-dark);
   background-color: #03040a;
-  position: relative;
-  min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -101,18 +99,18 @@ h1, h2, h3,
 /* ── Décor spatial : nébuleuse + champ d'étoiles, 100% CSS (aucune requête externe) ── */
 body::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(ellipse 160vw 820px at 50% -40px, rgba(196, 78, 26,0.4), transparent 64%),
+    radial-gradient(ellipse at 50% -10%, rgba(196, 78, 26,0.38), transparent 55%),
     radial-gradient(ellipse at 100% 100%, rgba(150, 62, 20,0.28), transparent 50%),
     radial-gradient(ellipse at 0% 85%, rgba(150, 48, 20,0.18), transparent 45%),
     #03040a;
 }
 body::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
