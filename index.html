@@ -676,6 +676,7 @@ body::after {
       line-height: 1;
       color: var(--primary-color);
       text-shadow: 0 0 16px rgba(255, 106, 26, 0.45);
+      font-variant-numeric: tabular-nums;
     }
     .stat-label {
       margin-top: 8px;
@@ -689,10 +690,26 @@ body::after {
     .toggle-btn:focus-visible,
     .show-more-btn:focus-visible,
     #scrollTopBtn:focus-visible,
-    #searchInput:focus-visible {
+    #searchInput:focus-visible,
+    .btn:focus-visible,
+    .nav-links a:focus-visible,
+    .drop-card:focus-visible {
       outline: 2px solid rgba(255, 106, 26, 0.7);
-      outline-offset: 2px;
+      outline-offset: 3px;
+      border-radius: 8px;
     }
+
+    /* ── Surfaces navigateur : barre de défilement de page thématisée (signe un site fini) ── */
+    html { scrollbar-width: thin; scrollbar-color: rgba(255, 106, 26, 0.4) transparent; }
+    ::-webkit-scrollbar { width: 11px; height: 11px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 106, 26, 0.32);
+      border-radius: 999px;
+      border: 3px solid transparent;
+      background-clip: padding-box;
+    }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255, 106, 26, 0.55); background-clip: padding-box; }
 
     @media screen and (max-width: 600px) {
       .stat-number { font-size: 1.6rem; }
@@ -1151,7 +1168,7 @@ body::after {
     }
     .hero-title .tm { font-size: 0.26em; vertical-align: super; color: var(--gold); }
     .hero-sub {
-      max-width: 60em;
+      max-width: 42em;   /* mesure de lecture pro (~62ch) au lieu d'une pleine largeur sur desktop */
       font-size: 1.08rem;
       line-height: 1.65;
       color: rgba(255, 255, 255, 0.74);
@@ -2621,7 +2638,7 @@ body::after {
       color: #f0d79a; font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
     }
     .drop-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #e8b84b; box-shadow: 0 0 8px rgba(232, 184, 75, 0.9); animation: livePulse 1.5s ease-in-out infinite; }
-    .drop-logo { width: clamp(120px, 30vw, 168px); height: clamp(120px, 30vw, 168px); border-radius: 24px; object-fit: cover; margin: 22px auto 0; border: 1px solid rgba(232, 184, 75, 0.4); box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55); display: block; }
+    .drop-logo { width: clamp(184px, 42vw, 264px); height: clamp(184px, 42vw, 264px); border-radius: 28px; object-fit: cover; margin: 26px auto 4px; border: 1px solid rgba(232, 184, 75, 0.45); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6), 0 0 44px rgba(232, 184, 75, 0.16); display: block; }
     .drop-title { font-size: clamp(2rem, 5vw, 3.4rem); line-height: 1.02; margin: 16px 0 0; letter-spacing: 0.01em; }
     .drop-tagline { max-width: 42em; color: var(--muted); font-size: 1rem; line-height: 1.6; margin: 14px auto 0; }
     .drop-countdown { display: flex; justify-content: center; align-items: flex-end; gap: 10px; margin: 30px 0 0; }
@@ -2691,16 +2708,6 @@ body::after {
       <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
           <div class="hero-rule" aria-hidden="true"></div>
           <div class="hero-metrics" id="heroStats"></div>
-      <div class="hero-cta">
-        <a class="btn btn-primary" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3.5 2 5 5.5 5 9 0 2.2-1 4.2-2.4 5.6L12 21l-2.6-3.4C8 16.2 7 14.2 7 12c0-3.5 1.5-7 5-9Z"/><circle cx="12" cy="11" r="1.6"/><path d="M9 18l-2.4 2.6M15 18l2.4 2.6"/></svg>
-          View the next drop
-        </a>
-        <a class="btn btn-ghost" href="#collections">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11l4.5-2.5Z"/></svg>
-          Explore collections
-        </a>
-          </div>
         </div>
       </div>
 
