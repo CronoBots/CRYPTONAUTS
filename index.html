@@ -1096,11 +1096,12 @@ body::after {
     /* ── HERO cosmique — constellation 3D + hublot en verre ── */
     .hero {
       position: relative;
-      min-height: calc(100vh - 84px);
-      display: flex;
-      align-items: center;
+      /* L'accueil n'est PLUS un hero plein écran : il arrive aligné comme les
+         autres onglets. On retire le min-height plein écran et le centrage
+         vertical ; l'offset haut = main(24px) + .section(48px) = 72px, donc
+         l'eyebrow « The universe » démarre à la même hauteur que « The collections ». */
       overflow: hidden;
-      padding: 40px clamp(22px, 4vw, 72px) 60px;
+      padding: 72px clamp(22px, 4vw, 72px) 60px;
       box-sizing: border-box;
       background: transparent; /* laisse passer le fond global du site (body::before halo + body::after étoiles) */
     }
@@ -1302,7 +1303,9 @@ body::after {
       .nav-social { display: none; }
       /* Le contenu ne doit pas passer sous la barre d'onglets fixe : réserve la place. */
       body { padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)); }
-      .hero { min-height: auto; padding: 30px 16px 44px; }
+      /* Accueil aligné sur les autres onglets : eyebrow au même offset haut
+         (main 24px + .section 48px = 72px) que « The collections » & co. */
+      .hero { min-height: auto; padding: 72px 16px 44px; }
       .hero-title { font-size: clamp(2.9rem, 15vw, 4.6rem); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
       .marquee-track span { font-size: 0.66rem; padding: 0 16px; }
