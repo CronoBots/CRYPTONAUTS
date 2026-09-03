@@ -1105,16 +1105,10 @@ body::after {
       box-sizing: border-box;
       background: transparent; /* laisse passer le fond global du site (body::before halo + body::after étoiles) */
     }
-    /* Fondu du bas du hero vers le fond de la page (au-dessus des étoiles, sous le contenu). */
-    .hero::after {
-      content: '';
-      position: absolute;
-      left: 0; right: 0; bottom: 0;
-      height: 200px;
-      z-index: 4;
-      pointer-events: none;
-      background: linear-gradient(180deg, rgba(3, 4, 10, 0) 0%, #03040a 88%);
-    }
+    /* Plus de fondu bas du hero : il peignait une bande #03040a solide qui
+       masquait le halo global et créait une séparation visible au milieu de
+       l'accueil (absente des autres onglets). Le fond global fixe (body::before
+       halo + body::after étoiles) reste désormais continu sous tout l'accueil. */
     /* Constellation interactive : étoiles orange/or reliées, parallaxe au curseur (canvas).
        Transparente + additive → se pose sur le fond global (halo + étoiles) partagé par tous les onglets. */
     .hero-constellation {
