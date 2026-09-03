@@ -1245,6 +1245,29 @@ body::after {
     #collections .section-head { max-width: 1280px; }
     #collections .section-head .section-sub { max-width: 760px; margin: 0 auto; }
 
+    /* ── Accueil « d'un seul tenant » : l'ex-hero est intégré comme une section
+       normale (même offset haut + filet doré) et l'en-tête + la carte drop + le
+       mur Spotlight forment UNE seule section (un seul bloc DOM), sans padding
+       inter-sections. Le fond global reste continu ; la constellation ne couvre
+       que la zone d'intro. ── */
+    .section.home-view { padding-top: 0; }   /* l'offset haut est porté par .home-intro pour que la constellation couvre aussi cet espace */
+    .home-intro {
+      position: relative;
+      /* Pleine largeur pour la constellation (échappe au padding horizontal de
+         main) ; le contenu reste aligné sur la grille via le re-padding. */
+      margin-left: calc(-1 * clamp(18px, 4vw, 72px));
+      margin-right: calc(-1 * clamp(18px, 4vw, 72px));
+      padding: 48px clamp(18px, 4vw, 72px) 4px;   /* 48 + main(24) = 72 avant l'eyebrow, comme les autres onglets */
+    }
+    /* Filet doré sous l'en-tête d'accueil (même accent que .section-head::after). */
+    .hero-rule {
+      width: 58px; height: 2px; margin: 26px auto 30px;
+      background: linear-gradient(90deg, transparent, var(--gold) 50%, transparent);
+    }
+    /* Sous-parties de l'accueil : de l'air, mais AUCUNE séparation de section. */
+    .home-view .drop-card { margin-top: clamp(36px, 6vw, 60px); }
+    .home-view #spotlight { display: block; margin-top: clamp(44px, 7vw, 72px); }
+
     /* ── Révélations au défilement ── */
     .reveal {
       opacity: 0;
@@ -2658,13 +2681,16 @@ body::after {
     </div>
   </nav>
 
-  <header id="home" class="hero" data-view="home">
-    <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
-    <div class="hero-inner">
-      <span class="eyebrow eyebrow-lines">The universe</span>
+  <main>
+    <section class="section reveal home-view" id="home" data-view="home">
+      <div class="home-intro">
+        <canvas class="hero-constellation" data-constellation aria-hidden="true"></canvas>
+        <div class="hero-inner">
+          <span class="eyebrow eyebrow-lines">The universe</span>
       <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
       <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
-      <div class="hero-metrics" id="heroStats"></div>
+          <div class="hero-rule" aria-hidden="true"></div>
+          <div class="hero-metrics" id="heroStats"></div>
       <div class="hero-cta">
         <a class="btn btn-primary" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c3.5 2 5 5.5 5 9 0 2.2-1 4.2-2.4 5.6L12 21l-2.6-3.4C8 16.2 7 14.2 7 12c0-3.5 1.5-7 5-9Z"/><circle cx="12" cy="11" r="1.6"/><path d="M9 18l-2.4 2.6M15 18l2.4 2.6"/></svg>
@@ -2674,12 +2700,10 @@ body::after {
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M15.5 8.5 13 13l-4.5 2.5L11 11l4.5-2.5Z"/></svg>
           Explore collections
         </a>
+          </div>
+        </div>
       </div>
-    </div>
-  </header>
 
-  <main>
-    <section class="section reveal drop-feature" id="nextdrop" data-view="home" aria-labelledby="dropTitle">
       <a class="drop-card" href="https://crovia.app/launch/cryptonauts-civilizations" target="_blank" rel="noopener" aria-label="Cryptonauts Civilizations — view the drop on Crovia">
         <div class="drop-media">
           <img class="drop-bg" src="assets/civilizations-banner.jpg" alt="" loading="lazy" decoding="async">
@@ -2734,15 +2758,15 @@ body::after {
           </div>
         </div>
       </a>
-    </section>
 
-    <section class="section reveal spot-section" id="spotlight" data-view="home">
-      <div class="section-head">
-        <span class="eyebrow">Spotlight</span>
+      <div id="spotlight" class="spot-section spot-block">
+        <div class="section-head">
+          <span class="eyebrow">Spotlight</span>
         <h2 class="section-title">Twelve collections.<br>One galaxy of holders.</h2>
         <p class="section-sub">A living wall of Cryptonauts artworks.</p>
       </div>
-      <div class="spot-wall" id="spotWall" aria-label="Featured Cryptonauts"></div>
+        <div class="spot-wall" id="spotWall" aria-label="Featured Cryptonauts"></div>
+      </div>
     </section>
 
     <section class="section reveal hidden-view" id="collections" data-view="collections">
