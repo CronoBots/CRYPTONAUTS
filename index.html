@@ -4761,16 +4761,38 @@ body::after {
       build();
       var mouse = { x: 0.5, y: 0.5, active: false };
       var rotX = 0.06, rotY = 0, tRotX = 0.06, tRotY = 0;
-      if (fine) {
-        window.addEventListener('pointermove', function (e) {
-          var r = hero.getBoundingClientRect();
-          mouse.x = (e.clientX - r.left) / r.width;
-          mouse.y = (e.clientY - r.top) / r.height;
-          mouse.active = (e.clientY - r.top) < r.height + 60 && (e.clientY - r.top) > -60;
-          tRotY = (mouse.x - 0.5) * 0.6;
-          tRotX = 0.06 + (mouse.y - 0.5) * -0.4;
+      // Parallaxe pilotee par le pointeur : SOURIS sur desktop, DOIGT sur mobile.
+      // Les pointer events couvrent les deux (avant, `if (fine)` la reservait a la
+      // souris -> aucune reaction au toucher). Sur mobile le geste ne s'exprime que
+      // pendant le contact, on remet donc a neutre au relachement (touch seulement,
+      // pour ne pas casser le survol souris au clic).
+      function aim(e) {
+        var r = hero.getBoundingClientRect();
+        mouse.x = (e.clientX - r.left) / r.width;
+        mouse.y = (e.clientY - r.top) / r.height;
+        mouse.active = (e.clientY - r.top) < r.height + 60 && (e.clientY - r.top) > -60;
+        tRotY = (mouse.x - 0.5) * 0.6;
+        tRotX = 0.06 + (mouse.y - 0.5) * -0.4;
+      }
+      function relax() { mouse.active = false; tRotY = 0; tRotX = 0.06; }
+      function relaxTouch(e) { if (e.pointerType === 'touch') relax(); }
+      window.addEventListener('pointermove', aim, { passive: true });
+      window.addEventListener('pointerdown', aim, { passive: true });
+      window.addEventListener('pointerup', relaxTouch, { passive: true });
+      window.addEventListener('pointercancel', relaxTouch, { passive: true });
+      window.addEventListener('pointerleave', relax);
+      // Bonus gyroscope la ou c'est autorise SANS prompt (Android...) : la
+      // constellation suit l'inclinaison du telephone. iOS exige une permission
+      // declenchee par un geste (DeviceOrientationEvent.requestPermission) -> non
+      // impose ici pour eviter un pop-up ; le tactile ci-dessus suffit a la reaction.
+      if (window.DeviceOrientationEvent && typeof DeviceOrientationEvent.requestPermission !== 'function') {
+        window.addEventListener('deviceorientation', function (e) {
+          if (e.gamma == null || e.beta == null || mouse.active) return;
+          var gx = Math.max(-1, Math.min(1, e.gamma / 45));
+          var gy = Math.max(-1, Math.min(1, (e.beta - 45) / 45));
+          tRotY = gx * 0.5;
+          tRotX = 0.06 + gy * -0.35;
         }, { passive: true });
-        window.addEventListener('pointerleave', function () { mouse.active = false; tRotY = 0; tRotX = 0.06; });
       }
       var CONN = 128, running = true, visible = true, started = false, raf = 0, t = 0, P = [];
       function frame() {
