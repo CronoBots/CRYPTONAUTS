@@ -1213,6 +1213,10 @@ body::after {
       .hero-title { transform: none; }
       .hero-constellation { display: none; }
     }
+    /* PWA installée (mode standalone) : pas de constellation. */
+    @media (display-mode: standalone) {
+      .hero-constellation { display: none !important; }
+    }
 
     .scroll-cue {
       position: absolute;
@@ -1340,6 +1344,7 @@ body::after {
       /* Accueil aligné sur les autres onglets : eyebrow au même offset haut
          (main 24px + .section 48px = 72px) que « The collections » & co. */
       .hero { min-height: auto; padding: 72px 16px 44px; }
+      .hero-constellation { display: none !important; }   /* pas de constellation sur mobile */
       .hero-title { font-size: clamp(2.9rem, 15vw, 4.6rem); }
       .btn { padding: 12px 20px; font-size: 0.78rem; }
       .marquee-track span { font-size: 0.66rem; padding: 0 16px; }
@@ -4754,13 +4759,18 @@ body::after {
   (function () {
     var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var fine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+    // Constellation supprimée sur mobile (<=600px) et en PWA installée (standalone).
+    var noConstellation =
+      (window.matchMedia && window.matchMedia('(max-width: 600px)').matches) ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      window.navigator.standalone === true;
     var hero = document.getElementById('home');
     if (!hero) return;
 
     /* ---- Constellation (canvas, étoiles orange/or reliées, rotation 3D) ---- */
     (function () {
       var canvas = hero.querySelector('[data-constellation]');
-      if (!canvas || reduce) return;
+      if (!canvas || reduce || noConstellation) { if (canvas) canvas.style.display = 'none'; return; }
       var ctx; try { ctx = canvas.getContext('2d'); } catch (e) {}
       if (!ctx) return;
       var dpr = Math.min(window.devicePixelRatio || 1, 2), W = 0, H = 0;
