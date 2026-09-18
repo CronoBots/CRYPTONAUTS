@@ -1209,8 +1209,9 @@ body::after {
       border-radius: 22px;
       border: 1px solid rgba(232, 184, 75, 0.45);
       box-shadow: 0 26px 64px rgba(0, 0, 0, 0.62), inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 46px rgba(255, 106, 26, 0.2);
-      background: #0a0a0a;
+      background: #0a0a0a;   /* tuile sombre affichée pendant le tirage (aucune ancienne image) */
       display: block;
+      transition: opacity 0.45s ease;
     }
     .hero-portrait figcaption {
       font-size: clamp(0.58rem, 2.4vw, 0.7rem);   /* rétrécit sur petit écran pour tenir sur 1 ligne */
@@ -2801,7 +2802,7 @@ body::after {
       <h1 class="hero-title">Cryptonauts<sup class="tm">™</sup></h1>
       <p class="hero-sub">The Cryptonauts are explorers of the metaverse, citizens of the Cronos chain — quantum astronauts who have been everywhere, at all times. Across eleven curated, fully sold-out drops on crypto.com, the saga has grown into an expanding universe of 1/1 avatars full of psychedelia and cosmic surrealism, where holders receive full IP rights, airdrops and rewards.</p>
           <figure class="hero-portrait">
-            <img src="assets/hero-cryptonaut.webp?v=1" alt="Featured Cryptonaut — a carved-wood alien astronaut, a 1/1 from the Civilizations chapter" width="360" height="360" loading="eager" decoding="async">
+            <img src="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%201%201'%3E%3C/svg%3E" data-fallback="assets/hero-cryptonaut.webp?v=1" alt="Featured Cryptonaut" width="360" height="360" loading="eager" decoding="async">
             <figcaption>Featured 1/1 · Civilizations</figcaption>
           </figure>
           <div class="hero-rule" aria-hidden="true"></div>
@@ -3828,18 +3829,24 @@ body::after {
         .filter(c => c.meta.id || (c.meta.contract && (EXTERNAL_ASSETS[c.meta.contract] || []).length));
       if (!pool.length) return;
 
-      // Applique une œuvre au portrait : précharge l'image, ne bascule qu'une fois prête (pas de flash).
-      const apply = (src, name, title) => {
-        const pre = new Image();
-        pre.onload = () => {
-          img.src = src;
-          img.alt = 'Featured Cryptonaut' + (name ? ' — ' + name : '') + ' · ' + title;
-          if (cap) cap.textContent = 'Featured 1/1 · ' + title;
-        };
-        pre.src = src;
+      // Bascule le portrait sur l'image donnée avec un fondu (l'image est déjà préchargée).
+      const swap = (src, name, title) => {
+        img.style.opacity = '0';
+        img.src = src;
+        img.alt = 'Featured Cryptonaut' + (name ? ' — ' + name : '') + (title ? ' · ' + title : '');
+        if (title && cap) cap.textContent = 'Featured 1/1 · ' + title;
+        requestAnimationFrame(() => { img.style.opacity = '1'; });
       };
 
-      // Tire une œuvre au hasard ; réessaie avec une autre collection si l'API échoue.
+      // Précharge une œuvre : ne l'affiche QU'UNE FOIS prête (aucune ancienne image en attendant).
+      const load = (src, name, title) => new Promise(resolve => {
+        const pre = new Image();
+        pre.onload = () => { swap(src, name, title); resolve(true); };
+        pre.onerror = () => resolve(false);
+        pre.src = src;
+      });
+
+      // Tire une œuvre au hasard ; réessaie avec une autre collection si l'API/l'image échoue.
       const tries = pool.slice();
       for (let n = 0; n < 4 && tries.length; n++) {
         const c = tries.splice(Math.floor(Math.random() * tries.length), 1)[0];
@@ -3848,8 +3855,8 @@ body::after {
             const arr = EXTERNAL_ASSETS[c.meta.contract] || [];
             const a = arr[Math.floor(Math.random() * arr.length)];
             if (!a || !a.h) continue;
-            apply(croviaImg(c.meta.contract, a.h, 'full'), a.n, c.title);
-            return;
+            if (await load(croviaImg(c.meta.contract, a.h, 'full'), a.n, c.title)) return;
+            continue;
           }
           const st = COLLECTION_STATS[c.title] || {};
           const supply = st.supply || 30;
@@ -3863,10 +3870,12 @@ body::after {
           if (!a) continue;
           const src = ((a.cover && a.cover.url) || (a.main && a.main.url) || '');
           if (!src) continue;
-          apply(src + '?d=lg-logo', a.name, c.title);
-          return;
+          if (await load(src + '?d=lg-logo', a.name, c.title)) return;
         } catch (e) { /* essaie une autre collection */ }
       }
+
+      // Tout a échoué : on retombe sur l'image statique (Civilizations), légende inchangée.
+      if (img.dataset.fallback) swap(img.dataset.fallback, '', '');
     }
 
     // Spotlight : mur d'œuvres en mouvement (chargé en direct depuis crypto.com).
