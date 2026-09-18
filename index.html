@@ -3820,6 +3820,62 @@ body::after {
       });
     }
 
+    // Portrait vedette du hero : un Cryptonaut TIRÉ AU HASARD à chaque chargement, toutes
+    // collections confondues (crypto.com via GraphQL, Crovia via EXTERNAL_ASSETS). Remplace
+    // l'ancienne image fixe. En cas d'échec API, on garde l'image statique déjà affichée.
+    async function loadHeroPortrait() {
+      const fig = document.querySelector('.hero-portrait');
+      if (!fig) return;
+      const img = fig.querySelector('img');
+      const cap = fig.querySelector('figcaption');
+      if (!img) return;
+
+      // Collections éligibles : soit un id crypto.com, soit un contrat Crovia dont les œuvres sont chargées.
+      const pool = Object.keys(COLLECTION_META).map(title => ({ title, meta: COLLECTION_META[title] }))
+        .filter(c => c.meta.id || (c.meta.contract && (EXTERNAL_ASSETS[c.meta.contract] || []).length));
+      if (!pool.length) return;
+
+      // Applique une œuvre au portrait : précharge l'image, ne bascule qu'une fois prête (pas de flash).
+      const apply = (src, name, title) => {
+        const pre = new Image();
+        pre.onload = () => {
+          img.src = src;
+          img.alt = 'Featured Cryptonaut' + (name ? ' — ' + name : '') + ' · ' + title;
+          if (cap) cap.textContent = 'Featured 1/1 · ' + title;
+        };
+        pre.src = src;
+      };
+
+      // Tire une œuvre au hasard ; réessaie avec une autre collection si l'API échoue.
+      const tries = pool.slice();
+      for (let n = 0; n < 4 && tries.length; n++) {
+        const c = tries.splice(Math.floor(Math.random() * tries.length), 1)[0];
+        try {
+          if (c.meta.contract) {
+            const arr = EXTERNAL_ASSETS[c.meta.contract] || [];
+            const a = arr[Math.floor(Math.random() * arr.length)];
+            if (!a || !a.h) continue;
+            apply(croviaImg(c.meta.contract, a.h, 'full'), a.n, c.title);
+            return;
+          }
+          const st = COLLECTION_STATS[c.title] || {};
+          const supply = st.supply || 30;
+          const skip = Math.floor(Math.random() * Math.max(1, supply - 1));
+          const res = await fetch(NFT_GQL, {
+            method: 'POST', headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ variables: { id: c.meta.id, first: 1, skip }, query: 'query($id:ID,$first:Int!,$skip:Int!){public{assets(collectionId:$id,first:$first,skip:$skip){id name defaultEditionId cover{url} main{url}}}}' })
+          });
+          const data = await res.json();
+          const a = ((data && data.data && data.data.public && data.data.public.assets) || [])[0];
+          if (!a) continue;
+          const src = ((a.cover && a.cover.url) || (a.main && a.main.url) || '');
+          if (!src) continue;
+          apply(src + '?d=lg-logo', a.name, c.title);
+          return;
+        } catch (e) { /* essaie une autre collection */ }
+      }
+    }
+
     // Spotlight : mur d'œuvres en mouvement (chargé en direct depuis crypto.com).
     // Spotlight : une ligne défilante PAR collection (œuvres aléatoires + nom léger).
     async function loadSpotlight() {
@@ -4476,6 +4532,7 @@ body::after {
       buildStatsBand();
 
       // Tout le contenu est chargé en amont ; les onglets ne font que montrer/masquer.
+      loadHeroPortrait();
       loadSpotlight();
       loadGalleryBanners();
       loadSales();        // Sales Bot mis à jour à l'ouverture de la page (pas d'auto-refresh)
