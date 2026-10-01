@@ -4488,7 +4488,8 @@ body::after {
       });
 
       globalOwnersData.forEach(owner => {
-        owner.url = 'https://crypto.com/nft/profile/' + owner.name;
+        // Détenteurs Crovia-only : url cronoscan déjà fournie par data.json → on la garde.
+        if (!owner.url) owner.url = 'https://crypto.com/nft/profile/' + owner.name;
         owner.twitter = owner.twitter ? validateTwitterUrl(owner.twitter) : '';
       });
 

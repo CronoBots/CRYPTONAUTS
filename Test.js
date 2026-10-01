@@ -859,16 +859,38 @@ function writeCryptonautsData(collectionsData, globalOwnerNFTs, ownersData, exte
     };
   });
 
-  // Collections externes (Crovia / Cronos) — ajoutées en tête (les plus récentes), dans l'ordre de la
-  // config. Données via l'API Crovia (owners en adresses/cronoscan) ; volontairement absentes de
-  // globalOwnersData (exclues du leaderboard global basé sur les pseudos crypto.com).
+  // Collections externes (Crovia / Cronos) — ajoutées en tête (les plus récentes), dans l'ordre de la config.
   allCollectionsData.unshift(...(externalCollections || []).filter(Boolean));
 
-  // Prepare globalOwnersData (sans url ni rank : reconstruits/recalculés côté client)
-  const globalOwnersData = assignRanks(Object.entries(globalOwnerNFTs)).map(({ name, count }) => {
+  // Leaderboard global = somme des holdings par détenteur sur TOUTES les collections : crypto.com
+  // (clé = pseudo) ET Crovia/Cronos (clé = pseudo V3_NAMES / nom .cro / adresse tronquée). Le
+  // rapprochement est INSENSIBLE À LA CASSE : un override Crovia « SANDIMAN » rejoint le username
+  // crypto.com « sandiman » (même personne) → holdings additionnés sous le libellé crypto.com. Un
+  // détenteur Crovia-only garde son libellé + son lien cronoscan (sinon URL crypto.com reconstruite côté client).
+  const globalCounts = {};          // libellé canonique -> total NFT
+  const keyToDisplay = {};          // nom minuscule -> libellé canonique (crypto.com prioritaire)
+  const croviaUrlByName = {};       // libellé -> lien cronoscan (détenteurs Crovia-only)
+  for (const [name, count] of Object.entries(globalOwnerNFTs)) {
+    keyToDisplay[name.toLowerCase()] = name;                 // le username crypto.com fait foi pour l'affichage
+    globalCounts[name] = (globalCounts[name] || 0) + count;
+  }
+  for (const col of (externalCollections || [])) {
+    for (const o of (col.owners || [])) {
+      const k = o.name.toLowerCase();
+      const isNew = !keyToDisplay[k];
+      const display = isNew ? o.name : keyToDisplay[k];
+      if (isNew) keyToDisplay[k] = display;
+      globalCounts[display] = (globalCounts[display] || 0) + o.count;
+      if (o.url && isNew) croviaUrlByName[display] = o.url;  // Crovia-only → lien cronoscan explicite
+    }
+  }
+
+  // Prepare globalOwnersData (rank recalculé côté client ; url reconstruite sauf lien cronoscan explicite)
+  const globalOwnersData = assignRanks(Object.entries(globalCounts)).map(({ name, count }) => {
     const owner = { name, count };
     const tw = ownersData[name]?.twitter;
     if (tw) owner.twitter = tw;
+    if (croviaUrlByName[name]) owner.url = croviaUrlByName[name];
     return owner;
   });
 
