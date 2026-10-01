@@ -433,8 +433,15 @@ const V3_NAMES = {
   '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee': 'JERAAAMY',
   '0x740cd1001bf468e03a2cef898c4ce880f228da0d': 'CLOUDY',
   '0x183379144e7c8581f24b02b7eedd4e9995bb1048': 'PAULO24',
-  '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed': 'WARNEREVERCHANGE',
-  '0x7886acebc8401bd6b1cf397d84b85d01416e4c06': 'PAYSAGISTE00',
+  // Pseudos OFFICIELS publiés par le propriétaire (leaderboard Civilizations sold-out, Crovia) —
+  // priment sur les noms .cro résolus on-chain. Les 2 premiers CORRIGENT d'anciens libellés
+  // (0x7886 était 'PAYSAGISTE00' = en fait WNC ; 0xe6e7 était 'WARNEREVERCHANGE' = en fait Paysagiste).
+  '0xe6e7284ddc793fdc15c8cdfbde49a2b7e2b234ed': 'Paysagiste',
+  '0x7886acebc8401bd6b1cf397d84b85d01416e4c06': 'WNC',
+  '0x1d9b981b7aba1a747883833fb8a1b5072eac5d8f': 'Determinated',  // sinon tictac.cro
+  '0x105f4ed058dc3029c21489f0f1567475e0eeb242': 'MacTheKnife',   // sinon adresse tronquée
+  '0x478ffba8ea4945fb9327812231dfb1c6cafd2c49': 'Jamus',         // sinon jamus0.cro
+  '0x17bb1d83b312ce76eba5ffd43226b8c98652c1f6': 'Daltonecleus',  // sinon daltonecleus.cro
 };
 
 // Repli si la lecture on-chain échoue (snapshot du 2026-06-26) → data.json garde un V3 cohérent.
