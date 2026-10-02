@@ -431,7 +431,7 @@ const V3_NAMES = {
   '0x13550dd892ab9cb22b7a6e48d5eba0d2d181884b': 'SANDIMAN',
   '0x2b8b37dd17fa67833b01e30229502169d1a8ae40': 'MTCH',
   '0xac96bdcd69f708a5f660425af5d1248aa27fc1ee': 'JERAAAMY',
-  '0x740cd1001bf468e03a2cef898c4ce880f228da0d': 'CLOUDY',
+  '0x740cd1001bf468e03a2cef898c4ce880f228da0d': 'cloudbreak', // = compte crypto.com « cloudbreak » (même wallet) ; était 'CLOUDY' → dédoublé dans le global
   '0x183379144e7c8581f24b02b7eedd4e9995bb1048': 'PAULO24',
   // Pseudos OFFICIELS publiés par le propriétaire (leaderboard Civilizations sold-out, Crovia) —
   // priment sur les noms .cro résolus on-chain. Les 2 premiers CORRIGENT d'anciens libellés
