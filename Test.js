@@ -783,7 +783,7 @@ async function fetchIpfsJson(pathNoScheme) {
 // Carte des NFT d'une collection Crovia (tokenId → nom + hash image CDN), pour le Sales Bot
 // (vignettes) ET la galerie de la collection sur le site. Source : API Crovia bulk paginée
 // (/collections/{c}/nfts). Le hash est l'avant-dernier segment de l'URL image (cdn.crovia.app/
-// {contract}/{HASH}/full.webp) — même CDN que le bot Discord, fiable contrairement aux passerelles
+// {contract}/{HASH}/full.webp) — CDN officiel de Crovia, fiable contrairement aux passerelles
 // IPFS publiques. Injectée dans data.json (externalAssets) → index.html la rend via croviaImg().
 const CROVIA_NFT_H = { headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126 Safari/537.36', 'Accept': 'application/json', 'Referer': 'https://crovia.app/' }, timeout: 20000, validateStatus: s => s === 200 };
 const croviaHashOf = img => { const p = String(img || '').split('/'); return (p.length >= 2 && /^[0-9a-f]{16,}$/i.test(p[p.length - 2])) ? p[p.length - 2] : ''; };

@@ -2,8 +2,8 @@
  *
  * Stratégie :
  *  - navigation / index.html  → network-first (données fraîches), repli cache hors-ligne
- *  - data.json (classement)   → network-first : DOIT rester frais (rafraîchi par
- *                               la GitHub Action), repli cache uniquement hors-ligne
+ *  - data.json (classement)   → network-first : DOIT rester frais (régénéré par
+ *                               Test.js), repli cache uniquement hors-ligne
  *  - autres ressources même origine → cache-first (police, images, icônes)
  *  - ressources externes (CDN crypto.com) → réseau direct, non mises en cache
  *
@@ -57,7 +57,7 @@ self.addEventListener('fetch', (event) => {
   const isNavigation = req.mode === 'navigate' ||
     url.pathname.endsWith('/') || url.pathname.endsWith('index.html');
 
-  // data.json porte le classement rafraîchi par la GitHub Action : il NE DOIT PAS
+  // data.json porte le classement régénéré par Test.js : il NE DOIT PAS
   // être servi cache-first (sinon les visiteurs récurrents restent bloqués sur un
   // ancien classement / d'anciennes références d'images). Réseau d'abord, cache
   // seulement en repli hors-ligne — comme la navigation.
